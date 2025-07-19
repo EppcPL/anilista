@@ -1005,6 +1005,7 @@
             font-size: 0.9rem;
             border-radius: 6px;
         }
+        .anime-tag {background: var(--primary-light); color: var(--dark); border-radius: 12px; padding: 2px 10px; font-size: 0.85em; font-weight: 500; margin-right: 2px;}
     </style>
 </head>
 <body>
@@ -1059,6 +1060,7 @@
                     </div>
                 </div>
             </div>
+            <div id="profile-tags-stats" style="margin-top:2rem;"></div>
         </div>
         
         <div id="profile-anime-list" style="display:none;margin-top:1.5rem;"></div>
@@ -1071,6 +1073,11 @@
                 <div class="form-group">
                     <label for="title"><i class="fas fa-heading"></i> Tytuł anime</label>
                     <input type="text" id="title" required placeholder="Wpisz tytuł anime">
+                </div>
+                
+                <div class="form-group">
+                    <label for="anime-tags"><i class="fas fa-tags"></i> Tagi (oddziel średnikiem ; lub enterem)</label>
+                    <input type="text" id="anime-tags" placeholder="np. isekai; komedia; sport">
                 </div>
                 
                 <div class="form-group">
@@ -1095,6 +1102,9 @@
                 <div class="form-group">
                     <label for="episode-length"><i class="fas fa-clock"></i> Długość odcinka (minuty)</label>
                     <input type="number" id="episode-length" min="1" value="24">
+                    <small style="color:var(--gray);font-size:0.85rem;margin-top:4px;display:block;">
+                        <i class="fas fa-info-circle"></i> Dla anime z wieloma sezonami możesz ustawić różną długość odcinków dla każdego sezonu w polach poniżej.
+                    </small>
                 </div>
                 
                 <div class="form-group">
@@ -1230,6 +1240,10 @@
                 <label for="planner-title"><i class="fas fa-heading"></i> Tytuł anime</label>
                 <input type="text" id="planner-title" placeholder="Wpisz tytuł anime do planera">
             </div>
+            <div class="form-group">
+                <label for="planner-tags"><i class="fas fa-tags"></i> Tagi (oddziel średnikiem ; lub enterem)</label>
+                <input type="text" id="planner-tags" placeholder="np. akcja; dramat; fantasy">
+            </div>
             
             <div class="form-group">
                 <label for="planner-season-count"><i class="fas fa-layer-group"></i> Liczba sezonów</label>
@@ -1239,6 +1253,9 @@
             <div class="form-group">
                 <label for="planner-total-episodes"><i class="fas fa-list-ol"></i> Łączna liczba odcinków</label>
                 <input type="number" id="planner-total-episodes" min="1" value="12">
+                <small style="color:var(--gray);font-size:0.85rem;margin-top:4px;display:block;">
+                    <i class="fas fa-info-circle"></i> Dla anime z wieloma sezonami możesz ustawić różną długość odcinków dla każdego sezonu w polach poniżej.
+                </small>
             </div>
             
             <div class="form-group">
@@ -1437,9 +1454,11 @@
                 const seasonCount = parseInt(document.getElementById('season-count').value);
                 let seasons = [];
                 let seasonRewatches = [];
+                let seasonEpisodeLengths = [];
                 if (seasonCount > 1) {
                     const seasonInputs = document.querySelectorAll('#seasons-container .season-episodes');
                     const rewatchInputs = document.querySelectorAll('#seasons-container .season-rewatch');
+                    const episodeLengthInputs = document.querySelectorAll('#seasons-container .season-episode-length');
                     seasonInputs.forEach((input, index) => {
                         const v = parseInt(input.value);
                         seasons.push(isNaN(v) ? 0 : v);
@@ -1447,6 +1466,10 @@
                     rewatchInputs.forEach((input, index) => {
                         const v = parseInt(input.value);
                         seasonRewatches.push(isNaN(v) ? 0 : v);
+                    });
+                    episodeLengthInputs.forEach((input, index) => {
+                        const v = parseInt(input.value);
+                        seasonEpisodeLengths.push(isNaN(v) ? 24 : v); // domyślnie 24 minuty
                     });
                 }
                 const totalEpisodes = parseInt(document.getElementById('total-episodes').value) || 12;
@@ -1458,6 +1481,9 @@
                 const story = parseInt(document.getElementById('story').value);
                 const fun = parseInt(document.getElementById('fun').value);
                 const averageRating = calculateAverage();
+                
+                const tagsRaw = document.getElementById('anime-tags').value.trim();
+                const tags = tagsRaw ? tagsRaw.split(/;|\n/).map(t => t.trim()).filter(Boolean) : [];
                 
                 const animeData = {
                     id: editIdInput.value ? parseInt(editIdInput.value) : Date.now(),
@@ -1474,12 +1500,14 @@
                         fun
                     },
                     averageRating,
-                    createdAt: new Date().toISOString()
+                    createdAt: new Date().toISOString(),
+                    tags
                 };
                 
                 if (seasons.length > 1) {
                     animeData.seasons = seasons;
                     animeData.seasonRewatches = seasonRewatches;
+                    animeData.seasonEpisodeLengths = seasonEpisodeLengths;
                 }
                 
                 // Add image data if available
@@ -1526,7 +1554,7 @@
                     document.getElementById('total-episodes').value = 12;
                     document.getElementById('episode-length').value = 24;
                     document.getElementById('watched-episodes').value = 0;
-                    document.getElementById('rewatch-count').value = 0;
+                    document.getElementById('season-count').value = 1;
                     document.getElementById('graphics').value = 5;
                     document.getElementById('music').value = 5;
                     document.getElementById('characters').value = 5;
@@ -1536,6 +1564,11 @@
                     
                     // Clear image
                     resetImageUpload();
+                    
+                    // Reset seasons container
+                    seasonsContainer.innerHTML = '';
+                    seasonsContainer.style.display = 'none';
+                    totalEpisodesInput.readOnly = false;
                     
                     // Show success notification
                     showNotification('Anime zostało dodane!', 'success');
@@ -1556,6 +1589,7 @@
                 document.getElementById('total-episodes').value = 12;
                 document.getElementById('episode-length').value = 24;
                 document.getElementById('watched-episodes').value = 0;
+                document.getElementById('season-count').value = 1;
                 document.getElementById('graphics').value = 5;
                 document.getElementById('music').value = 5;
                 document.getElementById('characters').value = 5;
@@ -1564,6 +1598,10 @@
                 calculateAverage();
                 // Clear image
                 resetImageUpload();
+                // Reset seasons container
+                seasonsContainer.innerHTML = '';
+                seasonsContainer.style.display = 'none';
+                totalEpisodesInput.readOnly = false;
             }
             
             // Save anime list to localStorage
@@ -1590,21 +1628,70 @@
                 document.getElementById('total-watching').textContent = watchingAnime.length;
                 document.getElementById('total-all').textContent = allAnime.length;
 
+                // Calculate average rating
+                const ratedAnimeForAvg = animeList.filter(a => a.averageRating > 0);
+                let averageRating = 0;
+                if (ratedAnimeForAvg.length > 0) {
+                    const totalRating = ratedAnimeForAvg.reduce((sum, anime) => sum + anime.averageRating, 0);
+                    averageRating = Math.round((totalRating / ratedAnimeForAvg.length) * 10) / 10; // Zaokrąglenie do 1 miejsca po przecinku
+                }
+                
+                // Update average rating display
+                document.getElementById('average-rating').textContent = averageRating.toFixed(1);
+                const averageRatingBar = document.getElementById('average-rating-bar');
+                const percentage = (averageRating / 11) * 100; // 11 to maksymalna ocena
+                averageRatingBar.style.width = percentage + '%';
+
+                // Calculate watch progress
+                const totalEpisodes = animeList.reduce((sum, anime) => sum + anime.totalEpisodes, 0);
+                const watchedEpisodes = animeList.reduce((sum, anime) => {
+                    if (anime.status === 'completed') {
+                        return sum + anime.totalEpisodes;
+                    } else {
+                        return sum + anime.watchedEpisodes;
+                    }
+                }, 0);
+                
+                const watchProgress = totalEpisodes > 0 ? Math.round((watchedEpisodes / totalEpisodes) * 100) : 0;
+                document.getElementById('watch-progress').textContent = watchProgress + '%';
+                const watchProgressBar = document.getElementById('watch-progress-bar');
+                watchProgressBar.style.width = watchProgress + '%';
+
                 
                 // Total watch time (including rewatches)
                 let totalMinutes = 0;
                 let totalRewatchMinutes = 0;
                 
                 animeList.forEach(anime => {
-                    const watchedEpisodes = anime.status === 'completed' ? anime.totalEpisodes : anime.watchedEpisodes;
-                    const animeTime = watchedEpisodes * anime.episodeLength;
+                    let animeTime = 0;
+                    
+                    if (anime.seasons && anime.seasons.length > 1) {
+                        // Oblicz czas dla każdego sezonu osobno
+                        let watched = anime.status === 'completed' ? anime.totalEpisodes : anime.watchedEpisodes;
+                        anime.seasons.forEach((episodeCount, index) => {
+                            const watchedThis = Math.max(0, Math.min(watched, episodeCount));
+                            const episodeLength = anime.seasonEpisodeLengths && anime.seasonEpisodeLengths[index] 
+                                ? anime.seasonEpisodeLengths[index] 
+                                : anime.episodeLength;
+                            animeTime += watchedThis * episodeLength;
+                            watched -= watchedThis;
+                        });
+                    } else {
+                        // Standardowe obliczenie dla pojedynczego sezonu
+                        const watchedEpisodes = anime.status === 'completed' ? anime.totalEpisodes : anime.watchedEpisodes;
+                        animeTime = watchedEpisodes * anime.episodeLength;
+                    }
+                    
                     totalMinutes += animeTime;
                     
                     // Licz rewatchy z sezonów jeśli są dostępne
                     if (anime.seasonRewatches && anime.seasonRewatches.length > 0) {
                         anime.seasonRewatches.forEach((rewatchCount, index) => {
                             if (rewatchCount > 0 && anime.seasons && anime.seasons[index]) {
-                                totalRewatchMinutes += rewatchCount * anime.seasons[index] * anime.episodeLength;
+                                const episodeLength = anime.seasonEpisodeLengths && anime.seasonEpisodeLengths[index] 
+                                    ? anime.seasonEpisodeLengths[index] 
+                                    : anime.episodeLength;
+                                totalRewatchMinutes += rewatchCount * anime.seasons[index] * episodeLength;
                             }
                         });
                     } else if (anime.rewatchCount) {
@@ -1620,64 +1707,105 @@
                 totalTimeElement.title = `Podstawowy czas: ${formatTime(totalMinutes)}\nRewatche: ${formatTime(totalRewatchMinutes)}`;
                 totalTimeElement.dataset.minutes = totalMinutes + totalRewatchMinutes;
                 
-                totalTimeElement.addEventListener('click', function() {
-                    renderTimeBreakdown();
-                });
-
-                // Calculate average rating of ALL rated anime
-                if (ratedAnime.length > 0) {
-                    const totalRatings = ratedAnime.reduce((sum, anime) => sum + anime.averageRating, 0);
-                    const averageRating = (totalRatings / ratedAnime.length).toFixed(1);
-                    document.getElementById('average-rating').textContent = averageRating;
-                    
-                    const ratingPercentage = (averageRating / 11) * 100;
-                    document.getElementById('average-rating-bar').style.width = `${ratingPercentage}%`;
-                    
-                    // Color coding for average rating
-                    const ratingBar = document.getElementById('average-rating-bar');
-                    if (averageRating >= 9) {
-                        ratingBar.style.background = 'linear-gradient(90deg, var(--success), #00a383)';
-                    } else if (averageRating >= 7) {
-                        ratingBar.style.background = 'linear-gradient(90deg, var(--info), #0877c7)';
-                    } else if (averageRating >= 5) {
-                        ratingBar.style.background = 'linear-gradient(90deg, var(--warning), #e6a336)';
-                    } else {
-                        ratingBar.style.background = 'linear-gradient(90deg, var(--danger), #c0392b)';
-                    }
-                } else {
-                    document.getElementById('average-rating').textContent = '0.0';
-                    document.getElementById('average-rating-bar').style.width = '0%';
-                }
-
-                // Watch progress
-                if (watchingAnime.length > 0) {
-                    let totalEpisodes = 0;
-                    let watchedEpisodes = 0;
-                    
-                    watchingAnime.forEach(anime => {
-                        totalEpisodes += anime.totalEpisodes;
-                        watchedEpisodes += anime.watchedEpisodes;
+                // Kliknięcie na cały kafelek 'Czas oglądania' (drugi stat-card w #profile-stats)
+                const statsCards = document.querySelectorAll('#profile-stats .stat-card');
+                if (statsCards[1]) {
+                    statsCards[1].style.cursor = 'pointer';
+                    statsCards[1].addEventListener('click', function() {
+                        renderTimeBreakdown();
                     });
-                    
-                    const progressPercentage = Math.round((watchedEpisodes / totalEpisodes) * 100);
-                    document.getElementById('watch-progress').textContent = `${progressPercentage}%`;
-                    document.getElementById('watch-progress-bar').style.width = `${progressPercentage}%`;
-                    
-                    // Color coding for progress
-                    const progressBar = document.getElementById('watch-progress-bar');
-                    if (progressPercentage >= 75) {
-                        progressBar.style.background = 'linear-gradient(90deg, var(--success), #00a383)';
-                    } else if (progressPercentage >= 50) {
-                        progressBar.style.background = 'linear-gradient(90deg, var(--info), #0877c7)';
-                    } else if (progressPercentage >= 25) {
-                        progressBar.style.background = 'linear-gradient(90deg, var(--warning), #e6a336)';
-                    } else {
-                        progressBar.style.background = 'linear-gradient(90deg, var(--danger), #c0392b)';
-                    }
-                } else {
-                    document.getElementById('watch-progress').textContent = '0%';
-                    document.getElementById('watch-progress-bar').style.width = '0%';
                 }
+
+                // Renderuj statystyki tagów
+                renderTagsStats();
+            }
+
+            // Statystyki tagów na profilu
+            function renderTagsStats() {
+                const container = document.getElementById('profile-tags-stats');
+                if (!animeList.length) {
+                    container.innerHTML = '<div style="color:var(--gray);text-align:center;">Brak tagów do wyświetlenia</div>';
+                    return;
+                }
+                // Zbierz wszystkie tagi
+                const tagMap = {};
+                animeList.forEach(anime => {
+                    if (anime.tags && Array.isArray(anime.tags)) {
+                        anime.tags.forEach(tag => {
+                            if (!tagMap[tag]) tagMap[tag] = {count:0, totalMinutes:0, ratings:[], animeCount:0};
+                            tagMap[tag].animeCount++;
+                            // Czas oglądania
+                            let animeTime = 0;
+                            
+                            if (anime.seasons && anime.seasons.length > 1) {
+                                // Oblicz czas dla każdego sezonu osobno
+                                let watched = anime.status === 'completed' ? anime.totalEpisodes : anime.watchedEpisodes;
+                                anime.seasons.forEach((episodeCount, index) => {
+                                    const watchedThis = Math.max(0, Math.min(watched, episodeCount));
+                                    const episodeLength = anime.seasonEpisodeLengths && anime.seasonEpisodeLengths[index] 
+                                        ? anime.seasonEpisodeLengths[index] 
+                                        : anime.episodeLength;
+                                    animeTime += watchedThis * episodeLength;
+                                    watched -= watchedThis;
+                                });
+                            } else {
+                                const watchedEpisodes = anime.status === 'completed' ? anime.totalEpisodes : anime.watchedEpisodes;
+                                animeTime = watchedEpisodes * anime.episodeLength;
+                            }
+                            
+                            // Rewatche
+                            if (anime.seasonRewatches && anime.seasonRewatches.length > 0) {
+                                anime.seasonRewatches.forEach((rewatchCount, index) => {
+                                    if (rewatchCount > 0 && anime.seasons && anime.seasons[index]) {
+                                        const episodeLength = anime.seasonEpisodeLengths && anime.seasonEpisodeLengths[index] 
+                                            ? anime.seasonEpisodeLengths[index] 
+                                            : anime.episodeLength;
+                                        animeTime += rewatchCount * anime.seasons[index] * episodeLength;
+                                    }
+                                });
+                            } else if (anime.rewatchCount) {
+                                animeTime += anime.rewatchCount * anime.totalEpisodes * anime.episodeLength;
+                            }
+                            tagMap[tag].totalMinutes += animeTime;
+                            tagMap[tag].ratings.push(anime.averageRating);
+                        });
+                    }
+                });
+                const tags = Object.keys(tagMap).sort((a,b)=>a.localeCompare(b));
+                if (!tags.length) {
+                    container.innerHTML = '<div style="color:var(--gray);text-align:center;">Brak tagów do wyświetlenia</div>';
+                    return;
+                }
+                let html = `<h3 style='margin-bottom:1rem;'><i class="fas fa-tags"></i> Statystyki tagów</h3>`;
+                html += `<div style='overflow-x:auto;'><table style='width:100%;border-collapse:collapse;'>`;
+                html += `<thead><tr style='border-bottom:2px solid var(--glass-border);'>
+                    <th style='text-align:left;padding:8px 4px;'>Tag</th>
+                    <th style='text-align:left;padding:8px 4px;'>Liczba anime</th>
+                    <th style='text-align:left;padding:8px 4px;'>Czas łącznie</th>
+                    <th style='text-align:left;padding:8px 4px;'>Średnia ocena</th>
+                </tr></thead><tbody>`;
+                tags.forEach(tag => {
+                    const t = tagMap[tag];
+                    const avg = t.ratings.length ? (t.ratings.reduce((a,b)=>a+b,0)/t.ratings.length).toFixed(2) : '-';
+                    html += `<tr style='border-bottom:1px solid var(--glass-border);'>
+                        <td style='padding:8px 4px;'><span class='anime-tag tag-clickable' data-tag="${encodeURIComponent(tag)}">${tag}</span></td>
+                        <td style='padding:8px 4px;'>${t.animeCount}</td>
+                        <td style='padding:8px 4px;'>${formatTime(t.totalMinutes)}</td>
+                        <td style='padding:8px 4px;'>${avg}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table></div>`;
+                container.innerHTML = html;
+
+                // Dodaj obsługę kliknięcia na tag
+                container.querySelectorAll('.tag-clickable').forEach(el => {
+                    el.style.cursor = 'pointer';
+                    el.title = 'Pokaż anime z tym tagiem';
+                    el.addEventListener('click', function(e) {
+                        const tag = decodeURIComponent(this.dataset.tag);
+                        renderProfileAnimeListByTag(tag);
+                    });
+                });
             }
             
             // Render anime list
@@ -1686,12 +1814,20 @@
                 // Filtrowanie po wyszukiwaniu
                 if (currentSearch.trim() !== '') {
                     const searchLower = currentSearch.trim().toLowerCase();
-                    sortedList = sortedList.filter(anime =>
-                        anime.title.toLowerCase().includes(searchLower)
-                        || (anime.status && anime.status.toLowerCase().includes(searchLower))
-                        || (anime.ratings && Object.values(anime.ratings).some(val => (val+''||'').includes(searchLower)))
-                        || (anime.averageRating+''||'').includes(searchLower)
-                    );
+                    // Obsługa wyszukiwania po tagach: tag:nazwa
+                    const tagMatch = searchLower.match(/^tag:(.+)$/);
+                    if (tagMatch) {
+                        const tagQuery = tagMatch[1].trim();
+                        sortedList = sortedList.filter(anime => anime.tags && anime.tags.some(tag => tag.toLowerCase().includes(tagQuery)));
+                    } else {
+                        sortedList = sortedList.filter(anime =>
+                            anime.title.toLowerCase().includes(searchLower)
+                            || (anime.status && anime.status.toLowerCase().includes(searchLower))
+                            || (anime.ratings && Object.values(anime.ratings).some(val => (val+''||'').includes(searchLower)))
+                            || (anime.averageRating+''||'').includes(searchLower)
+                            || (anime.tags && anime.tags.some(tag => tag.toLowerCase().includes(searchLower)))
+                        );
+                    }
                 }
                 // Sortowanie
                 switch(currentSort) {
@@ -1769,15 +1905,33 @@
                                         Math.round((anime.watchedEpisodes / anime.totalEpisodes) * 100);
                     
                     // Calculate watch time (including rewatches)
-                    const mainTime = anime.watchedEpisodes * anime.episodeLength;
+                    let mainTime = 0;
                     let rewatchTime = 0;
                     let rewatchCount = 0;
+                    
+                    if (anime.seasons && anime.seasons.length > 1) {
+                        // Oblicz czas dla każdego sezonu osobno
+                        let watched = anime.watchedEpisodes;
+                        anime.seasons.forEach((episodeCount, index) => {
+                            const watchedThis = Math.max(0, Math.min(watched, episodeCount));
+                            const episodeLength = anime.seasonEpisodeLengths && anime.seasonEpisodeLengths[index] 
+                                ? anime.seasonEpisodeLengths[index] 
+                                : anime.episodeLength;
+                            mainTime += watchedThis * episodeLength;
+                            watched -= watchedThis;
+                        });
+                    } else {
+                        mainTime = anime.watchedEpisodes * anime.episodeLength;
+                    }
                     
                     // Licz rewatchy z sezonów jeśli są dostępne
                     if (anime.seasonRewatches && anime.seasonRewatches.length > 0) {
                         anime.seasonRewatches.forEach((count, index) => {
                             if (count > 0 && anime.seasons && anime.seasons[index]) {
-                                rewatchTime += count * anime.seasons[index] * anime.episodeLength;
+                                const episodeLength = anime.seasonEpisodeLengths && anime.seasonEpisodeLengths[index] 
+                                    ? anime.seasonEpisodeLengths[index] 
+                                    : anime.episodeLength;
+                                rewatchTime += count * anime.seasons[index] * episodeLength;
                                 rewatchCount += count;
                             }
                         });
@@ -1803,15 +1957,24 @@
                             if (anime.seasonRewatches && anime.seasonRewatches[idx] > 0) {
                                 rewatchInfo = ` <span style='color:var(--primary);font-size:0.8em;'>(+${anime.seasonRewatches[idx]}x rewatch)</span>`;
                             }
-                            seasonsProgressHtml += `<div>Sezon ${idx+1}: ${watchedThis}/${count} (${percent}%)${rewatchInfo}</div>`;
+                            const episodeLength = anime.seasonEpisodeLengths && anime.seasonEpisodeLengths[idx] 
+                                ? anime.seasonEpisodeLengths[idx] 
+                                : anime.episodeLength;
+                            seasonsProgressHtml += `<div>Sezon ${idx+1}: ${watchedThis}/${count} (${percent}%) - ${episodeLength}min${rewatchInfo}</div>`;
                             watched -= watchedThis;
                         });
                         seasonsProgressHtml += `</div>`;
                     }
                     
+                    let tagHtml = '';
+                    if (anime.tags && anime.tags.length) {
+                        tagHtml = `<div style='margin:8px 0 0 0;display:flex;flex-wrap:wrap;gap:6px;'>${anime.tags.map(tag => `<span class='anime-tag'>${tag}</span>`).join('')}</div>`;
+                    }
+                    
                     animeCard.innerHTML = `
                         <div class="anime-title">${anime.title}</div>
                         <span class="anime-status ${statusClass}">${statusText}</span>
+                        ${tagHtml}
                         <div class="rating-container odcinki-row" data-id="${anime.id}" style="cursor:${hasSeasons ? 'pointer' : 'default'};">
                             <span class="rating-label">Odcinki:</span>
                             <span class="rating-value">${episodesText}${hasSeasons ? " <span style=\"font-size:0.8em;opacity:0.7;\">(kliknij)</span>" : ''}</span>
@@ -1899,6 +2062,7 @@
                             document.getElementById('characters').value = animeToEdit.ratings.characters;
                             document.getElementById('story').value = animeToEdit.ratings.story;
                             document.getElementById('fun').value = animeToEdit.ratings.fun;
+                            document.getElementById('anime-tags').value = animeToEdit.tags ? animeToEdit.tags.join('; ') : '';
                             editIdInput.value = animeToEdit.id;
                             
                             // Set image preview if available
@@ -1929,7 +2093,7 @@
                             calculateAverage();
                             
                             // Scroll to form
-                            document.getElementById('anime-form').scrollIntoView({ behavior: 'smooth' });
+                            document.getElementById('dodaj').scrollIntoView({ behavior: 'smooth' });
                         }
                     });
                 });
@@ -2040,12 +2204,20 @@
                         notesHtml = `<div class="planner-notes"><i class="fas fa-sticky-note"></i> ${item.notes}</div>`;
                     }
                     
+                    let tagHtml = '';
+                    if (item.tags && item.tags.length) {
+                        tagHtml = `<div style='margin:8px 0 0 0;display:flex;flex-wrap:wrap;gap:6px;'>${item.tags.map(tag => `<span class='anime-tag'>${tag}</span>`).join('')}</div>`;
+                    }
+                    
                     plannerCard.innerHTML = `
                         <div class="anime-title">${item.title}</div>
+                        ${tagHtml}
                         <span class="priority-badge priority-${item.priority}">Priorytet: ${item.priority}</span>
                         <div style="margin-bottom:8px;color:var(--gray);font-size:0.95em;">
                             ${item.seasonCount ? `Sezony: <b>${item.seasonCount}</b>` : ''}
                             ${item.totalEpisodes ? `&nbsp;Odcinki: <b>${item.totalEpisodes}</b>` : ''}
+                            ${item.seasonEpisodeLengths && item.seasonEpisodeLengths.length > 1 ? 
+                                `<br><span style="font-size:0.85em;">Długości: ${item.seasonEpisodeLengths.map((len, idx) => `S${idx+1}: ${len}min`).join(', ')}</span>` : ''}
                         </div>
                         ${notesHtml}
                         <div class="planner-actions">
@@ -2091,7 +2263,8 @@ const animeData = {
     },
     averageRating: 5,
     createdAt: new Date().toISOString(),
-    seasons: plannerItem.seasons
+    seasons: plannerItem.seasons,
+    seasonEpisodeLengths: plannerItem.seasonEpisodeLengths
 };
                             
                             animeList.push(animeData);
@@ -2120,6 +2293,36 @@ const animeData = {
                             document.getElementById('planner-title').value = plannerItem.title;
                             document.getElementById('planner-priority').value = plannerItem.priority;
                             document.getElementById('planner-notes').value = plannerItem.notes || '';
+                            plannerTagsInput.value = plannerItem.tags ? plannerItem.tags.join('; ') : '';
+                            
+                            // Fill season inputs if needed
+                            if (plannerItem.seasons && plannerItem.seasons.length > 1) {
+                                plannerSeasonCountInput.value = plannerItem.seasons.length;
+                                plannerSeasonCountInput.dispatchEvent(new Event('input'));
+                                const episodeLengthValues = plannerItem.seasonEpisodeLengths || [];
+                                setTimeout(() => {
+                                    const seasonInputs = plannerSeasonsContainer.querySelectorAll('.planner-season-episodes');
+                                    const episodeLengthInputs = plannerSeasonsContainer.querySelectorAll('.planner-season-episode-length');
+                                    seasonInputs.forEach((input, index) => {
+                                        if (plannerItem.seasons[index]) {
+                                            input.value = plannerItem.seasons[index];
+                                        }
+                                    });
+                                    episodeLengthInputs.forEach((input, index) => {
+                                        if (episodeLengthValues[index] !== undefined) {
+                                            input.value = episodeLengthValues[index];
+                                        } else {
+                                            input.value = 24; // domyślna długość
+                                        }
+                                    });
+                                    updatePlannerTotalEpisodesFromSeasons();
+                                }, 10);
+                            } else {
+                                plannerSeasonCountInput.value = 1;
+                                plannerSeasonsContainer.innerHTML = '';
+                                plannerSeasonsContainer.style.display = 'none';
+                                plannerTotalEpisodesInput.readOnly = false;
+                            }
                             
                             // Change button text
                             const addBtn = document.getElementById('add-to-planner');
@@ -2370,21 +2573,24 @@ const animeData = {
             const seasonsContainer = document.getElementById('seasons-container');
             const totalEpisodesInput = document.getElementById('total-episodes');
 
-            function renderSeasonInputs(count, values=[], rewatchValues=[]) {
+            function renderSeasonInputs(count, values=[], rewatchValues=[], episodeLengths=[]) {
                 seasonsContainer.innerHTML = '';
                 for (let i = 0; i < count; i++) {
                     const val = values[i] || '';
                     const rewatchVal = rewatchValues[i] || 0;
+                    const episodeLength = episodeLengths[i] || '';
                     seasonsContainer.innerHTML += `
                         <div style='margin-bottom:12px;padding:12px;background:rgba(0,0,0,0.2);border-radius:8px;border:1px solid var(--glass-border);'>
                             <div style='margin-bottom:8px;'>
                                 <label style='font-weight:600;color:var(--lighter);'>Sezon ${i+1}:</label>
                                 <input type='number' class='season-episodes' min='1' value='${val}' style='width:80px;display:inline-block;margin-left:8px;padding:6px;border-radius:4px;border:1px solid var(--glass-border);background:rgba(0,0,0,0.3);color:var(--lighter);'>
                                 <span style='margin-left:8px;color:var(--gray);font-size:0.9rem;'>odcinków</span>
+                                <input type='number' class='season-episode-length' min='1' value='${episodeLength}' placeholder='24' style='width:80px;display:inline-block;margin-left:12px;padding:6px;border-radius:4px;border:1px solid var(--glass-border);background:rgba(0,0,0,0.3);color:var(--lighter);'>
+                                <span style='margin-left:8px;color:var(--gray);font-size:0.9rem;'>min</span>
                             </div>
                             <div style='margin-left:20px;'>
                                 <label style='font-size:0.9rem;color:var(--gray);'><i class="fas fa-redo"></i> Rewatch:</label>
-                                <input type='number' class='season-rewatch' min='0' value='${rewatchVal}' style='width:60px;display:inline-block;margin-left:8px;padding:4px;border-radius:4px;border:1px solid var(--glass-border);background:rgba(0,0,0,0.3);color:var(--lighter);font-size:0.9rem;'>
+                                <input type='number' class='season-rewatch' min='0' value='${rewatchVal}' style='width:60px;display:inline-block;margin-left:8px;padding:4px;border-radius:4px;border:1px solid var(--glass-border);background:rgba(0,0,0,0.3);color:var(--lighter);font-size:0.8rem;'>
                                 <span style='margin-left:4px;color:var(--gray);font-size:0.8rem;'>razy</span>
                             </div>
                         </div>
@@ -2427,9 +2633,34 @@ const animeData = {
             function fillSeasonInputsIfNeeded(anime) {
                 if (anime.seasons && Array.isArray(anime.seasons) && anime.seasons.length > 1) {
                     seasonCountInput.value = anime.seasons.length;
+                    // Trigger the input event to ensure the season inputs are rendered
+                    seasonCountInput.dispatchEvent(new Event('input'));
                     const rewatchValues = anime.seasonRewatches || [];
-                    renderSeasonInputs(anime.seasons.length, anime.seasons, rewatchValues);
-                    updateTotalEpisodesFromSeasons();
+                    const episodeLengthValues = anime.seasonEpisodeLengths || [];
+                    // After the inputs are rendered, set the values
+                    setTimeout(() => {
+                        const seasonInputs = seasonsContainer.querySelectorAll('.season-episodes');
+                        const rewatchInputs = seasonsContainer.querySelectorAll('.season-rewatch');
+                        const episodeLengthInputs = seasonsContainer.querySelectorAll('.season-episode-length');
+                        seasonInputs.forEach((input, index) => {
+                            if (anime.seasons[index]) {
+                                input.value = anime.seasons[index];
+                            }
+                        });
+                        rewatchInputs.forEach((input, index) => {
+                            if (rewatchValues[index] !== undefined) {
+                                input.value = rewatchValues[index];
+                            }
+                        });
+                        episodeLengthInputs.forEach((input, index) => {
+                            if (episodeLengthValues[index] !== undefined) {
+                                input.value = episodeLengthValues[index];
+                            } else {
+                                input.value = anime.episodeLength || 24; // fallback do głównej długości odcinka
+                            }
+                        });
+                        updateTotalEpisodesFromSeasons();
+                    }, 10);
                 } else {
                     seasonCountInput.value = 1;
                     seasonsContainer.innerHTML = '';
@@ -2651,14 +2882,36 @@ const animeData = {
                 
                 // Oblicz czas dla każdego anime
                 const animeWithTime = animeList.map(anime => {
-                    const watchedEpisodes = anime.status === 'completed' ? anime.totalEpisodes : anime.watchedEpisodes;
-                    const mainTime = watchedEpisodes * anime.episodeLength;
+                    let mainTime = 0;
+                    let fullTime = 0;
+                    
+                    if (anime.seasons && anime.seasons.length > 1) {
+                        // Oblicz czas dla każdego sezonu osobno
+                        let watched = anime.status === 'completed' ? anime.totalEpisodes : anime.watchedEpisodes;
+                        anime.seasons.forEach((episodeCount, index) => {
+                            const watchedThis = Math.max(0, Math.min(watched, episodeCount));
+                            const episodeLength = anime.seasonEpisodeLengths && anime.seasonEpisodeLengths[index] 
+                                ? anime.seasonEpisodeLengths[index] 
+                                : anime.episodeLength;
+                            mainTime += watchedThis * episodeLength;
+                            fullTime += episodeCount * episodeLength;
+                            watched -= watchedThis;
+                        });
+                    } else {
+                        // Standardowe obliczenie dla pojedynczego sezonu
+                        const watchedEpisodes = anime.status === 'completed' ? anime.totalEpisodes : anime.watchedEpisodes;
+                        mainTime = watchedEpisodes * anime.episodeLength;
+                        fullTime = anime.totalEpisodes * anime.episodeLength;
+                    }
                     
                     let rewatchTime = 0;
                     if (anime.seasonRewatches && anime.seasonRewatches.length > 0) {
                         anime.seasonRewatches.forEach((count, index) => {
                             if (count > 0 && anime.seasons && anime.seasons[index]) {
-                                rewatchTime += count * anime.seasons[index] * anime.episodeLength;
+                                const episodeLength = anime.seasonEpisodeLengths && anime.seasonEpisodeLengths[index] 
+                                    ? anime.seasonEpisodeLengths[index] 
+                                    : anime.episodeLength;
+                                rewatchTime += count * anime.seasons[index] * episodeLength;
                             }
                         });
                     } else if (anime.rewatchCount) {
@@ -2666,7 +2919,6 @@ const animeData = {
                     }
                     
                     const totalTime = mainTime + rewatchTime;
-                    const fullTime = anime.totalEpisodes * anime.episodeLength;
                     
                     return {
                         ...anime,
@@ -2725,6 +2977,10 @@ const animeData = {
                 });
                 
                 let totalWatchTime = animeWithTime.reduce((sum, anime) => sum + anime.totalTime, 0);
+                // Dodaj percentOfTotal do każdego anime PRZED sortowaniem
+                animeWithTime.forEach(anime => {
+                    anime.percentOfTotal = totalWatchTime > 0 ? (anime.totalTime / totalWatchTime) * 100 : 0;
+                });
                 let html = `<div style='background:rgba(0,0,0,0.2);border-radius:12px;padding:1rem;'><h3 style='text-align:center;margin-bottom:1rem;'>Szczegółowy czas oglądania</h3>`;
                 html += `<div style='overflow-x:auto;'><table style='width:100%;border-collapse:collapse;'>`;
                 html += `<thead><tr style='border-bottom:2px solid var(--glass-border);'>
@@ -2733,7 +2989,7 @@ const animeData = {
                     <th style='text-align:left;padding:8px 4px;cursor:pointer;text-decoration:underline;' id='sort-total-time'>Czas oglądany ${sortBy==='totalTime'?(sortDir==='asc'?'▲':'▼'):''}</th>
                     <th style='text-align:left;padding:8px 4px;cursor:pointer;text-decoration:underline;' id='sort-full-time'>Pełna długość ${sortBy==='fullTime'?(sortDir==='asc'?'▲':'▼'):''}</th>
                     <th style='text-align:left;padding:8px 4px;cursor:pointer;text-decoration:underline;' id='sort-progress'>Postęp ${sortBy==='progress'?(sortDir==='asc'?'▲':'▼'):''}</th>
-                    <th style='text-align:left;padding:8px 4px;cursor:pointer;text-decoration:underline;' id='sort-percent'>% całości ${sortBy==='percentOfTotal'?(sortDir==='asc'?'▲':'▼'):''}</th>
+                    <th style='text-align:left;padding:8px 4px;'>% całości</th>
                 </tr></thead><tbody>`;
                 
                 animeWithTime.forEach(anime => {
@@ -2757,7 +3013,7 @@ const animeData = {
                                 <span style='position:absolute;top:-18px;right:0;font-size:0.8rem;color:var(--gray);'>${progressPercent}%</span>
                             </div>
                         </td>
-                        <td style='padding:8px 4px;'>${percentOfTotal}%</td>
+                        <td style='padding:8px 4px;'>${anime.percentOfTotal.toFixed(1)}%</td>
                     </tr>`;
                 });
                 
@@ -2818,16 +3074,6 @@ const animeData = {
                         renderTimeBreakdown.sortState = {sortBy, sortDir};
                         renderTimeBreakdown();
                     };
-                    document.getElementById('sort-percent').onclick = function() {
-                        if (sortBy === 'percentOfTotal') {
-                            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-                        } else {
-                            sortBy = 'percentOfTotal';
-                            sortDir = 'desc';
-                        }
-                        renderTimeBreakdown.sortState = {sortBy, sortDir};
-                        renderTimeBreakdown();
-                    };
                 }
                 assignTimeBreakdownSortHandlers();
             }
@@ -2862,18 +3108,27 @@ const animeData = {
             const plannerTitleInput = document.getElementById('planner-title');
             const plannerPrioritySelect = document.getElementById('planner-priority');
             const plannerNotesTextarea = document.getElementById('planner-notes');
+            const plannerTagsInput = document.getElementById('planner-tags');
             
             addToPlannerBtn.addEventListener('click', function() {
                 const title = plannerTitleInput.value.trim();
                 const priority = plannerPrioritySelect.value;
                 const notes = plannerNotesTextarea.value.trim();
+                const tagsRaw = plannerTagsInput.value.trim();
+                const tags = tagsRaw ? tagsRaw.split(/;|\n/).map(t => t.trim()).filter(Boolean) : [];
                 const seasonCount = parseInt(plannerSeasonCountInput.value);
                 let seasons = [];
+                let seasonEpisodeLengths = [];
                 if (seasonCount > 1) {
                     const seasonInputs = document.querySelectorAll('#planner-seasons-container .planner-season-episodes');
+                    const episodeLengthInputs = document.querySelectorAll('#planner-seasons-container .planner-season-episode-length');
                     seasonInputs.forEach(input => {
                         const v = parseInt(input.value);
                         seasons.push(isNaN(v) ? 0 : v);
+                    });
+                    episodeLengthInputs.forEach(input => {
+                        const v = parseInt(input.value);
+                        seasonEpisodeLengths.push(isNaN(v) ? 24 : v);
                     });
                 }
                 const totalEpisodes = parseInt(plannerTotalEpisodesInput.value) || 12;
@@ -2894,7 +3149,9 @@ const animeData = {
                             notes,
                             seasonCount,
                             seasons: seasons.length > 1 ? seasons : undefined,
-                            totalEpisodes
+                            seasonEpisodeLengths: seasonEpisodeLengths.length > 1 ? seasonEpisodeLengths : undefined,
+                            totalEpisodes,
+                            tags
                         };
                         savePlannerList();
                         renderPlannerList();
@@ -2913,7 +3170,9 @@ const animeData = {
                         createdAt: new Date().toISOString(),
                         seasonCount,
                         seasons: seasons.length > 1 ? seasons : undefined,
-                        totalEpisodes
+                        seasonEpisodeLengths: seasonEpisodeLengths.length > 1 ? seasonEpisodeLengths : undefined,
+                        totalEpisodes,
+                        tags
                     };
                     plannerList.push(plannerItem);
                     savePlannerList();
@@ -2924,6 +3183,7 @@ const animeData = {
                 plannerTitleInput.value = '';
                 plannerPrioritySelect.value = 'średni';
                 plannerNotesTextarea.value = '';
+                plannerTagsInput.value = '';
                 plannerSeasonCountInput.value = 1;
                 plannerSeasonsContainer.innerHTML = '';
                 plannerSeasonsContainer.style.display = 'none';
@@ -2937,14 +3197,20 @@ const animeData = {
             const plannerSeasonsContainer = document.getElementById('planner-seasons-container');
             const plannerTotalEpisodesInput = document.getElementById('planner-total-episodes');
 
-            function renderPlannerSeasonInputs(count, values=[]) {
+            function renderPlannerSeasonInputs(count, values=[], episodeLengths=[]) {
                 plannerSeasonsContainer.innerHTML = '';
                 for (let i = 0; i < count; i++) {
                     const val = values[i] || '';
+                    const episodeLength = episodeLengths[i] || '';
                     plannerSeasonsContainer.innerHTML += `
-                        <div style='margin-bottom:8px;'>
-                            <label>Sezon ${i+1}:</label>
-                            <input type='number' class='planner-season-episodes' min='1' value='${val}' style='width:80px;display:inline-block;margin-left:8px;'>
+                        <div style='margin-bottom:8px;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;border:1px solid var(--glass-border);'>
+                            <div style='margin-bottom:4px;'>
+                                <label style='font-weight:600;color:var(--lighter);'>Sezon ${i+1}:</label>
+                                <input type='number' class='planner-season-episodes' min='1' value='${val}' style='width:80px;display:inline-block;margin-left:8px;padding:4px;border-radius:4px;border:1px solid var(--glass-border);background:rgba(0,0,0,0.3);color:var(--lighter);'>
+                                <span style='margin-left:8px;color:var(--gray);font-size:0.9rem;'>odcinków</span>
+                                <input type='number' class='planner-season-episode-length' min='1' value='${episodeLength}' placeholder='24' style='width:80px;display:inline-block;margin-left:12px;padding:4px;border-radius:4px;border:1px solid var(--glass-border);background:rgba(0,0,0,0.3);color:var(--lighter);'>
+                                <span style='margin-left:8px;color:var(--gray);font-size:0.9rem;'>min</span>
+                            </div>
                         </div>
                     `;
                 }
@@ -2978,6 +3244,37 @@ const animeData = {
                     if (!isNaN(v)) sum += v;
                 });
                 plannerTotalEpisodesInput.value = sum > 0 ? sum : '';
+            }
+
+            // Dodaj funkcję do wyświetlania anime z danym tagiem
+            function renderProfileAnimeListByTag(tag) {
+                const list = animeList.filter(a => a.tags && a.tags.includes(tag));
+                const label = `Anime z tagiem: <span class='anime-tag'>${tag}</span>`;
+                const container = document.getElementById('profile-anime-list');
+                if (list.length === 0) {
+                    container.innerHTML = `<div style='text-align:center;color:var(--gray);'>Brak anime z tagiem "${tag}"</div><div style='text-align:center;margin-top:1rem;'><button id='close-profile-list' class='btn-accent'>Zamknij</button></div>`;
+                    container.style.display = '';
+                    document.getElementById('close-profile-list').onclick = () => { container.style.display = 'none'; };
+                    return;
+                }
+                let html = `<div style='background:rgba(0,0,0,0.2);border-radius:12px;padding:1rem;'><h3 style='text-align:center;margin-bottom:1rem;'>${label}</h3>`;
+                html += `<div style='overflow-x:auto;'><table style='width:100%;border-collapse:collapse;'>`;
+                html += `<thead><tr style='border-bottom:2px solid var(--glass-border);'>
+                    <th style='text-align:left;padding:8px 4px;'>Tytuł</th>
+                    <th style='text-align:left;padding:8px 4px;'>Status</th>
+                    <th style='text-align:left;padding:8px 4px;'>Średnia ocena</th>
+                </tr></thead><tbody>`;
+                list.forEach(a => {
+                    html += `<tr style='border-bottom:1px solid var(--glass-border);'>
+                        <td style='padding:8px 4px;font-weight:600;'>${a.title}</td>
+                        <td style='padding:8px 4px;'>${a.status === 'completed' ? 'Obejrzane' : a.status === 'watching' ? 'Oglądane' : 'Nadchodzące'}</td>
+                        <td style='padding:8px 4px;'>${a.averageRating}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table></div><div style='text-align:center;margin-top:1rem;'><button id='close-profile-list' class='btn-accent'>Zamknij</button></div></div>`;
+                container.innerHTML = html;
+                container.style.display = '';
+                document.getElementById('close-profile-list').onclick = () => { container.style.display = 'none'; };
             }
         });
     </script>
