@@ -1044,18 +1044,55 @@
         .calendar-grid {
             display: grid;
             grid-template-columns: auto 1fr;
-            gap: 8px;
+            gap: 12px;
             align-items: start;
         }
         
         .calendar-labels {
             display: grid;
             grid-template-rows: repeat(7, 1fr);
-            gap: 4px;
-            font-size: 0.8rem;
+            gap: 3px;
+            font-size: 0.85rem;
             color: var(--gray);
             text-align: right;
-            padding-right: 8px;
+            padding-right: 10px;
+            font-weight: 500;
+            margin-top: 32px; /* Przesunięcie w dół, żeby wyrównać z kwadratami */
+        }
+        
+
+        
+        .calendar-labels > div {
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        .calendar-labels > div:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--lighter);
+        }
+        
+        .calendar-months > div {
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        .calendar-months > div:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--lighter);
+        }
+        
+        .calendar-day.dimmed {
+            opacity: 0.3;
+            filter: grayscale(0.5);
         }
         
         .calendar-months {
@@ -1068,15 +1105,47 @@
             text-align: center;
         }
         
+        .calendar-month {
+            position: relative;
+        }
+        
+        .calendar-month:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: -2px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: var(--glass-border);
+        }
+        
         .calendar-days {
             display: grid;
             grid-template-columns: repeat(53, 1fr);
-            gap: 2px;
+            grid-template-rows: repeat(7, 1fr);
+            gap: 3px;
+            position: relative;
+        }
+        
+        .calendar-days::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            pointer-events: none;
+            background-image: 
+                linear-gradient(to right, var(--glass-border) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--glass-border) 1px, transparent 1px);
+            background-size: calc(100% / 12) 100%, 100% calc(100% / 7);
+            background-position: 0 0;
+            opacity: 0.3;
         }
         
         .calendar-day {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 2px;
             cursor: pointer;
             transition: var(--transition);
@@ -1090,11 +1159,13 @@
         }
         
         .calendar-day.empty {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .calendar-day.level-0 {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .calendar-day.level-1 {
@@ -2213,7 +2284,7 @@
                         renderTimeBreakdown();
                     });
                 }
-                
+
                 // Obejrzane - pokazuje listę obejrzanych anime
                 if (statsCards[2]) {
                     statsCards[2].classList.add('clickable');
@@ -4270,7 +4341,7 @@ const animeData = {
                         </div>
                         <div>
                             <div class="calendar-months">
-                                ${months.map(month => `<div>${month}</div>`).join('')}
+                                ${months.map(month => `<div class="calendar-month">${month}</div>`).join('')}
                             </div>
                             <div class="calendar-days" id="calendar-days">
                             </div>
@@ -4308,30 +4379,58 @@ const animeData = {
                     firstMonday.setDate(firstMonday.getDate() - 1);
                 }
                 
-                let html = '';
-                let currentDate = new Date(firstMonday);
+                // Oblicz liczbę tygodni potrzebnych dla całego roku
+                const totalDays = Math.ceil((endDate - firstMonday) / (1000 * 60 * 60 * 24)) + 1;
+                const weeks = Math.ceil(totalDays / 7);
                 
-                while (currentDate <= endDate) {
-                    const dateStr = currentDate.toISOString().split('T')[0];
-                    const episodes = activityData[dateStr] || 0;
-                    const level = getActivityLevel(episodes);
-                    const isCurrentYear = currentDate.getFullYear() === currentYear;
-                    
-                    if (isCurrentYear) {
-                        const tooltip = episodes > 0 ? 
-                            `${dateStr}: ${episodes} odcinków` : 
-                            `${dateStr}: Brak aktywności`;
+                // Przygotuj tablicę 2D: [dzień_tygodnia][tydzień]
+                const calendarGrid = Array(7).fill().map(() => Array(weeks).fill(null));
+                
+                // Wypełnij grid datami
+                for (let week = 0; week < weeks; week++) {
+                    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                        const currentDate = new Date(firstMonday);
+                        currentDate.setDate(firstMonday.getDate() + (week * 7) + dayOfWeek);
                         
-                        html += `
-                            <div class="calendar-day level-${level}" data-date="${dateStr}" data-episodes="${episodes}">
-                                <div class="calendar-tooltip">${tooltip}</div>
-                            </div>
-                        `;
-                    } else {
-                        html += `<div class="calendar-day empty"></div>`;
+                        // dayOfWeek = 0 to poniedziałek (firstMonday), dayOfWeek = 1 to wtorek, itd.
+                        // Chcemy: 0=poniedziałek, 1=wtorek, 2=środa, 3=czwartek, 4=piątek, 5=sobota, 6=niedziela
+                        const mappedDayOfWeek = dayOfWeek;
+                        
+                        const dateStr = currentDate.toISOString().split('T')[0];
+                        const episodes = activityData[dateStr] || 0;
+                        const level = getActivityLevel(episodes);
+                        const isCurrentYear = currentDate.getFullYear() === currentYear;
+                        
+                        calendarGrid[mappedDayOfWeek][week] = {
+                            date: dateStr,
+                            episodes: episodes,
+                            level: level,
+                            isCurrentYear: isCurrentYear
+                        };
                     }
-                    
-                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                
+                // Renderuj HTML - każdy rząd to jeden dzień tygodnia
+                let html = '';
+                // Renderuj każdy tydzień osobno, żeby poniedziałek był pierwszy
+                for (let week = 0; week < weeks; week++) {
+                    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                        const day = calendarGrid[dayOfWeek][week];
+                        
+                        if (day.isCurrentYear) {
+                            const tooltip = day.episodes > 0 ? 
+                                `${day.date}: ${day.episodes} odcinków` : 
+                                `${day.date}: Brak aktywności`;
+                            
+                            html += `
+                                <div class="calendar-day level-${day.level}" data-date="${day.date}" data-episodes="${day.episodes}" style="grid-row: ${dayOfWeek + 1}; grid-column: ${week + 1};">
+                                    <div class="calendar-tooltip">${tooltip}</div>
+                                </div>
+                            `;
+                        } else {
+                            html += `<div class="calendar-day empty" style="grid-row: ${dayOfWeek + 1}; grid-column: ${week + 1};"></div>`;
+                        }
+                    }
                 }
                 
                 daysContainer.innerHTML = html;
@@ -4342,6 +4441,65 @@ const animeData = {
                         const date = day.dataset.date;
                         const episodes = parseInt(day.dataset.episodes) || 0;
                         showDayDetails(date, episodes);
+                    });
+                });
+                
+                // Dodaj event listeners dla hover na etykiety dni
+                const dayLabels = document.querySelectorAll('.calendar-labels > div');
+                dayLabels.forEach((label, index) => {
+                    label.addEventListener('mouseenter', () => {
+                        // Przyciemnij wszystkie kwadraty
+                        document.querySelectorAll('.calendar-day').forEach(day => {
+                            day.classList.add('dimmed');
+                        });
+                        
+                        // Podświetl kwadraty dla tego dnia tygodnia
+                        document.querySelectorAll('.calendar-day').forEach(day => {
+                            const dayElement = day;
+                            const computedStyle = window.getComputedStyle(dayElement);
+                            const gridRow = computedStyle.gridRow;
+                            if (gridRow === `${index + 1}`) {
+                                dayElement.classList.remove('dimmed');
+                            }
+                        });
+                    });
+                    
+                    label.addEventListener('mouseleave', () => {
+                        // Usuń przyciemnienie ze wszystkich kwadratów
+                        document.querySelectorAll('.calendar-day').forEach(day => {
+                            day.classList.remove('dimmed');
+                        });
+                    });
+                });
+                
+                // Dodaj event listeners dla hover na etykiety miesięcy
+                const monthLabels = document.querySelectorAll('.calendar-months > div');
+                monthLabels.forEach((label, index) => {
+                    label.addEventListener('mouseenter', () => {
+                        // Przyciemnij wszystkie kwadraty
+                        document.querySelectorAll('.calendar-day').forEach(day => {
+                            day.classList.add('dimmed');
+                        });
+                        
+                        // Podświetl kwadraty dla tego miesiąca
+                        document.querySelectorAll('.calendar-day').forEach(day => {
+                            const dayElement = day;
+                            if (dayElement.dataset.date) {
+                                const date = new Date(dayElement.dataset.date);
+                                const month = date.getMonth(); // 0-11 (styczeń=0, luty=1, itd.)
+                                
+                                if (month === index) {
+                                    dayElement.classList.remove('dimmed');
+                                }
+                            }
+                        });
+                    });
+                    
+                    label.addEventListener('mouseleave', () => {
+                        // Usuń przyciemnienie ze wszystkich kwadratów
+                        document.querySelectorAll('.calendar-day').forEach(day => {
+                            day.classList.remove('dimmed');
+                        });
                     });
                 });
             }
