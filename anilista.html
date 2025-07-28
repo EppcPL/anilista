@@ -1684,9 +1684,12 @@
                 
                 <div class="form-group" id="completed-date-group" style="display:none;">
                     <label for="completed-date"><i class="fas fa-calendar-check"></i> Data ukończenia</label>
-                    <input type="date" id="completed-date">
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <input type="date" id="completed-date">
+                        <button type="button" id="clear-completed-date" class="btn-secondary" style="padding:6px 12px;font-size:0.9em;">Nie pamiętam daty</button>
+                    </div>
                     <small style="color:var(--gray);font-size:0.85rem;margin-top:4px;display:block;">
-                        <i class="fas fa-info-circle"></i> Możesz ręcznie ustawić datę ukończenia anime.
+                        <i class="fas fa-info-circle"></i> Możesz ręcznie ustawić datę ukończenia anime lub wyczyścić to pole.
                     </small>
                 </div>
                 
@@ -2209,9 +2212,9 @@
                         animeList[index] = animeData;
                         
                         // Jeśli status zmienił się na 'completed' i nie ma daty ukończenia, dodaj ją
-                        if (animeData.status === 'completed' && !animeData.completedDate) {
-                            animeData.completedDate = new Date().toISOString().split('T')[0];
-                        }
+                        // if (animeData.status === 'completed' && !animeData.completedDate) {
+                        //     animeData.completedDate = new Date().toISOString().split('T')[0];
+                        // }
                     }
                     cancelEdit();
                 } else {
@@ -3696,11 +3699,11 @@ const animeData = {
             function migrateExistingAnime() {
                 let hasChanges = false;
                 animeList.forEach(anime => {
-                    if (anime.status === 'completed' && !anime.completedDate) {
-                        // Dla już ukończonych anime ustaw datę ukończenia na datę utworzenia
-                        anime.completedDate = anime.createdAt ? anime.createdAt.split('T')[0] : new Date().toISOString().split('T')[0];
-                        hasChanges = true;
-                    }
+                    // Usuń automatyczne ustawianie daty ukończenia - niech użytkownik sam decyduje
+                    // if (anime.status === 'completed' && !anime.completedDate) {
+                    //     anime.completedDate = anime.createdAt ? anime.createdAt.split('T')[0] : new Date().toISOString().split('T')[0];
+                    //     hasChanges = true;
+                    // }
                 });
                 
                 if (hasChanges) {
@@ -5257,7 +5260,8 @@ const animeData = {
                             console.log('Czy jest ukończone po:', isNowCompleted);
                             if (isNowCompleted && anime.status === 'watching') {
                                 anime.status = 'completed';
-                                anime.completedDate = date; // Ustaw datę ukończenia na datę aktywności
+                                // Usuń automatyczne ustawianie daty ukończenia - niech użytkownik sam decyduje
+                                // anime.completedDate = date; // Ustaw datę ukończenia na datę aktywności
                                 console.log('Anime zostało ukończone!');
                             }
                             // Zawsze aktualizuj datę ostatniego oglądania
@@ -5313,6 +5317,11 @@ const animeData = {
                     container.scrollIntoView({ behavior: 'smooth' });
                 }, 100);
             }
+
+            // Obsługa czyszczenia daty ukończenia
+            document.getElementById('clear-completed-date').addEventListener('click', function() {
+                document.getElementById('completed-date').value = '';
+            });
         });
     </script>
     
