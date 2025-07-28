@@ -1474,6 +1474,46 @@
             padding: 2rem;
         }
         
+        .day-summary-tag-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 0.8rem;
+            border: 1px solid var(--glass-border);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-width: 150px;
+        }
+        
+        .day-summary-tag-item:hover {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: var(--primary);
+        }
+        
+        .day-summary-tag-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        
+        .day-summary-tag-episodes {
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .day-summary-tag-anime {
+            color: var(--accent);
+            font-weight: 500;
+        }
+        
+        .day-summary-tag-time {
+            color: var(--secondary);
+            font-weight: 500;
+        }
+        
         .priority-niski {
             color: var(--success);
             border-color: var(--success);
@@ -4543,6 +4583,7 @@ const animeData = {
                 let totalMinutes = 0;
                 let monthDetails = [];
                 let animeStats = {};
+                let tagStats = {};
                 
                 // Przejdź przez wszystkie dni miesiąca
                 const startDate = new Date(currentYear, monthIndex, 1);
@@ -4573,6 +4614,23 @@ const animeData = {
                                 };
                             }
                             animeStats[title].episodes += detail.episodes;
+                            
+                            // Zbierz statystyki tagów
+                            if (anime && anime.tags && Array.isArray(anime.tags)) {
+                                anime.tags.forEach(tag => {
+                                    if (!tagStats[tag]) {
+                                        tagStats[tag] = {
+                                            name: tag,
+                                            episodes: 0,
+                                            animeCount: 0,
+                                            animeIds: new Set()
+                                        };
+                                    }
+                                    tagStats[tag].episodes += detail.episodes;
+                                    tagStats[tag].animeIds.add(detail.animeId);
+                                    tagStats[tag].animeCount = tagStats[tag].animeIds.size;
+                                });
+                            }
                         });
                     }
                 }
@@ -4666,6 +4724,53 @@ const animeData = {
                             Brak aktywności w tym miesiącu
                         </div>
                     `;
+                }
+                
+                // Dodaj sekcję z tagami jeśli są jakieś
+                if (Object.keys(tagStats).length > 0) {
+                    // Sortuj tagi według liczby odcinków (malejąco)
+                    const sortedTags = Object.values(tagStats).sort((a, b) => b.episodes - a.episodes);
+                    
+                    let tagsHtml = `
+                        <div class="day-summary-section">
+                            <h4 style="margin: 1.5rem 0 1rem 0; color: var(--lighter); font-size: 1.1rem;">
+                                <i class="fas fa-tags"></i> Najpopularniejsze tagi
+                            </h4>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    `;
+                    
+                    sortedTags.forEach(tag => {
+                        const tagTime = tag.episodes * 24; // Przybliżony czas na odcinek
+                        const tagHours = Math.floor(tagTime / 60);
+                        const tagMinutes = tagTime % 60;
+                        const tagTimeString = tagHours > 0 ? 
+                            `${tagHours}h ${tagMinutes > 0 ? tagMinutes + 'm' : ''}` : 
+                            `${tagMinutes}m`;
+                        
+                        tagsHtml += `
+                            <div class="day-summary-tag-item">
+                                <span class="anime-tag">${tag.name}</span>
+                                <div class="day-summary-tag-stats">
+                                    <span class="day-summary-tag-episodes">
+                                        <i class="fas fa-play-circle"></i> ${tag.episodes} odc.
+                                    </span>
+                                    <span class="day-summary-tag-anime">
+                                        <i class="fas fa-film"></i> ${tag.animeCount} anime
+                                    </span>
+                                    <span class="day-summary-tag-time">
+                                        <i class="fas fa-clock"></i> ~${tagTimeString}
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    tagsHtml += `
+                            </div>
+                        </div>
+                    `;
+                    
+                    animeListEl.innerHTML += tagsHtml;
                 }
                 
                 modal.classList.add('show');
