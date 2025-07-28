@@ -2121,19 +2121,25 @@
                 
                 const status = document.getElementById('status').value;
                 const seasonCount = parseInt(document.getElementById('season-count').value);
+                console.log('Debug - seasonCount from form:', seasonCount);
+                console.log('Debug - season-count element value:', document.getElementById('season-count').value);
                 let seasons = [];
                 let seasonRewatches = [];
                 let seasonEpisodeLengths = [];
+                let seasonCompletedDates = [];
                 if (seasonCount > 1) {
                     const seasonInputs = document.querySelectorAll('#seasons-container .season-episodes');
                     const rewatchInputs = document.querySelectorAll('#seasons-container .season-rewatch');
                     const episodeLengthInputs = document.querySelectorAll('#seasons-container .season-episode-length');
                     const seasonDateInputs = document.querySelectorAll('#seasons-container .season-completed-date');
-                    let seasonCompletedDates = [];
+                    
+                    console.log('Debug - seasonCount:', seasonCount);
+                    console.log('Debug - seasonInputs found:', seasonInputs.length);
                     
                     seasonInputs.forEach((input, index) => {
                         const v = parseInt(input.value);
                         seasons.push(isNaN(v) ? 0 : v);
+                        console.log(`Debug - Season ${index + 1}: ${input.value} -> ${isNaN(v) ? 0 : v}`);
                     });
                     rewatchInputs.forEach((input, index) => {
                         const v = parseInt(input.value);
@@ -2147,6 +2153,10 @@
                         const date = input.value;
                         seasonCompletedDates.push(date || null);
                     });
+                    
+                    console.log('Debug - seasons array:', seasons);
+                    console.log('Debug - seasonRewatches array:', seasonRewatches);
+                    console.log('Debug - seasonEpisodeLengths array:', seasonEpisodeLengths);
                 }
                 const totalEpisodes = parseInt(document.getElementById('total-episodes').value) || 12;
                 const episodeLength = parseInt(document.getElementById('episode-length').value) || 24;
@@ -2191,6 +2201,12 @@
                     animeData.seasonRewatches = seasonRewatches;
                     animeData.seasonEpisodeLengths = seasonEpisodeLengths;
                     animeData.seasonCompletedDates = seasonCompletedDates;
+                    console.log('Debug - animeData with seasons:', {
+                        title: animeData.title,
+                        seasons: animeData.seasons,
+                        seasonRewatches: animeData.seasonRewatches,
+                        seasonEpisodeLengths: animeData.seasonEpisodeLengths
+                    });
                 }
                 
                 // Add image data if available
@@ -3788,11 +3804,11 @@ const animeData = {
             function fillSeasonInputsIfNeeded(anime) {
                 if (anime.seasons && Array.isArray(anime.seasons) && anime.seasons.length > 1) {
                     seasonCountInput.value = anime.seasons.length;
-                    // Trigger the input event to ensure the season inputs are rendered
-                    renderSeasonInputs(anime.seasons.length, anime.seasons, rewatchValues, episodeLengthValues, seasonCompletedDates);
                     const rewatchValues = anime.seasonRewatches || [];
                     const episodeLengthValues = anime.seasonEpisodeLengths || [];
                     const seasonCompletedDates = anime.seasonCompletedDates || [];
+                    // Trigger the input event to ensure the season inputs are rendered
+                    renderSeasonInputs(anime.seasons.length, anime.seasons, rewatchValues, episodeLengthValues, seasonCompletedDates);
                     // After the inputs are rendered, set the values
                     setTimeout(() => {
                         const seasonInputs = seasonsContainer.querySelectorAll('.season-episodes');
@@ -3962,6 +3978,7 @@ const animeData = {
                         <th style='text-align:left;padding:8px 4px;cursor:pointer;text-decoration:underline;' id='sort-title'>Tytuł ${sortBy==='title'?(sortDir==='asc'?'▲':'▼'):''}</th>
                         <th style='text-align:left;padding:8px 4px;cursor:pointer;text-decoration:underline;' id='sort-priority'>Priorytet ${sortBy==='priority'?(sortDir==='asc'?'▲':'▼'):''}</th>
                         <th style='text-align:left;padding:8px 4px;'>Notatki</th>
+                        ${type === 'completed' ? '<th style="text-align:left;padding:8px 4px;">Data ukończenia</th>' : ''}
                     </tr></thead><tbody>`;
                     list.forEach(a => {
                         const priorityClass = `priority-${a.priority}`;
@@ -3970,6 +3987,7 @@ const animeData = {
                             <td style='padding:8px 4px;font-weight:600;'>${a.title}</td>
                             <td style='padding:8px 4px;'><span class='priority-badge ${priorityClass}' style='font-size:0.7rem;padding:2px 8px;'>${a.priority}</span></td>
                             <td style='padding:8px 4px;font-size:0.9rem;color:var(--gray);'>${notes}</td>
+                            ${type === 'completed' ? `<td style='padding:8px 4px;color:var(--accent);font-size:0.9rem;'>${a.completedDate ? formatDate(a.completedDate) : 'Brak daty'}</td>` : ''}
                         </tr>`;
                     });
                 } else {
@@ -3978,12 +3996,14 @@ const animeData = {
                         <th style='text-align:left;padding:8px 4px;cursor:pointer;text-decoration:underline;' id='sort-title'>Tytuł ${sortBy==='title'?(sortDir==='asc'?'▲':'▼'):''}</th>
                         <th style='text-align:left;padding:8px 4px;cursor:pointer;text-decoration:underline;' id='sort-status'>Status ${sortBy==='status'?(sortDir==='asc'?'▲':'▼'):''}</th>
                         <th style='text-align:left;padding:8px 4px;cursor:pointer;text-decoration:underline;' id='sort-avg-rating'>Średnia ocena ${sortBy==='averageRating'?(sortDir==='asc'?'▲':'▼'):''}</th>
+                        ${type === 'completed' ? '<th style="text-align:left;padding:8px 4px;">Data ukończenia</th>' : ''}
                     </tr></thead><tbody>`;
                     list.forEach(a => {
                         html += `<tr style='border-bottom:1px solid var(--glass-border);'>
                             <td style='padding:8px 4px;font-weight:600;'>${a.title}</td>
                             <td style='padding:8px 4px;'>${a.status === 'completed' ? 'Obejrzane' : a.status === 'watching' ? 'Oglądane' : 'Nadchodzące'}</td>
                             <td style='padding:8px 4px;'>${a.averageRating}</td>
+                            ${type === 'completed' ? `<td style='padding:8px 4px;color:var(--accent);font-size:0.9rem;'>${a.completedDate ? formatDate(a.completedDate) : 'Brak daty'}</td>` : ''}
                         </tr>`;
                     });
                 }
