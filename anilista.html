@@ -1083,11 +1083,41 @@
             transition: var(--transition);
             padding: 2px 4px;
             border-radius: 3px;
+            position: relative;
         }
         
         .calendar-months > div:hover {
             background: rgba(255, 255, 255, 0.1);
             color: var(--lighter);
+        }
+        
+        .calendar-months > div:active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(0.95);
+        }
+        
+        .calendar-month-tooltip {
+            position: absolute;
+            background: var(--darker);
+            color: var(--lighter);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 5px;
+        }
+        
+        .calendar-months > div:hover .calendar-month-tooltip {
+            opacity: 1;
         }
         
         .calendar-day.dimmed {
@@ -1127,21 +1157,7 @@
             position: relative;
         }
         
-        .calendar-days::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            pointer-events: none;
-            background-image: 
-                linear-gradient(to right, var(--glass-border) 1px, transparent 1px),
-                linear-gradient(to bottom, var(--glass-border) 1px, transparent 1px);
-            background-size: calc(100% / 12) 100%, 100% calc(100% / 7);
-            background-position: 0 0;
-            opacity: 0.3;
-        }
+
         
         .calendar-day {
             width: 14px;
@@ -4341,7 +4357,7 @@ const animeData = {
                         </div>
                         <div>
                             <div class="calendar-months">
-                                ${months.map(month => `<div class="calendar-month">${month}</div>`).join('')}
+                                ${months.map(month => `<div class="calendar-month">${month}<div class="calendar-month-tooltip">Kliknij aby zobaczyć podsumowanie miesiąca</div></div>`).join('')}
                             </div>
                             <div class="calendar-days" id="calendar-days">
                             </div>
@@ -4501,7 +4517,158 @@ const animeData = {
                             day.classList.remove('dimmed');
                         });
                     });
+                    
+                    // Dodaj event listener dla kliknięcia na miesiąc
+                    label.addEventListener('click', () => {
+                        showMonthDetails(index);
+                    });
                 });
+            }
+            
+            function showMonthDetails(monthIndex) {
+                const modal = document.getElementById('day-summary-modal');
+                const dateEl = document.getElementById('day-summary-date');
+                const statsEl = document.getElementById('day-summary-stats');
+                const animeListEl = document.getElementById('day-summary-anime-list');
+                
+                // Nazwy miesięcy
+                const monthNames = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 
+                                   'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+                
+                // Formatuj nagłówek
+                dateEl.textContent = `${monthNames[monthIndex]} ${currentYear}`;
+                
+                // Zbierz dane dla całego miesiąca
+                let totalEpisodes = 0;
+                let totalMinutes = 0;
+                let monthDetails = [];
+                let animeStats = {};
+                
+                // Przejdź przez wszystkie dni miesiąca
+                const startDate = new Date(currentYear, monthIndex, 1);
+                const endDate = new Date(currentYear, monthIndex + 1, 0); // Ostatni dzień miesiąca
+                
+                for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                    const dateStr = d.toISOString().split('T')[0];
+                    const episodes = activityData[dateStr] || 0;
+                    const details = activityDetails[dateStr] || [];
+                    
+                    if (episodes > 0) {
+                        totalEpisodes += episodes;
+                        monthDetails.push(...details);
+                        
+                        // Oblicz czas oglądania dla tego dnia
+                        details.forEach(detail => {
+                            const anime = animeList.find(a => a.id === detail.animeId);
+                            const episodeLength = anime ? anime.episodeLength : 24;
+                            totalMinutes += detail.episodes * episodeLength;
+                            
+                            // Zbierz statystyki anime
+                            const title = detail.title;
+                            if (!animeStats[title]) {
+                                animeStats[title] = {
+                                    title: title,
+                                    episodes: 0,
+                                    animeId: detail.animeId
+                                };
+                            }
+                            animeStats[title].episodes += detail.episodes;
+                        });
+                    }
+                }
+                
+                if (totalEpisodes > 0) {
+                    const hours = Math.floor(totalMinutes / 60);
+                    const minutes = totalMinutes % 60;
+                    const timeString = hours > 0 ? 
+                        `${hours}h ${minutes > 0 ? minutes + 'm' : ''}` : 
+                        `${minutes}m`;
+                    
+                    // Statystyki miesiąca
+                    statsEl.innerHTML = `
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">${totalEpisodes}</div>
+                            <div class="day-summary-stat-label">Odcinki</div>
+                        </div>
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">${timeString}</div>
+                            <div class="day-summary-stat-label">Czas oglądania</div>
+                        </div>
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">${Object.keys(animeStats).length}</div>
+                            <div class="day-summary-stat-label">Anime</div>
+                        </div>
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">${monthDetails.length}</div>
+                            <div class="day-summary-stat-label">Sesje oglądania</div>
+                        </div>
+                    `;
+                    
+                    // Lista anime z podsumowaniem
+                    if (Object.keys(animeStats).length > 0) {
+                        let animeHtml = '';
+                        Object.values(animeStats).forEach(group => {
+                            const anime = animeList.find(a => a.id === group.animeId);
+                            const episodeLength = anime ? anime.episodeLength : 24;
+                            const animeTime = group.episodes * episodeLength;
+                            const animeHours = Math.floor(animeTime / 60);
+                            const animeMinutes = animeTime % 60;
+                            const animeTimeString = animeHours > 0 ? 
+                                `${animeHours}h ${animeMinutes > 0 ? animeMinutes + 'm' : ''}` : 
+                                `${animeMinutes}m`;
+                            
+                            animeHtml += `
+                                <div class="day-summary-anime-item">
+                                    <div class="day-summary-anime-title">${group.title}</div>
+                                    <div class="day-summary-anime-details">
+                                        <span class="day-summary-anime-episodes">
+                                            <i class="fas fa-play-circle"></i> ${group.episodes} odcinków
+                                        </span>
+                                        <span class="day-summary-anime-time">
+                                            <i class="fas fa-clock"></i> ${animeTimeString}
+                                        </span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        animeListEl.innerHTML = animeHtml;
+                    } else {
+                        animeListEl.innerHTML = `
+                            <div class="day-summary-empty">
+                                <i class="fas fa-info-circle"></i>
+                                Brak szczegółów oglądanych anime
+                            </div>
+                        `;
+                    }
+                } else {
+                    statsEl.innerHTML = `
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">0</div>
+                            <div class="day-summary-stat-label">Odcinki</div>
+                        </div>
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">0h</div>
+                            <div class="day-summary-stat-label">Czas oglądania</div>
+                        </div>
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">0</div>
+                            <div class="day-summary-stat-label">Anime</div>
+                        </div>
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">0</div>
+                            <div class="day-summary-stat-label">Sesje oglądania</div>
+                        </div>
+                    `;
+                    
+                    animeListEl.innerHTML = `
+                        <div class="day-summary-empty">
+                            <i class="fas fa-calendar-times"></i>
+                            Brak aktywności w tym miesiącu
+                        </div>
+                    `;
+                }
+                
+                modal.classList.add('show');
             }
             
             function showDayDetails(date, episodes) {
