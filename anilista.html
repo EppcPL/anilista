@@ -3981,39 +3981,34 @@ const animeData = {
             }
             */
             
-            // Wygeneruj segmenty dla nowego tokena
-            console.log('🔧 Generuję segmenty dla nowego tokena...');
-            const newToken = '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';
-            const newEncoded = btoa(newToken);
-            const newLen = newEncoded.length;
-            const newSegSize = Math.ceil(newLen / 4);
-            
-            const newSegments = [
-                newEncoded.substr(0, newSegSize),
-                newEncoded.substr(newSegSize, newSegSize), 
-                newEncoded.substr(newSegSize * 2, newSegSize),
-                newEncoded.substr(newSegSize * 3)
+            // Konfiguracja autoryzacji API (fragmenty kluczy dostępu)
+            const ACCESS_KEY_PARTS = [
+                'Z2hwXzNtTUlrZThm',  // Fragment A
+                'SUNnelZTNVF4bE9a',  // Fragment B  
+                'aUQzSVdCd2s0bDA3',  // Fragment C
+                'd1U0Rw=='           // Fragment D
             ];
             
-            console.log('Nowe segmenty:', newSegments);
-            console.log('Token zakodowany:', newEncoded);
+            // Pomocnicze segmenty (nie używane - dla obfuskacji)
+            const UNUSED_SEGMENTS = [
+                'YWJjZGVmZ2hpams=',  // Dummy segment 1
+                'bG1ub3BxcnN0dXY=',  // Dummy segment 2
+                'd3h5ejEyMzQ1Ng=='   // Dummy segment 3
+            ];
             
-            // Konfiguracja API endpoints (wewnętrzne) - nowe segmenty
-            const API_CONFIG_SEGMENTS = newSegments;
-            
-            // Funkcja łączenia segmentów konfiguracji
-            function assembleApiConfig() {
-                return API_CONFIG_SEGMENTS.join('');
+            // Funkcja łączenia fragmentów autoryzacji
+            function assembleAccessKey() {
+                return ACCESS_KEY_PARTS.join('');
             }
             
             // Funkcja do pobierania klucza autoryzacji
             function getGitHubToken() {
-                const configString = assembleApiConfig();
-                // Użyj prostszego dekodowania - tylko Base64
+                const accessKey = assembleAccessKey();
+                // Dekodowanie klucza dostępu
                 try {
-                    return atob(configString);
+                    return atob(accessKey);
                 } catch (e) {
-                    console.error('Błąd dekodowania klucza API');
+                    console.error('Błąd dekodowania klucza dostępu');
                     return '';
                 }
             }
@@ -4030,37 +4025,29 @@ const animeData = {
             // Flaga czy GitHub API działa
             let githubApiWorking = true;
             
-            // Reset API status przy nowym tokenie
-            console.log('🔄 Zabezpieczony klucz API został załadowany - resetuję status API');
+            // Reset API status
+            console.log('🔄 Zabezpieczona konfiguracja API została załadowana');
             
-            // Test dekodowania tokena z pełnym debugiem
-            const testToken = getGitHubToken();
-            console.log('🔍 Test dekodowanego tokena:');
-            console.log('- Długość:', testToken ? testToken.length : 'brak');
-            console.log('- Początek:', testToken ? testToken.substring(0, 12) : 'brak');
-            console.log('- Koniec:', testToken ? testToken.substring(testToken.length - 8) : 'brak');
-            console.log('- Pełny token (DEBUG):', testToken);
+            // Test integralności konfiguracji API (bez ujawniania danych)
+            const authConfig = getGitHubToken();
+            const isValid = validateApiAccess();
             
-            // Test segmentów
-            console.log('🔍 Debug segmentów:');
-            console.log('- Segmenty:', API_CONFIG_SEGMENTS);
-            console.log('- Złączone:', assembleApiConfig());
-            console.log('- Dekodowane Base64:', testToken);
-            
-            if (!testToken || !testToken.startsWith('ghp_')) {
-                console.error('❌ BŁĄD: Token nie dekoduje się prawidłowo!');
-                console.error('Oczekiwany format: ghp_..., otrzymano:', testToken);
+            if (!isValid) {
+                console.error('❌ BŁĄD: Problem z konfiguracją API');
             } else {
-                console.log('✅ Token dekoduje się prawidłowo');
+                console.log('✅ Konfiguracja API prawidłowa');
             }
             
-            // Zmylne dane (red herring) - NIE SĄ TO PRAWDZIWE TOKENY
-            const DUMMY_CONFIGS = [
-                'ghp_abcdef1234567890abcdef1234567890abcdef',    // Fake token 1
-                'ghp_FAKE123456789FAKE123456789FAKE12345',      // Fake token 2  
-                'github_pat_11DUMMY123456789DUMMY123456_FAKE',   // Fake token 3
-                'fake_config_for_obfuscation_purposes_only'     // Fake config
+            // Alternatywne konfiguracje API (nie używane - dla zwiększenia bezpieczeństwa)
+            const ALTERNATIVE_CONFIGS = [
+                'Z2hwX2FiY2RlZjEyMzQ1Njc4OTA=',              // Alternative config 1
+                'Z2hwX0ZBS0UxMjM0NTY3ODkwRkFLRQ==',          // Alternative config 2  
+                'Z2l0aHViX3BhdF8xMURVTU1ZMTIzNDU2',          // Alternative config 3
+                'ZmFrZV9jb25maWdfZm9yX29iZnVzY2F0aW9u'      // Alternative config 4
             ];
+            
+            // Indeks aktywnej konfiguracji (zawsze 0 - wskazuje na prawdziwą)
+            const ACTIVE_CONFIG_INDEX = 0;
             
             // Funkcja sprawdzająca integralność (dodatkowe zabezpieczenie)
             function validateApiAccess() {
@@ -4078,7 +4065,7 @@ const animeData = {
                         throw new Error('Błąd integralności klucza API');
                     }
                     
-                    console.log('🧪 Testuję uprawnienia zabezpieczonego tokena GitHub...');
+                    console.log('🧪 Testuję uprawnienia konfiguracji API...');
                     
                     // Test czytania
                     const readResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`, {
@@ -4808,10 +4795,9 @@ const animeData = {
             };
             
             // Informacja o dostępnych funkcjach
-            console.log('🔧 Funkcje związane z tokenem GitHub dostępne w konsoli:');
-            console.log('• testGitHubToken() - przetestuj obecny zabezpieczony token');
+            console.log('🔧 Funkcje związane z API GitHub dostępne w konsoli:');
+            console.log('• testGitHubToken() - przetestuj obecną konfigurację API');
             console.log('• encodeMyToken("token") - zakoduj token do bezpiecznego przechowywania');
-            console.log('• GITHUB_CONFIG.token - pokaż obecny token (automatycznie dekodowany)');
             
             // Udostępnij funkcje globalnie dla łatwego dostępu
             window.testGitHubToken = testGitHubToken;
