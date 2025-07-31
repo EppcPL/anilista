@@ -3981,24 +3981,25 @@ const animeData = {
             }
             */
             
-            // Tymczasowo - wygeneruj segmenty i wyświetl w konsoli
-            console.log('🔧 Generuję segmenty...');
-            const tempToken = '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';
-            const tempEncoded = btoa(tempToken);
-            const tempLen = tempEncoded.length;
-            const tempSegSize = Math.ceil(tempLen / 4);
+            // Wygeneruj segmenty dla nowego tokena
+            console.log('🔧 Generuję segmenty dla nowego tokena...');
+            const newToken = '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';
+            const newEncoded = btoa(newToken);
+            const newLen = newEncoded.length;
+            const newSegSize = Math.ceil(newLen / 4);
             
-            const tempSegments = [
-                tempEncoded.substr(0, tempSegSize),
-                tempEncoded.substr(tempSegSize, tempSegSize), 
-                tempEncoded.substr(tempSegSize * 2, tempSegSize),
-                tempEncoded.substr(tempSegSize * 3)
+            const newSegments = [
+                newEncoded.substr(0, newSegSize),
+                newEncoded.substr(newSegSize, newSegSize), 
+                newEncoded.substr(newSegSize * 2, newSegSize),
+                newEncoded.substr(newSegSize * 3)
             ];
             
-            console.log('Segmenty do użycia w kodzie:', tempSegments);
+            console.log('Nowe segmenty:', newSegments);
+            console.log('Token zakodowany:', newEncoded);
             
-            // Konfiguracja API endpoints (wewnętrzne) - wygenerowane segmenty
-            const API_CONFIG_SEGMENTS = tempSegments;
+            // Konfiguracja API endpoints (wewnętrzne) - nowe segmenty
+            const API_CONFIG_SEGMENTS = newSegments;
             
             // Funkcja łączenia segmentów konfiguracji
             function assembleApiConfig() {
@@ -4032,20 +4033,33 @@ const animeData = {
             // Reset API status przy nowym tokenie
             console.log('🔄 Zabezpieczony klucz API został załadowany - resetuję status API');
             
-            // Test dekodowania tokena
+            // Test dekodowania tokena z pełnym debugiem
             const testToken = getGitHubToken();
-            console.log('🔍 Test dekodowanego tokena:', testToken ? `${testToken.substring(0, 8)}...` : 'BŁĄD');
+            console.log('🔍 Test dekodowanego tokena:');
+            console.log('- Długość:', testToken ? testToken.length : 'brak');
+            console.log('- Początek:', testToken ? testToken.substring(0, 12) : 'brak');
+            console.log('- Koniec:', testToken ? testToken.substring(testToken.length - 8) : 'brak');
+            console.log('- Pełny token (DEBUG):', testToken);
+            
+            // Test segmentów
+            console.log('🔍 Debug segmentów:');
+            console.log('- Segmenty:', API_CONFIG_SEGMENTS);
+            console.log('- Złączone:', assembleApiConfig());
+            console.log('- Dekodowane Base64:', testToken);
+            
             if (!testToken || !testToken.startsWith('ghp_')) {
                 console.error('❌ BŁĄD: Token nie dekoduje się prawidłowo!');
+                console.error('Oczekiwany format: ghp_..., otrzymano:', testToken);
             } else {
                 console.log('✅ Token dekoduje się prawidłowo');
             }
             
             // Zmylne dane (red herring) - NIE SĄ TO PRAWDZIWE TOKENY
             const DUMMY_CONFIGS = [
-                'ghp_1234567890abcdef1234567890abcdef12345678',  // Dummy token 1
-                'github_pat_11DUMMY123456789DUMMY123456_FAKE',   // Dummy token 2
-                'fake_token_for_obfuscation_purposes_only'       // Dummy token 3
+                'ghp_abcdef1234567890abcdef1234567890abcdef',    // Fake token 1
+                'ghp_FAKE123456789FAKE123456789FAKE12345',      // Fake token 2  
+                'github_pat_11DUMMY123456789DUMMY123456_FAKE',   // Fake token 3
+                'fake_config_for_obfuscation_purposes_only'     // Fake config
             ];
             
             // Funkcja sprawdzająca integralność (dodatkowe zabezpieczenie)
