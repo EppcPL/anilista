@@ -1021,9 +1021,194 @@
             color: var(--lighter);
         }
         
+        .calendar-year.clickable {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            position: relative;
+        }
+        
+        .calendar-year.clickable:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .calendar-year.clickable:active {
+            transform: translateY(0);
+        }
+        
+        .calendar-month-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--lighter);
+            text-align: center;
+        }
+        
+        .calendar-month-title.clickable {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
+        
+        .calendar-month-title.clickable:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .calendar-month-title.clickable:active {
+            transform: translateY(0);
+        }
+        
         .calendar-nav {
             display: flex;
             gap: 0.5rem;
+        }
+        
+
+        
+        /* Desktop widok miesięczny */
+        .calendar-back-btn {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-left: 1rem;
+        }
+        
+        .calendar-back-btn:hover {
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+        }
+        
+        .desktop-month-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 12px;
+            align-items: start;
+            margin-top: 1rem;
+        }
+        
+        .desktop-month-labels {
+            display: grid;
+            grid-template-rows: repeat(7, 1fr);
+            gap: 3px;
+            font-size: 0.85rem;
+            color: var(--gray);
+            text-align: right;
+            padding-right: 10px;
+            font-weight: 500;
+        }
+        
+        .desktop-month-label {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        .desktop-month-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 3px;
+        }
+        
+        .desktop-month-day {
+            aspect-ratio: 1;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .desktop-month-day:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        
+        .desktop-month-day.empty {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--gray);
+            cursor: default;
+        }
+        
+        .desktop-month-day.other-month {
+            color: var(--gray);
+            opacity: 0.5;
+        }
+        
+        .desktop-month-day.level-0 { background: rgba(255, 255, 255, 0.1); }
+        .desktop-month-day.level-1 { background: rgba(108, 92, 231, 0.3); }
+        .desktop-month-day.level-2 { background: rgba(108, 92, 231, 0.5); }
+        .desktop-month-day.level-3 { background: rgba(108, 92, 231, 0.7); }
+        .desktop-month-day.level-4 { background: rgba(108, 92, 231, 0.9); }
+        
+        .desktop-month-tooltip {
+            position: absolute;
+            background: var(--darker);
+            color: var(--lighter);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+        }
+        
+        .desktop-month-day:hover .desktop-month-tooltip {
+            opacity: 1;
+        }
+        
+        /* Animacje przejścia dla kalendarza */
+        .calendar-grid {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .calendar-days {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .calendar-day {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .calendar-day:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        
+        /* Animacja fade dla przełączania widoków */
+        .calendar-days.fade-out {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        
+        .calendar-days.fade-in {
+            opacity: 1;
+            transform: translateY(0);
         }
         
         .calendar-nav-btn {
@@ -1079,11 +1264,11 @@
         }
         
         .calendar-months > div {
-            cursor: pointer;
             transition: var(--transition);
             padding: 2px 4px;
             border-radius: 3px;
             position: relative;
+            cursor: pointer;
         }
         
         .calendar-months > div:hover {
@@ -1091,34 +1276,7 @@
             color: var(--lighter);
         }
         
-        .calendar-months > div:active {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(0.95);
-        }
-        
-        .calendar-month-tooltip {
-            position: absolute;
-            background: var(--darker);
-            color: var(--lighter);
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            z-index: 1000;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--glass-border);
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-bottom: 5px;
-        }
-        
-        .calendar-months > div:hover .calendar-month-tooltip {
-            opacity: 1;
-        }
+
         
         .calendar-day.dimmed {
             opacity: 0.3;
@@ -1222,6 +1380,192 @@
         
         .calendar-day:hover .calendar-tooltip {
             opacity: 1;
+        }
+        
+        /* Mobile Calendar Improvements */
+        @media (max-width: 768px) {
+            .activity-calendar {
+                padding: 1rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            
+
+            
+            .activity-calendar::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .calendar-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .calendar-year {
+                font-size: 1.2rem;
+                text-align: center;
+            }
+            
+            .calendar-month-title {
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: var(--lighter);
+                text-align: center;
+            }
+            
+            .calendar-nav {
+                justify-content: center;
+            }
+            
+            .calendar-nav-btn {
+                padding: 12px 16px;
+                font-size: 1rem;
+                min-width: 50px;
+                min-height: 50px;
+                touch-action: manipulation;
+            }
+            
+            /* Mobile Calendar Grid */
+            .mobile-calendar-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .mobile-calendar-labels {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 4px;
+                margin-bottom: 0.5rem;
+            }
+            
+            .mobile-calendar-label {
+                text-align: center;
+                font-size: 0.8rem;
+                color: var(--gray);
+                font-weight: 500;
+                padding: 4px;
+            }
+            
+            .mobile-calendar-days {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 4px;
+            }
+            
+            .mobile-calendar-day {
+                aspect-ratio: 1;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: var(--transition);
+                position: relative;
+                border: 1px solid transparent;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.8rem;
+                font-weight: 500;
+                min-height: 32px;
+            }
+            
+            .mobile-calendar-day:hover {
+                transform: scale(1.1);
+                z-index: 10;
+            }
+            
+            .mobile-calendar-day.empty {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .mobile-calendar-day.other-month {
+                opacity: 0.3;
+                color: var(--gray);
+            }
+            
+            .mobile-calendar-day.level-0 {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: var(--lighter);
+            }
+            
+            .mobile-calendar-day.level-1 {
+                background: var(--primary-light);
+                color: var(--dark);
+            }
+            
+            .mobile-calendar-day.level-2 {
+                background: var(--primary);
+                color: white;
+            }
+            
+            .mobile-calendar-day.level-3 {
+                background: var(--primary-dark);
+                color: white;
+            }
+            
+            .mobile-calendar-day.level-4 {
+                background: var(--accent);
+                color: white;
+            }
+            
+            .mobile-calendar-day.level-5 {
+                background: var(--secondary);
+                color: white;
+            }
+            
+            .mobile-calendar-tooltip {
+                position: absolute;
+                background: var(--darker);
+                color: var(--lighter);
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-size: 0.8rem;
+                white-space: nowrap;
+                z-index: 1000;
+                box-shadow: var(--shadow);
+                border: 1px solid var(--glass-border);
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.2s;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                margin-bottom: 5px;
+            }
+            
+            .mobile-calendar-day:hover .mobile-calendar-tooltip {
+                opacity: 1;
+            }
+            
+            /* Ukryj desktop calendar na mobile */
+            .calendar-grid {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .mobile-calendar-day {
+                min-height: 28px;
+                font-size: 0.7rem;
+            }
+            
+            .mobile-calendar-label {
+                font-size: 0.7rem;
+            }
+            
+            .calendar-month-title {
+                font-size: 1rem;
+            }
+            
+            .calendar-nav-btn {
+                padding: 10px 12px;
+                min-width: 45px;
+                min-height: 45px;
+            }
         }
         
         /* Episode counter modal */
@@ -2512,9 +2856,6 @@
 
                 // Renderuj statystyki tagów
                 renderTagsStats();
-                
-                // Renderuj kalendarz aktywności
-                renderActivityCalendar();
             }
 
             // Statystyki tagów na profilu
@@ -2605,248 +2946,7 @@
                 });
             }
             
-            // Kalendarz aktywności
-            function renderActivityCalendar() {
-                const container = document.getElementById('calendar-container');
-                if (!animeList.length) {
-                    container.innerHTML = '<div style="color:var(--gray);text-align:center;">Brak danych aktywności do wyświetlenia</div>';
-                    return;
-                }
-                
-                // Zbierz anime z datami oglądania
-                const animeWithDates = animeList.filter(anime => anime.watchDate);
-                if (!animeWithDates.length) {
-                    container.innerHTML = '<div style="color:var(--gray);text-align:center;">Dodaj daty oglądania do swoich anime, aby zobaczyć kalendarz aktywności</div>';
-                    return;
-                }
-                
-                // Grupuj anime według roku i miesiąca
-                const activityData = {};
-                animeWithDates.forEach(anime => {
-                    const date = new Date(anime.watchDate);
-                    const year = date.getFullYear();
-                    const month = date.getMonth();
-                    
-                    if (!activityData[year]) {
-                        activityData[year] = {};
-                    }
-                    if (!activityData[year][month]) {
-                        activityData[year][month] = {
-                            count: 0,
-                            anime: [],
-                            totalMinutes: 0
-                        };
-                    }
-                    
-                    activityData[year][month].count++;
-                    activityData[year][month].anime.push(anime);
-                    
-                    // Oblicz czas oglądania
-                    let animeTime = 0;
-                    if (anime.seasons && anime.seasons.length > 1) {
-                        let watched = anime.status === 'completed' ? anime.totalEpisodes : anime.watchedEpisodes;
-                        anime.seasons.forEach((episodeCount, index) => {
-                            const watchedThis = Math.max(0, Math.min(watched, episodeCount));
-                            const episodeLength = anime.seasonEpisodeLengths && anime.seasonEpisodeLengths[index] 
-                                ? anime.seasonEpisodeLengths[index] 
-                                : anime.episodeLength;
-                            animeTime += watchedThis * episodeLength;
-                            watched -= watchedThis;
-                        });
-                    } else {
-                        const watchedEpisodes = anime.status === 'completed' ? anime.totalEpisodes : anime.watchedEpisodes;
-                        animeTime = watchedEpisodes * anime.episodeLength;
-                    }
-                    
-                    // Dodaj rewatche
-                    if (anime.seasonRewatches && anime.seasonRewatches.length > 0) {
-                        anime.seasonRewatches.forEach((rewatchCount, index) => {
-                            if (rewatchCount > 0 && anime.seasons && anime.seasons[index]) {
-                                const episodeLength = anime.seasonEpisodeLengths && anime.seasonEpisodeLengths[index] 
-                                    ? anime.seasonEpisodeLengths[index] 
-                                    : anime.episodeLength;
-                                animeTime += rewatchCount * anime.seasons[index] * episodeLength;
-                            }
-                        });
-                    } else if (anime.rewatchCount) {
-                        animeTime += anime.rewatchCount * anime.totalEpisodes * anime.episodeLength;
-                    }
-                    
-                    activityData[year][month].totalMinutes += animeTime;
-                });
-                
-                // Znajdź maksymalną aktywność dla normalizacji
-                let maxActivity = 0;
-                Object.values(activityData).forEach(yearData => {
-                    Object.values(yearData).forEach(monthData => {
-                        maxActivity = Math.max(maxActivity, monthData.count);
-                    });
-                });
-                
-                // Renderuj kalendarz
-                const years = Object.keys(activityData).sort((a, b) => parseInt(b) - parseInt(a));
-                let html = '';
-                
-                years.forEach(year => {
-                    html += `<div class="year-section" style="margin-bottom:2rem;">
-                        <h4 style="margin-bottom:1rem;color:var(--primary);">${year}</h4>
-                        <div class="months-grid" style="display:grid;grid-template-columns:repeat(12,1fr);gap:0.5rem;margin-bottom:1rem;">`;
-                    
-                    const months = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
-                    
-                    for (let month = 0; month < 12; month++) {
-                        const monthData = activityData[year][month];
-                        if (monthData) {
-                            const intensity = maxActivity > 0 ? (monthData.count / maxActivity) : 0;
-                            const opacity = 0.3 + (intensity * 0.7); // 0.3 do 1.0
-                            const backgroundColor = `rgba(108, 92, 231, ${opacity})`; // var(--primary)
-                            
-                            html += `<div class="month-dot clickable" 
-                                data-year="${year}" 
-                                data-month="${month}" 
-                                style="
-                                    width:30px;height:30px;border-radius:50%;background:${backgroundColor};
-                                    display:flex;align-items:center;justify-content:center;cursor:pointer;
-                                    border:2px solid var(--glass-border);transition:var(--transition);
-                                    font-size:0.8rem;font-weight:500;color:white;
-                                "
-                                title="${months[month]} ${year} - ${monthData.count} anime (${formatTime(monthData.totalMinutes)})">
-                                ${monthData.count}
-                            </div>`;
-                        } else {
-                            html += `<div class="month-dot" 
-                                style="
-                                    width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.1);
-                                    display:flex;align-items:center;justify-content:center;
-                                    border:2px solid var(--glass-border);font-size:0.8rem;color:var(--gray);
-                                ">
-                                -
-                            </div>`;
-                        }
-                    }
-                    
-                    html += `</div></div>`;
-                });
-                
-                container.innerHTML = html;
-                
-                // Dodaj obsługę kliknięcia na miesiąc
-                container.querySelectorAll('.month-dot.clickable').forEach(dot => {
-                    dot.addEventListener('click', function() {
-                        const year = this.dataset.year;
-                        const month = this.dataset.month;
-                        const monthData = activityData[year][month];
-                        showMonthSummary(year, month, monthData);
-                    });
-                });
-            }
-            
-            // Podsumowanie miesiąca
-            function showMonthSummary(year, month, monthData) {
-                const months = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 
-                               'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
-                
-                // Analiza tagów
-                const tagStats = {};
-                monthData.anime.forEach(anime => {
-                    if (anime.tags && Array.isArray(anime.tags)) {
-                        anime.tags.forEach(tag => {
-                            if (!tagStats[tag]) tagStats[tag] = 0;
-                            tagStats[tag]++;
-                        });
-                    }
-                });
-                
-                // Analiza dni tygodnia
-                const dayStats = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}; // 0 = niedziela
-                monthData.anime.forEach(anime => {
-                    const date = new Date(anime.watchDate);
-                    const dayOfWeek = date.getDay();
-                    dayStats[dayOfWeek]++;
-                });
-                
-                const daysOfWeek = ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'];
-                const mostActiveDay = Object.keys(dayStats).reduce((a, b) => dayStats[a] > dayStats[b] ? a : b);
-                
-                // Top tagi
-                const topTags = Object.entries(tagStats)
-                    .sort(([,a], [,b]) => b - a)
-                    .slice(0, 5)
-                    .map(([tag, count]) => `${tag} (${count})`)
-                    .join(', ');
-                
-                let html = `<div class="month-summary-modal" style="
-                    position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);
-                    display:flex;align-items:center;justify-content:center;z-index:1000;
-                ">
-                    <div style="
-                        background:var(--glass);backdrop-filter:blur(10px);border-radius:16px;
-                        padding:2rem;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;
-                        border:1px solid var(--glass-border);box-shadow:var(--shadow);
-                    ">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-                            <h3 style="color:var(--primary);">${months[month]} ${year}</h3>
-                            <button class="btn-secondary" onclick="this.closest('.month-summary-modal').remove()">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        
-                        <div style="margin-bottom:1.5rem;">
-                            <h4 style="margin-bottom:0.5rem;color:var(--accent);">📊 Statystyki</h4>
-                            <p><strong>Obejrzane anime:</strong> ${monthData.count}</p>
-                            <p><strong>Czas oglądania:</strong> ${formatTime(monthData.totalMinutes)}</p>
-                            <p><strong>Średnio na anime:</strong> ${formatTime(Math.round(monthData.totalMinutes / monthData.count))}</p>
-                        </div>
-                        
-                        ${topTags ? `<div style="margin-bottom:1.5rem;">
-                            <h4 style="margin-bottom:0.5rem;color:var(--accent);">🏷️ Najpopularniejsze tagi</h4>
-                            <p>${topTags}</p>
-                        </div>` : ''}
-                        
-                        <div style="margin-bottom:1.5rem;">
-                            <h4 style="margin-bottom:0.5rem;color:var(--accent);">📅 Aktywność w dni tygodnia</h4>
-                            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.5rem;margin-top:0.5rem;">
-                                ${daysOfWeek.map((day, index) => {
-                                    const count = dayStats[index];
-                                    const isMostActive = index == mostActiveDay;
-                                    return `<div style="
-                                        text-align:center;padding:0.5rem;border-radius:8px;
-                                        background:${isMostActive ? 'var(--primary)' : 'rgba(255,255,255,0.1)'};
-                                        color:${isMostActive ? 'white' : 'var(--light)'};
-                                        font-weight:${isMostActive ? '600' : '400'};
-                                    ">
-                                        <div style="font-size:0.8rem;">${day.slice(0, 3)}</div>
-                                        <div style="font-size:1.2rem;font-weight:600;">${count}</div>
-                                    </div>`;
-                                }).join('')}
-                            </div>
-                            <p style="margin-top:0.5rem;font-size:0.9rem;color:var(--gray);">
-                                <i class="fas fa-star"></i> Najbardziej aktywny dzień: <strong>${daysOfWeek[mostActiveDay]}</strong>
-                            </p>
-                        </div>
-                        
-                        <div>
-                            <h4 style="margin-bottom:0.5rem;color:var(--accent);">📺 Lista obejrzanych anime</h4>
-                            <div style="max-height:200px;overflow-y:auto;">
-                                ${monthData.anime.map(anime => `
-                                    <div style="
-                                        padding:0.5rem;margin-bottom:0.5rem;border-radius:8px;
-                                        background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);
-                                    ">
-                                        <div style="font-weight:500;">${anime.title}</div>
-                                        <div style="font-size:0.8rem;color:var(--gray);">
-                                            ${new Date(anime.watchDate).toLocaleDateString('pl-PL')} • 
-                                            ${anime.tags ? anime.tags.join(', ') : 'Brak tagów'}
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-                
-                document.body.insertAdjacentHTML('beforeend', html);
-            }
+
             
             // Render anime list
             function renderAnimeList() {
@@ -4531,9 +4631,6 @@ const animeData = {
             
             // Initial render of planner
             renderPlannerList();
-            
-            // Initial render of activity calendar
-            renderActivityCalendar();
 
             const plannerSeasonCountInput = document.getElementById('planner-season-count');
             const plannerSeasonsContainer = document.getElementById('planner-seasons-container');
@@ -4603,16 +4700,102 @@ const animeData = {
                 return 5;
             }
             
+            // Zmienne dla widoku miesięcznego
+            let currentMonth = new Date().getMonth();
+            let isMobileView = window.innerWidth <= 768;
+            let selectedMonth = null; // null = widok lat, number = widok konkretnego miesiąca
+            
             function renderActivityCalendar() {
                 const container = document.getElementById('calendar-container');
                 if (!container) return;
                 
+                // Sprawdź czy to mobile
+                isMobileView = window.innerWidth <= 768;
+                
+                if (isMobileView) {
+                    renderMobileCalendar(container);
+                } else {
+                    if (selectedMonth !== null) {
+                        renderDesktopMonthView(container);
+                    } else {
+                        renderDesktopCalendar(container);
+                    }
+                }
+            }
+            
+            function renderDesktopMonthView(container) {
+                const months = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 
+                               'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+                const days = ['Nie', 'Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob'];
+                
+                let html = `
+                    <div class="calendar-header">
+                        <div class="calendar-month-title clickable" id="month-title-clickable" title="Kliknij aby wrócić do lat">${months[selectedMonth]} ${currentYear}</div>
+                        <div class="calendar-nav">
+                            <button class="calendar-nav-btn" id="prev-month">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="calendar-nav-btn" id="next-month">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="desktop-month-grid">
+                        <div class="desktop-month-labels">
+                            ${days.map(day => `<div class="desktop-month-label">${day}</div>`).join('')}
+                        </div>
+                        <div class="desktop-month-days" id="desktop-month-days">
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML = html;
+                
+                // Dodaj event listeners dla nawigacji
+                document.getElementById('prev-month').addEventListener('click', () => {
+                    animateCalendarTransition(() => {
+                        selectedMonth--;
+                        if (selectedMonth < 0) {
+                            selectedMonth = 11;
+                            currentYear--;
+                        }
+                        renderActivityCalendar();
+                    });
+                });
+                
+                document.getElementById('next-month').addEventListener('click', () => {
+                    animateCalendarTransition(() => {
+                        selectedMonth++;
+                        if (selectedMonth > 11) {
+                            selectedMonth = 0;
+                            currentYear++;
+                        }
+                        renderActivityCalendar();
+                    });
+                });
+                
+                // Dodaj event listener dla kliknięcia na tytuł miesiąca
+                document.getElementById('month-title-clickable').addEventListener('click', () => {
+                    animateCalendarTransition(() => {
+                        selectedMonth = null;
+                        renderActivityCalendar();
+                    });
+                });
+                
+                // Renderuj dni miesięcznego widoku
+                renderDesktopMonthDays();
+                
+                // Dodaj obsługę swipe
+                addSwipeSupport(container);
+            }
+            
+            function renderDesktopCalendar(container) {
                 const months = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
                 const days = ['Nie', 'Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob'];
                 
                 let html = `
                     <div class="calendar-header">
-                        <div class="calendar-year">${currentYear}</div>
+                        <div class="calendar-year clickable" id="year-clickable" title="Kliknij aby zobaczyć aktualny miesiąc">${currentYear}</div>
                         <div class="calendar-nav">
                             <button class="calendar-nav-btn" id="prev-year">
                                 <i class="fas fa-chevron-left"></i>
@@ -4621,6 +4804,7 @@ const animeData = {
                                 <i class="fas fa-chevron-right"></i>
                             </button>
                         </div>
+
                     </div>
                     <div class="calendar-grid">
                         <div class="calendar-labels">
@@ -4628,7 +4812,7 @@ const animeData = {
                         </div>
                         <div>
                             <div class="calendar-months">
-                                ${months.map(month => `<div class="calendar-month">${month}<div class="calendar-month-tooltip">Kliknij aby zobaczyć podsumowanie miesiąca</div></div>`).join('')}
+                                ${months.map(month => `<div class="calendar-month">${month}</div>`).join('')}
                             </div>
                             <div class="calendar-days" id="calendar-days">
                             </div>
@@ -4640,23 +4824,241 @@ const animeData = {
                 
                 // Dodaj event listeners dla nawigacji
                 document.getElementById('prev-year').addEventListener('click', () => {
-                    currentYear--;
-                    renderActivityCalendar();
+                    animateCalendarTransition(() => {
+                        currentYear--;
+                        renderActivityCalendar();
+                    });
                 });
                 
                 document.getElementById('next-year').addEventListener('click', () => {
-                    currentYear++;
-                    renderActivityCalendar();
+                    animateCalendarTransition(() => {
+                        currentYear++;
+                        renderActivityCalendar();
+                    });
                 });
+                
+
+                
+                // Dodaj event listener dla kliknięcia na rok
+                document.getElementById('year-clickable').addEventListener('click', () => {
+                    animateCalendarTransition(() => {
+                        selectedMonth = new Date().getMonth(); // Aktualny miesiąc
+                        renderActivityCalendar();
+                    });
+                });
+                
+
                 
                 // Renderuj dni
                 renderCalendarDays();
+                
+                // Dodaj obsługę swipe dla mobile
+                addSwipeSupport(container);
             }
+            
+            function renderMobileCalendar(container) {
+                const months = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 
+                               'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+                const days = ['Nie', 'Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob'];
+                
+                let html = `
+                    <div class="calendar-header">
+                        <div class="calendar-month-title">${months[currentMonth]} ${currentYear}</div>
+                        <div class="calendar-nav">
+                            <button class="calendar-nav-btn" id="prev-month">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="calendar-nav-btn" id="next-month">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mobile-calendar-grid">
+                        <div class="mobile-calendar-labels">
+                            ${days.map(day => `<div class="mobile-calendar-label">${day}</div>`).join('')}
+                        </div>
+                        <div class="mobile-calendar-days" id="mobile-calendar-days">
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML = html;
+                
+                // Dodaj event listeners dla nawigacji
+                document.getElementById('prev-month').addEventListener('click', () => {
+                    currentMonth--;
+                    if (currentMonth < 0) {
+                        currentMonth = 11;
+                        currentYear--;
+                    }
+                    renderActivityCalendar();
+                });
+                
+                document.getElementById('next-month').addEventListener('click', () => {
+                    currentMonth++;
+                    if (currentMonth > 11) {
+                        currentMonth = 0;
+                        currentYear++;
+                    }
+                    renderActivityCalendar();
+                });
+                
+                // Renderuj dni mobilnego kalendarza
+                renderMobileCalendarDays();
+                
+                // Dodaj obsługę swipe dla mobile
+                addSwipeSupport(container);
+            }
+            
+            function renderMobileCalendarDays() {
+                const daysContainer = document.getElementById('mobile-calendar-days');
+                if (!daysContainer) return;
+                
+                const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+                const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+                const startDayOfWeek = firstDayOfMonth.getDay(); // 0 = niedziela, 1 = poniedziałek, itd.
+                
+                // Dostosuj do układu poniedziałek-niedziela
+                const adjustedStartDay = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+                
+                let html = '';
+                
+                // Dodaj puste dni z poprzedniego miesiąca
+                for (let i = 0; i < adjustedStartDay; i++) {
+                    html += '<div class="mobile-calendar-day empty other-month"></div>';
+                }
+                
+                // Dodaj dni bieżącego miesiąca
+                for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
+                    const date = new Date(currentYear, currentMonth, day);
+                    const dateStr = date.toISOString().split('T')[0];
+                    const episodes = activityData[dateStr] || 0;
+                    const level = getActivityLevel(episodes);
+                    
+                    const tooltip = episodes > 0 ? 
+                        `${dateStr}: ${episodes} odcinków` : 
+                        `${dateStr}: Brak aktywności`;
+                    
+                    html += `
+                        <div class="mobile-calendar-day level-${level}" data-date="${dateStr}" data-episodes="${episodes}">
+                            ${day}
+                            <div class="mobile-calendar-tooltip">${tooltip}</div>
+                        </div>
+                    `;
+                }
+                
+                // Dodaj puste dni z następnego miesiąca, żeby wypełnić grid
+                const totalDays = adjustedStartDay + lastDayOfMonth.getDate();
+                const remainingDays = 42 - totalDays; // 6 tygodni * 7 dni = 42
+                
+                for (let i = 0; i < remainingDays; i++) {
+                    html += '<div class="mobile-calendar-day empty other-month"></div>';
+                }
+                
+                daysContainer.innerHTML = html;
+                
+                // Dodaj event listeners dla kliknięć na dni
+                document.querySelectorAll('.mobile-calendar-day[data-date]').forEach(day => {
+                    day.addEventListener('click', () => {
+                        const date = day.dataset.date;
+                        const episodes = parseInt(day.dataset.episodes) || 0;
+                        showDayDetails(date, episodes);
+                    });
+                });
+            }
+            
+            function animateCalendarTransition(callback) {
+                const daysContainer = document.getElementById('calendar-days');
+                if (!daysContainer) {
+                    callback();
+                    return;
+                }
+                
+                // Animacja fade out
+                daysContainer.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    callback();
+                    
+                    // Animacja fade in
+                    setTimeout(() => {
+                        daysContainer.classList.remove('fade-out');
+                        daysContainer.classList.add('fade-in');
+                        
+                        setTimeout(() => {
+                            daysContainer.classList.remove('fade-in');
+                        }, 400);
+                    }, 50);
+                }, 200);
+            }
+            
+            function renderDesktopMonthDays() {
+                const daysContainer = document.getElementById('desktop-month-days');
+                if (!daysContainer) return;
+                
+                const firstDayOfMonth = new Date(currentYear, selectedMonth, 1);
+                const lastDayOfMonth = new Date(currentYear, selectedMonth + 1, 0);
+                const startDayOfWeek = firstDayOfMonth.getDay(); // 0 = niedziela, 1 = poniedziałek, itd.
+                
+                // Dostosuj do układu poniedziałek-niedziela
+                const adjustedStartDay = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+                
+                let html = '';
+                
+                // Dodaj puste dni z poprzedniego miesiąca
+                for (let i = 0; i < adjustedStartDay; i++) {
+                    html += '<div class="desktop-month-day empty other-month"></div>';
+                }
+                
+                // Dodaj dni bieżącego miesiąca
+                for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
+                    const date = new Date(currentYear, selectedMonth, day);
+                    const dateStr = date.toISOString().split('T')[0];
+                    const episodes = activityData[dateStr] || 0;
+                    const level = getActivityLevel(episodes);
+                    
+                    const tooltip = episodes > 0 ? 
+                        `${dateStr}: ${episodes} odcinków` : 
+                        `${dateStr}: Brak aktywności`;
+                    
+                    html += `
+                        <div class="desktop-month-day level-${level}" data-date="${dateStr}" data-episodes="${episodes}">
+                            ${day}
+                            <div class="desktop-month-tooltip">${tooltip}</div>
+                        </div>
+                    `;
+                }
+                
+                // Dodaj puste dni z następnego miesiąca, żeby wypełnić grid
+                const totalDays = adjustedStartDay + lastDayOfMonth.getDate();
+                const remainingDays = 42 - totalDays; // 6 tygodni * 7 dni = 42
+                
+                for (let i = 0; i < remainingDays; i++) {
+                    html += '<div class="desktop-month-day empty other-month"></div>';
+                }
+                
+                daysContainer.innerHTML = html;
+                
+                // Dodaj event listeners dla kliknięć na dni
+                document.querySelectorAll('.desktop-month-day[data-date]').forEach(day => {
+                    day.addEventListener('click', () => {
+                        const date = day.dataset.date;
+                        const episodes = parseInt(day.dataset.episodes) || 0;
+                        showDayDetails(date, episodes);
+                    });
+                });
+            }
+            
+
             
             function renderCalendarDays() {
                 const daysContainer = document.getElementById('calendar-days');
                 if (!daysContainer) return;
                 
+                renderYearlyView(daysContainer);
+            }
+            
+            function renderYearlyView(daysContainer) {
                 const startDate = new Date(currentYear, 0, 1);
                 const endDate = new Date(currentYear, 11, 31);
                 
@@ -5342,6 +5744,73 @@ const animeData = {
             document.getElementById('clear-completed-date').addEventListener('click', function() {
                 document.getElementById('completed-date').value = '';
             });
+            
+            // Initial render of activity calendar
+            renderActivityCalendar();
+            
+            // Obsługa zmiany rozmiaru okna
+            window.addEventListener('resize', () => {
+                const wasMobile = isMobileView;
+                isMobileView = window.innerWidth <= 768;
+                
+                // Przełącz widok tylko jeśli się zmienił
+                if (wasMobile !== isMobileView) {
+                    renderActivityCalendar();
+                }
+            });
+            
+            // Funkcja do obsługi swipe na kalendarzu
+            function addSwipeSupport(container) {
+                let startX = 0;
+                let startY = 0;
+                let endX = 0;
+                let endY = 0;
+                
+                container.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                }, { passive: true });
+                
+                container.addEventListener('touchend', (e) => {
+                    endX = e.changedTouches[0].clientX;
+                    endY = e.changedTouches[0].clientY;
+                    
+                    const diffX = startX - endX;
+                    const diffY = startY - endY;
+                    
+                    // Sprawdź czy swipe jest bardziej poziomy niż pionowy i ma odpowiednią długość
+                    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                        if (isMobileView) {
+                            // Na mobile - nawigacja miesięczna
+                            if (diffX > 0) {
+                                // Swipe w lewo - następny miesiąc
+                                currentMonth++;
+                                if (currentMonth > 11) {
+                                    currentMonth = 0;
+                                    currentYear++;
+                                }
+                            } else {
+                                // Swipe w prawo - poprzedni miesiąc
+                                currentMonth--;
+                                if (currentMonth < 0) {
+                                    currentMonth = 11;
+                                    currentYear--;
+                                }
+                            }
+                        } else {
+                            // Na desktop - nawigacja roczna
+                            if (diffX > 0) {
+                                // Swipe w lewo - następny rok
+                                currentYear++;
+                            } else {
+                                // Swipe w prawo - poprzedni rok
+                                currentYear--;
+                            }
+                        }
+                        renderActivityCalendar();
+                    }
+                }, { passive: true });
+            }
         });
     </script>
     
