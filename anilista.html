@@ -2152,6 +2152,25 @@
                         Kliknij aby wygenerować kod transferu
                     </div>
                 </div>
+                
+                <!-- Aktywny kod eksportu -->
+                <div class="stat-card" id="active-code-card" style="display: none;">
+                    <div class="stat-label"><i class="fas fa-key"></i> Aktywny kod eksportu</div>
+                    <div class="stat-value" style="font-size: 1.2rem; color: var(--primary); font-weight: bold;" id="active-code-display">
+                        <!-- Kod będzie wyświetlany tutaj -->
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--gray); margin-top: 0.5rem;" id="active-code-timer">
+                        <!-- Timer będzie wyświetlany tutaj -->
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 0.5rem;">
+                        <button class="btn-secondary" id="copy-active-code-btn" style="padding: 4px 8px; font-size: 0.8rem;">
+                            <i class="fas fa-copy"></i> Skopiuj
+                        </button>
+                        <button class="btn-secondary" id="check-active-code-btn" style="padding: 4px 8px; font-size: 0.8rem;">
+                            <i class="fas fa-search"></i> Sprawdź kod
+                        </button>
+                    </div>
+                </div>
 
                 <div class="stat-card clickable" id="import-code-card">
                     <div class="stat-label"><i class="fas fa-download"></i> Wgraj kod</div>
@@ -4236,6 +4255,140 @@ const animeData = {
                 }
             }
 
+            // Funkcje do zarządzania aktywnym kodem eksportu
+            function getActiveCode() {
+                const activeCode = localStorage.getItem('active_export_code');
+                console.log('🔍 getActiveCode - localStorage.getItem:', activeCode);
+                
+                if (!activeCode) {
+                    console.log('🔍 getActiveCode - Brak aktywnego kodu');
+                    return null;
+                }
+                
+                try {
+                    const codeData = JSON.parse(activeCode);
+                    const now = Date.now();
+                    
+                    console.log('🔍 getActiveCode - Parsed codeData:', codeData);
+                    console.log('🔍 getActiveCode - now:', now, 'expiresAt:', codeData.expiresAt);
+                    
+                    // Sprawdź czy kod nie wygasł
+                    if (codeData.expiresAt && now > codeData.expiresAt) {
+                        console.log('🔍 getActiveCode - Kod wygasł, usuwam z localStorage');
+                        localStorage.removeItem('active_export_code');
+                        return null;
+                    }
+                    
+                    console.log('🔍 getActiveCode - Zwracam aktywny kod:', codeData);
+                    return codeData;
+                } catch (error) {
+                    console.log('🔍 getActiveCode - Błąd parsowania, usuwam z localStorage:', error);
+                    localStorage.removeItem('active_export_code');
+                    return null;
+                }
+            }
+            
+            function setActiveCode(code, expiresAt) {
+                const codeData = {
+                    code: code,
+                    expiresAt: expiresAt,
+                    createdAt: Date.now()
+                };
+                localStorage.setItem('active_export_code', JSON.stringify(codeData));
+            }
+            
+            function clearActiveCode() {
+                console.log('🔍 clearActiveCode - Usuwam aktywny kod z localStorage');
+                localStorage.removeItem('active_export_code');
+                console.log('🔍 clearActiveCode - Kod usunięty, localStorage.getItem:', localStorage.getItem('active_export_code'));
+            }
+            
+            function updateActiveCodeDisplay() {
+                const activeCodeCard = document.getElementById('active-code-card');
+                const generateCodeCard = document.getElementById('generate-code-card');
+                const activeCodeDisplay = document.getElementById('active-code-display');
+                const activeCodeTimer = document.getElementById('active-code-timer');
+                
+                const activeCode = getActiveCode();
+                
+                console.log('🔍 updateActiveCodeDisplay - activeCode:', activeCode);
+                console.log('🔍 updateActiveCodeDisplay - activeCodeCard:', activeCodeCard);
+                console.log('🔍 updateActiveCodeDisplay - generateCodeCard:', generateCodeCard);
+                
+                if (activeCode) {
+                    // Pokaż aktywny kod i ukryj przycisk generowania
+                    activeCodeCard.style.display = 'block';
+                    generateCodeCard.style.display = 'none';
+                    
+                    activeCodeDisplay.textContent = activeCode.code;
+                    
+                    // Timer odliczający
+                    const updateTimer = () => {
+                        const now = Date.now();
+                        const timeLeft = Math.max(0, activeCode.expiresAt - now);
+                        
+                        if (timeLeft <= 0) {
+                            clearActiveCode();
+                            updateActiveCodeDisplay();
+                            showNotification('Kod eksportu wygasł!', 'warning');
+                            return;
+                        }
+                        
+                        const minutes = Math.floor(timeLeft / 60000);
+                        const seconds = Math.floor((timeLeft % 60000) / 1000);
+                        activeCodeTimer.textContent = `Wygasa za: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    };
+                    
+                    updateTimer();
+                    const timerInterval = setInterval(updateTimer, 1000);
+                    
+                    // Zapisz interval ID żeby można było go wyczyścić
+                    activeCodeCard.dataset.timerInterval = timerInterval;
+                    
+                    console.log('🔍 updateActiveCodeDisplay - Pokazuję aktywny kod, ukrywam przycisk generowania');
+                } else {
+                    // Ukryj aktywny kod i pokaż przycisk generowania
+                    activeCodeCard.style.display = 'none';
+                    generateCodeCard.style.display = 'block';
+                    
+                    // Wyczyść timer jeśli istnieje
+                    if (activeCodeCard.dataset.timerInterval) {
+                        clearInterval(parseInt(activeCodeCard.dataset.timerInterval));
+                        delete activeCodeCard.dataset.timerInterval;
+                    }
+                    
+                    console.log('🔍 updateActiveCodeDisplay - Ukrywam aktywny kod, pokazuję przycisk generowania');
+                }
+            }
+            
+            // Funkcja do sprawdzania czy aktywny kod nadal istnieje na serwerze
+            async function checkActiveCodeOnServer() {
+                const activeCode = getActiveCode();
+                if (!activeCode) {
+                    console.log('🔍 checkActiveCodeOnServer - Brak aktywnego kodu lokalnie');
+                    return;
+                }
+                
+                console.log('🔍 checkActiveCodeOnServer - Sprawdzam kod na serwerze:', activeCode.code);
+                
+                try {
+                    // Sprawdź czy kod nadal istnieje na serwerze
+                    const serverCodeData = await getDataFromCode(activeCode.code);
+                    
+                    if (!serverCodeData) {
+                        console.log('🔍 checkActiveCodeOnServer - Kod nie istnieje na serwerze, czyszczę lokalnie');
+                        clearActiveCode();
+                        updateActiveCodeDisplay();
+                        showNotification('Twój kod eksportu został użyty lub wygasł na serwerze!', 'info');
+                    } else {
+                        console.log('🔍 checkActiveCodeOnServer - Kod nadal istnieje na serwerze');
+                    }
+                } catch (error) {
+                    console.error('🔍 checkActiveCodeOnServer - Błąd podczas sprawdzania kodu na serwerze:', error);
+                    // W przypadku błędu sieci, zachowujemy lokalny kod
+                }
+            }
+            
             // Funkcja do generowania losowego 6-cyfrowego kodu
             async function generateTransferCode() {
                 const data = await getData();
@@ -4346,6 +4499,16 @@ const animeData = {
 
             // Obsługa generowania kodu
             document.getElementById('generate-code-card').addEventListener('click', async function() {
+                console.log('🔍 Generate button clicked');
+                // Sprawdź czy już istnieje aktywny kod
+                const activeCode = getActiveCode();
+                console.log('🔍 Generate button - activeCode check:', activeCode);
+                if (activeCode) {
+                    console.log('🔍 Generate button - Blocked by active code');
+                    showNotification('Masz już aktywny kod eksportu! Poczekaj aż wygaśnie lub zostanie użyty.', 'warning');
+                    return;
+                }
+                
                 const modal = document.getElementById('generate-code-modal');
                 const codeDisplay = document.getElementById('generated-code');
                 const timeRemaining = document.getElementById('time-remaining');
@@ -4358,6 +4521,9 @@ const animeData = {
                     // Generuj kod
                     const code = await generateTransferCode();
                     const transferData = await saveDataToCode(code);
+                    
+                    // Zapisz aktywny kod
+                    setActiveCode(code, transferData.expiresAt);
                     
                     codeDisplay.textContent = code;
                     
@@ -4372,6 +4538,8 @@ const animeData = {
                         if (timeLeft <= 0) {
                             clearInterval(timer);
                             modal.classList.remove('show');
+                            clearActiveCode();
+                            updateActiveCodeDisplay();
                             showNotification('Kod wygasł!', 'warning');
                         }
                     }, 1000);
@@ -4380,7 +4548,10 @@ const animeData = {
                     modal.dataset.timer = timer;
                     modal.dataset.code = code;
                     
-                    showNotification(`Kod ${code} został wygenerowany i zapisany na GitHub!`, 'success');
+                    // Aktualizuj wyświetlanie aktywnego kodu
+                    updateActiveCodeDisplay();
+                    
+                    showNotification(`Kod ${code} został wygenerowany!`, 'success');
                 } catch (error) {
                     modal.classList.remove('show');
                     showNotification('Błąd podczas generowania kodu: ' + error.message, 'danger');
@@ -4388,7 +4559,7 @@ const animeData = {
                 }
             });
 
-            // Obsługa kopiowania kodu
+            // Obsługa kopiowania kodu z modala
             document.getElementById('copy-code-btn').addEventListener('click', function() {
                 const code = document.getElementById('generated-code').textContent;
                 
@@ -4405,6 +4576,66 @@ const animeData = {
                     document.execCommand('copy');
                     document.body.removeChild(textArea);
                     showNotification('Kod skopiowany do schowka!', 'success');
+                }
+            });
+            
+            // Obsługa kopiowania aktywnego kodu
+            document.getElementById('copy-active-code-btn').addEventListener('click', function() {
+                const activeCode = getActiveCode();
+                if (!activeCode) return;
+                
+                const code = activeCode.code;
+                
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(code).then(() => {
+                        showNotification('Kod skopiowany do schowka!', 'success');
+                    });
+                } else {
+                    // Fallback dla starszych przeglądarek
+                    const textArea = document.createElement('textarea');
+                    textArea.value = code;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showNotification('Kod skopiowany do schowka!', 'success');
+                }
+            });
+            
+            // Obsługa sprawdzania aktywnego kodu
+            document.getElementById('check-active-code-btn').addEventListener('click', async function() {
+                const activeCode = getActiveCode();
+                if (!activeCode) {
+                    showNotification('Brak aktywnego kodu do sprawdzenia!', 'warning');
+                    return;
+                }
+                
+                const button = this;
+                const originalText = button.innerHTML;
+                
+                try {
+                    // Pokaż loading
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sprawdzanie...';
+                    button.disabled = true;
+                    
+                    // Sprawdź kod na serwerze
+                    const serverCodeData = await getDataFromCode(activeCode.code);
+                    
+                    if (serverCodeData) {
+                        showNotification('Kod jest nadal aktywny i ważny!', 'success');
+                    } else {
+                        showNotification('Kod został użyty lub wygasł na serwerze!', 'warning');
+                        // Wyczyść lokalny kod
+                        clearActiveCode();
+                        updateActiveCodeDisplay();
+                    }
+                } catch (error) {
+                    console.error('Błąd sprawdzania kodu:', error);
+                    showNotification('Błąd podczas sprawdzania kodu!', 'danger');
+                } finally {
+                    // Przywróć przycisk
+                    button.innerHTML = originalText;
+                    button.disabled = false;
                 }
             });
 
@@ -4545,6 +4776,17 @@ const animeData = {
                         
                         // Usuń kod
                         await removeCode(code);
+                        
+                        // Sprawdź czy to był aktywny kod użytkownika i wyczyść go
+                        const activeCode = getActiveCode();
+                        console.log('🔍 Import - Sprawdzam czy to aktywny kod:', activeCode, 'vs kod użyty:', code);
+                        if (activeCode && activeCode.code === code) {
+                            console.log('🔍 Import - To jest aktywny kod, czyszczę go');
+                            clearActiveCode();
+                            updateActiveCodeDisplay();
+                        } else {
+                            console.log('🔍 Import - To nie jest aktywny kod lub nie ma aktywnego kodu');
+                        }
                         
                         // Odśwież wyświetlanie
                         renderAnimeList();
@@ -6655,6 +6897,12 @@ const animeData = {
             
             // Initial render of activity calendar
             renderActivityCalendar();
+            
+            // Initialize active code display
+            updateActiveCodeDisplay();
+            
+            // Check if active code still exists on server
+            checkActiveCodeOnServer();
             
             // Obsługa zmiany rozmiaru okna
             window.addEventListener('resize', () => {
