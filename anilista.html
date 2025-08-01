@@ -5849,7 +5849,8 @@ const animeData = {
                 // Dodaj dni bieżącego miesiąca
                 for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
                     const date = new Date(currentYear, currentMonth, day);
-                    const dateStr = date.toISOString().split('T')[0];
+                    // Użyj lokalnej daty zamiast ISO string aby uniknąć przesunięcia czasowego
+                    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                     const episodes = activityData[dateStr] || 0;
                     const level = getActivityLevel(episodes);
                     
@@ -5931,7 +5932,8 @@ const animeData = {
                 // Dodaj dni bieżącego miesiąca
                 for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
                     const date = new Date(currentYear, selectedMonth, day);
-                    const dateStr = date.toISOString().split('T')[0];
+                    // Użyj lokalnej daty zamiast ISO string aby uniknąć przesunięcia czasowego
+                    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                     const episodes = activityData[dateStr] || 0;
                     const level = getActivityLevel(episodes);
                     
@@ -6003,7 +6005,8 @@ const animeData = {
                         // Chcemy: 0=poniedziałek, 1=wtorek, 2=środa, 3=czwartek, 4=piątek, 5=sobota, 6=niedziela
                         const mappedDayOfWeek = dayOfWeek;
                         
-                        const dateStr = currentDate.toISOString().split('T')[0];
+                        // Użyj lokalnej daty zamiast ISO string aby uniknąć przesunięcia czasowego
+                        const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
                         const episodes = activityData[dateStr] || 0;
                         const level = getActivityLevel(episodes);
                         const isCurrentYear = currentDate.getFullYear() === currentYear;
@@ -6141,7 +6144,8 @@ const animeData = {
                 const endDate = new Date(currentYear, monthIndex + 1, 0); // Ostatni dzień miesiąca
                 
                 for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                    const dateStr = d.toISOString().split('T')[0];
+                    // Użyj lokalnej daty zamiast ISO string aby uniknąć przesunięcia czasowego
+                    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                     const episodes = activityData[dateStr] || 0;
                     const details = activityDetails[dateStr] || [];
                     
