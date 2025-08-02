@@ -2146,6 +2146,14 @@
                     </div>
                 </div>
 
+                <div class="stat-card clickable" id="watch-streak-card">
+                    <div class="stat-label"><i class="fas fa-fire"></i> Obecny streak</div>
+                    <div class="stat-value" id="current-streak">0 dni</div>
+                    <div style="font-size: 0.8rem; color: var(--gray); margin-top: 0.5rem;">
+                        Najdłuższy: <span id="longest-streak">0 dni</span>
+                    </div>
+                </div>
+
                 <div class="stat-card clickable" id="generate-code-card">
                     <div class="stat-label"><i class="fas fa-qrcode"></i> Generuj kod</div>
                     <div class="stat-value" style="font-size: 1.5rem; color: var(--success);">
@@ -3084,6 +3092,24 @@
                     });
                 }
 
+                // Oblicz watch streak
+                const currentStreak = getCurrentStreak();
+                const longestStreakData = getLongestStreak();
+                
+                // Aktualizuj wyświetlanie streaku
+                document.getElementById('current-streak').textContent = currentStreak === 1 ? `${currentStreak} dzień` : `${currentStreak} dni`;
+                document.getElementById('longest-streak').textContent = longestStreakData.length === 1 ? `${longestStreakData.length} dzień` : `${longestStreakData.length} dni`;
+                
+                // Dodaj tooltip z datami najdłuższego streaku
+                const streakCard = document.getElementById('watch-streak-card');
+                if (longestStreakData.length > 0 && longestStreakData.startDate && longestStreakData.endDate) {
+                    const startDate = new Date(longestStreakData.startDate).toLocaleDateString('pl-PL');
+                    const endDate = new Date(longestStreakData.endDate).toLocaleDateString('pl-PL');
+                    streakCard.title = `Najdłuższy streak: ${longestStreakData.length} dni\nOd: ${startDate}\nDo: ${endDate}`;
+                } else {
+                    streakCard.title = 'Brak historii oglądania';
+                }
+
                 // Renderuj statystyki tagów
                 renderTagsStats();
             }
@@ -3918,11 +3944,15 @@ const animeData = {
                 if (confirm('Czy na pewno chcesz usunąć wszystkie dane? Tej operacji nie można cofnąć.')) {
                     animeList = [];
                     plannerList = [];
+                    activityData = {};
+                    activityDetails = {};
                     saveAnimeList();
                     savePlannerList();
+                    saveActivityData();
                     renderAnimeList();
                     renderPlannerList();
                     renderTierList();
+                    renderActivityCalendar();
                     updateProfileStats();
                     showNotification('Wszystkie dane zostały usunięte!', 'danger');
                 }
@@ -5981,6 +6011,80 @@ const animeData = {
                 if (episodes <= 8) return 4;
                 return 5;
             }
+
+            // Funkcje obliczające watch streak
+            function getCurrentStreak() {
+                const today = new Date();
+                let currentStreak = 0;
+                let checkDate = new Date(today);
+                
+                while (true) {
+                    const dateStr = checkDate.toISOString().split('T')[0];
+                    
+                    if (activityData[dateStr] && activityData[dateStr] > 0) {
+                        currentStreak++;
+                        checkDate.setDate(checkDate.getDate() - 1);
+                    } else {
+                        break;
+                    }
+                }
+                
+                return currentStreak;
+            }
+
+            function getLongestStreak() {
+                const dates = Object.keys(activityData).filter(date => activityData[date] > 0).sort();
+                
+                if (dates.length === 0) {
+                    return { length: 0, startDate: null, endDate: null };
+                }
+
+                let longestStreak = 0;
+                let longestStartDate = null;
+                let longestEndDate = null;
+                
+                let currentStreak = 1;
+                let currentStartDate = dates[0];
+                let currentEndDate = dates[0];
+
+                for (let i = 1; i < dates.length; i++) {
+                    const prevDate = new Date(dates[i - 1]);
+                    const currentDate = new Date(dates[i]);
+                    
+                    // Sprawdź czy daty są kolejne (różnica 1 dzień)
+                    const dayDiff = (currentDate - prevDate) / (1000 * 60 * 60 * 24);
+                    
+                    if (dayDiff === 1) {
+                        currentStreak++;
+                        currentEndDate = dates[i];
+                    } else {
+                        // Zakończ obecny streak i sprawdź czy to najdłuższy
+                        if (currentStreak > longestStreak) {
+                            longestStreak = currentStreak;
+                            longestStartDate = currentStartDate;
+                            longestEndDate = currentEndDate;
+                        }
+                        
+                        // Rozpocznij nowy streak
+                        currentStreak = 1;
+                        currentStartDate = dates[i];
+                        currentEndDate = dates[i];
+                    }
+                }
+                
+                // Sprawdź ostatni streak
+                if (currentStreak > longestStreak) {
+                    longestStreak = currentStreak;
+                    longestStartDate = currentStartDate;
+                    longestEndDate = currentEndDate;
+                }
+
+                return {
+                    length: longestStreak,
+                    startDate: longestStartDate,
+                    endDate: longestEndDate
+                };
+            }
             
             // Zmienne dla widoku miesięcznego
             let currentMonth = new Date().getMonth();
@@ -6865,6 +6969,7 @@ const animeData = {
                 
                 saveActivityData();
                 renderActivityCalendar();
+                updateProfileStats();
             }
             
             // Modal do dodawania odcinków
