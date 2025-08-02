@@ -2101,7 +2101,7 @@
         <a href="#lista" class="nav-item"><i class="fas fa-list"></i><span>Lista</span></a>
         <a href="#tier-lista" class="nav-item"><i class="fas fa-layer-group"></i><span>Tier Lista</span></a>
         <a href="#planer" class="nav-item"><i class="fas fa-calendar-alt"></i><span>Planer</span></a>
-        <a href="#eksport" class="nav-item"><i class="fas fa-file-export"></i><span>Eksport</span></a>
+        <a href="#eksport" class="nav-item"><i class="fas fa-file-export"></i><span>Dane</span></a>
     </nav>
 
     <div class="container">
@@ -6607,6 +6607,8 @@ const animeData = {
                 let monthDetails = [];
                 let animeStats = {};
                 let tagStats = {};
+                let mostActiveDayDate = null;
+                let mostActiveEpisodes = 0;
                 
                 // Przejdź przez wszystkie dni miesiąca
                 const startDate = new Date(currentYear, monthIndex, 1);
@@ -6618,8 +6620,15 @@ const animeData = {
                     const episodes = activityData[dateStr] || 0;
                     const details = activityDetails[dateStr] || [];
                     
+                    totalEpisodes += episodes;
+                    
+                    // Znajdź dzień z największą aktywnością
+                    if (episodes > mostActiveEpisodes) {
+                        mostActiveEpisodes = episodes;
+                        mostActiveDayDate = dateStr;
+                    }
+                    
                     if (episodes > 0) {
-                        totalEpisodes += episodes;
                         monthDetails.push(...details);
                         
                         // Oblicz czas oglądania dla tego dnia
@@ -6668,6 +6677,34 @@ const animeData = {
                     
                     // Statystyki miesiąca
                     const uniqueMonthAnime = new Set(monthDetails.map(d => d.animeId)).size;
+                    
+                    // Przygotuj dane dnia z największą aktywnością
+                    let mostActiveDayHtml = '';
+                    if (mostActiveDayDate && mostActiveEpisodes > 0) {
+                        const date = new Date(mostActiveDayDate);
+                        const dayNames = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
+                        const dayName = dayNames[date.getDay()];
+                        const day = date.getDate();
+                        const month = date.getMonth() + 1;
+                        const year = date.getFullYear();
+                        
+                        mostActiveDayHtml = `
+                            <div class="day-summary-stat">
+                                <div class="day-summary-stat-value" style="font-size: 1rem; text-transform: capitalize;">${dayName}</div>
+                                <div style="font-size: 0.75rem; color: var(--gray); margin-top: 0.25rem;">${day}.${String(month).padStart(2, '0')}.${year}</div>
+                                <div class="day-summary-stat-label">Dzień z największą aktywnością</div>
+                            </div>
+                        `;
+                    } else {
+                        mostActiveDayHtml = `
+                            <div class="day-summary-stat">
+                                <div class="day-summary-stat-value" style="font-size: 1rem;">-</div>
+                                <div style="font-size: 0.75rem; color: var(--gray); margin-top: 0.25rem;">Brak aktywności</div>
+                                <div class="day-summary-stat-label">Dzień z największą aktywnością</div>
+                            </div>
+                        `;
+                    }
+                    
                     statsEl.innerHTML = `
                         <div class="day-summary-stat">
                             <div class="day-summary-stat-value">${totalEpisodes}</div>
@@ -6681,6 +6718,7 @@ const animeData = {
                             <div class="day-summary-stat-value">${uniqueMonthAnime}</div>
                             <div class="day-summary-stat-label">Anime</div>
                         </div>
+                        ${mostActiveDayHtml}
                     `;
                     
                     // Lista anime z podsumowaniem
@@ -6734,8 +6772,9 @@ const animeData = {
                             <div class="day-summary-stat-label">Anime</div>
                         </div>
                         <div class="day-summary-stat">
-                            <div class="day-summary-stat-value">0</div>
-                            <div class="day-summary-stat-label">Sesje oglądania</div>
+                            <div class="day-summary-stat-value" style="font-size: 1rem;">-</div>
+                            <div style="font-size: 0.75rem; color: var(--gray); margin-top: 0.25rem;">Brak aktywności</div>
+                            <div class="day-summary-stat-label">Dzień z największą aktywnością</div>
                         </div>
                     `;
                     
