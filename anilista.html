@@ -6245,7 +6245,7 @@ const animeData = {
                 
                 let html = `
                     <div class="calendar-header">
-                        <div class="calendar-month-title">${months[currentMonth]} ${currentYear}</div>
+                        <div class="calendar-month-title clickable" id="mobile-month-title" title="Kliknij aby zobaczyć podsumowanie miesiąca">${months[currentMonth]} ${currentYear}</div>
                         <div class="calendar-nav">
                             <button class="calendar-nav-btn" id="prev-month">
                                 <i class="fas fa-chevron-left"></i>
@@ -6283,6 +6283,11 @@ const animeData = {
                         currentYear++;
                     }
                     renderActivityCalendar();
+                });
+                
+                // Dodaj event listener dla kliknięcia na tytuł miesiąca (podsumowanie)
+                document.getElementById('mobile-month-title').addEventListener('click', () => {
+                    showMonthDetails(currentMonth);
                 });
                 
                 // Renderuj dni mobilnego kalendarza
