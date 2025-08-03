@@ -3547,17 +3547,56 @@
                 display: none !important;
             }
             
-            /* Simplify calendar animations */
-            .calendar-day {
-                transition: background-color 0.2s ease !important;
+            /* ================================
+               🚀 OPTIMIZED CALENDAR STYLES
+               ================================ */
+            
+            /* Optimize calendar for 60fps performance */
+            .calendar-day, .mobile-calendar-day, .desktop-month-day {
+                transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+                will-change: transform; /* Optimize for GPU */
+                backface-visibility: hidden; /* Prevent flickering */
+                transform: translateZ(0); /* Force GPU acceleration */
             }
             
-            .calendar-day:hover {
-                transform: none !important;
+            .calendar-day:hover, .mobile-calendar-day:hover, .desktop-month-day:hover {
+                transform: translateZ(0) scale(1.05);
+                z-index: 10;
             }
             
+            /* Reduce expensive animations */
             .calendar-day.has-activity {
                 animation: none !important;
+            }
+            
+            /* Optimize dimmed state transitions */
+            .calendar-day.dimmed {
+                opacity: 0.3;
+                transition: opacity 0.1s ease-out;
+            }
+            
+            /* Optimize calendar grid rendering */
+            .calendar-days, .mobile-calendar-days, .desktop-month-grid {
+                contain: layout style paint; /* CSS containment for better performance */
+                transform: translateZ(0); /* GPU layer */
+            }
+            
+            /* Optimize tooltips */
+            .calendar-tooltip, .mobile-calendar-tooltip, .desktop-month-tooltip {
+                transform: translateZ(0);
+                pointer-events: none;
+                will-change: opacity;
+            }
+            
+            /* Disable expensive effects on mobile for better performance */
+            @media (max-width: 768px) {
+                .calendar-day:hover, .mobile-calendar-day:hover {
+                    transform: translateZ(0); /* Remove scale on mobile */
+                }
+                
+                .calendar-day, .mobile-calendar-day {
+                    transition: opacity 0.1s ease-out; /* Minimal transitions on mobile */
+                }
             }
             
             /* Disable modal animations */
@@ -7747,78 +7786,113 @@ const animeData = {
             let isMobileView = window.innerWidth <= 768;
             let selectedMonth = null; // null = widok lat, number = widok konkretnego miesiąca
             
-            function renderActivityCalendar() {
-                const container = document.getElementById('calendar-container');
-                if (!container) return;
-                
-                // Sprawdź czy to mobile
-                isMobileView = window.innerWidth <= 768;
-                
-                if (isMobileView) {
-                    renderMobileCalendar(container);
-                } else {
-                    if (selectedMonth !== null) {
-                        renderDesktopMonthView(container);
-                    } else {
-                        renderDesktopCalendar(container);
-                    }
+            // Performance optimization: Debounced rendering and resize handling
+            let calendarRenderTimeout = null;
+            let cachedCalendarContainer = null;
+            let resizeTimeout = null;
+            
+            // Throttled resize handler to prevent excessive re-renders
+            window.addEventListener('resize', () => {
+                if (resizeTimeout) {
+                    clearTimeout(resizeTimeout);
                 }
+                
+                resizeTimeout = setTimeout(() => {
+                    const newIsMobileView = window.innerWidth <= 768;
+                    if (newIsMobileView !== isMobileView) {
+                        // Clear cache when switching between mobile/desktop
+                        yearlyViewCache = {};
+                        calendarEventDelegated = false;
+                        hoverEventsDelegated = false;
+                        renderActivityCalendar();
+                    }
+                }, 250); // Debounce resize events
+            });
+            
+            // Memory cleanup function
+            function cleanupCalendarCache() {
+                yearlyViewCache = {};
+                calendarEventDelegated = false;
+                hoverEventsDelegated = false;
+                cachedCalendarContainer = null;
             }
+            
+            function renderActivityCalendar() {
+                // Debounce rapid calls
+                if (calendarRenderTimeout) {
+                    clearTimeout(calendarRenderTimeout);
+                }
+                
+                calendarRenderTimeout = setTimeout(() => {
+                    const container = cachedCalendarContainer || document.getElementById('calendar-container');
+                    if (!container) return;
+                    
+                    // Cache container reference
+                    if (!cachedCalendarContainer) {
+                        cachedCalendarContainer = container;
+                    }
+                    
+                    // Sprawdź czy to mobile
+                    isMobileView = window.innerWidth <= 768;
+                    
+                    // Use requestAnimationFrame for smooth rendering
+                    requestAnimationFrame(() => {
+                        if (isMobileView) {
+                            renderMobileCalendar(container);
+                        } else {
+                            if (selectedMonth !== null) {
+                                renderDesktopMonthView(container);
+                            } else {
+                                renderDesktopCalendar(container);
+                            }
+                        }
+                    });
+                }, 16); // ~60fps debouncing
+            }
+            
+            // Cache DOM elements and event handlers to prevent memory leaks
+            let calendarEventDelegated = false;
             
             function renderDesktopMonthView(container) {
                 const months = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 
                                'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
                 const days = ['Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob', 'Nie'];
                 
-                let html = `
-                    <div class="calendar-header">
-                        <div class="calendar-month-title clickable" id="month-title-clickable" title="Kliknij aby wrócić do lat">${months[selectedMonth]} ${currentYear}</div>
-                        <div class="calendar-nav">
-                            <button class="calendar-nav-btn" id="prev-month">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <button class="calendar-nav-btn" id="next-month">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="desktop-month-grid">
-                        ${days.map(day => `<div class="desktop-month-label">${day}</div>`).join('')}
+                // Use DocumentFragment for better performance
+                const fragment = document.createDocumentFragment();
+                
+                // Create header
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.innerHTML = `
+                    <div class="calendar-month-title clickable" data-action="back-to-year" title="Kliknij aby wrócić do lat">${months[selectedMonth]} ${currentYear}</div>
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn" data-action="prev-month">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="calendar-nav-btn" data-action="next-month">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                 `;
                 
-                container.innerHTML = html;
+                // Create month grid
+                const monthGrid = document.createElement('div');
+                monthGrid.className = 'desktop-month-grid';
+                monthGrid.innerHTML = days.map(day => `<div class="desktop-month-label">${day}</div>`).join('');
                 
-                // Dodaj event listeners dla nawigacji
-                document.getElementById('prev-month').addEventListener('click', () => {
-                    animateCalendarTransition(() => {
-                        selectedMonth--;
-                        if (selectedMonth < 0) {
-                            selectedMonth = 11;
-                            currentYear--;
-                        }
-                        renderActivityCalendar();
-                    });
-                });
+                fragment.appendChild(header);
+                fragment.appendChild(monthGrid);
                 
-                document.getElementById('next-month').addEventListener('click', () => {
-                    animateCalendarTransition(() => {
-                        selectedMonth++;
-                        if (selectedMonth > 11) {
-                            selectedMonth = 0;
-                            currentYear++;
-                        }
-                        renderActivityCalendar();
-                    });
-                });
+                // Clear container and append fragment in one operation
+                container.innerHTML = '';
+                container.appendChild(fragment);
                 
-                // Dodaj event listener dla kliknięcia na tytuł miesiąca
-                document.getElementById('month-title-clickable').addEventListener('click', () => {
-                    animateCalendarTransition(() => {
-                        selectedMonth = null;
-                        renderActivityCalendar();
-                    });
-                });
+                // Use event delegation for better performance (only set up once)
+                if (!calendarEventDelegated) {
+                    setupCalendarEventDelegation(container);
+                    calendarEventDelegated = true;
+                }
                 
                 // Renderuj dni miesięcznego widoku
                 renderDesktopMonthDays();
@@ -7827,65 +7901,135 @@ const animeData = {
                 addSwipeSupport(container);
             }
             
+            // Event delegation setup to handle all calendar events efficiently
+            function setupCalendarEventDelegation(container) {
+                container.addEventListener('click', (e) => {
+                    const action = e.target.closest('[data-action]')?.dataset.action;
+                    
+                    switch(action) {
+                        case 'prev-month':
+                            e.preventDefault();
+                            animateCalendarTransition(() => {
+                                selectedMonth--;
+                                if (selectedMonth < 0) {
+                                    selectedMonth = 11;
+                                    currentYear--;
+                                }
+                                renderActivityCalendar();
+                            });
+                            break;
+                            
+                        case 'next-month':
+                            e.preventDefault();
+                            animateCalendarTransition(() => {
+                                selectedMonth++;
+                                if (selectedMonth > 11) {
+                                    selectedMonth = 0;
+                                    currentYear++;
+                                }
+                                renderActivityCalendar();
+                            });
+                            break;
+                            
+                        case 'back-to-year':
+                            e.preventDefault();
+                            animateCalendarTransition(() => {
+                                selectedMonth = null;
+                                renderActivityCalendar();
+                            });
+                            break;
+                            
+                        case 'prev-year':
+                            e.preventDefault();
+                            animateCalendarTransition(() => {
+                                currentYear--;
+                                renderActivityCalendar();
+                            });
+                            break;
+                            
+                        case 'next-year':
+                            e.preventDefault();
+                            animateCalendarTransition(() => {
+                                currentYear++;
+                                renderActivityCalendar();
+                            });
+                            break;
+                            
+                        case 'current-month':
+                            e.preventDefault();
+                            animateCalendarTransition(() => {
+                                selectedMonth = new Date().getMonth();
+                                renderActivityCalendar();
+                            });
+                            break;
+                    }
+                    
+                    // Handle calendar day clicks
+                    const dayElement = e.target.closest('.calendar-day[data-date], .mobile-calendar-day[data-date], .desktop-month-day[data-date]');
+                    if (dayElement && dayElement.dataset.date) {
+                        const date = dayElement.dataset.date;
+                        const episodes = parseInt(dayElement.dataset.episodes) || 0;
+                        showDayDetails(date, episodes);
+                    }
+                });
+            }
+            
             function renderDesktopCalendar(container) {
                 const months = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
                 const days = ['Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob', 'Nie'];
                 
-                let html = `
-                    <div class="calendar-header">
-                        <div class="calendar-year clickable" id="year-clickable" title="Kliknij aby zobaczyć aktualny miesiąc">${currentYear}</div>
-                        <div class="calendar-nav">
-                            <button class="calendar-nav-btn" id="prev-year">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <button class="calendar-nav-btn" id="next-year">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-
-                    </div>
-                    <div class="calendar-grid">
-                        <div class="calendar-labels">
-                            ${days.map(day => `<div>${day}</div>`).join('')}
-                        </div>
-                        <div>
-                            <div class="calendar-months">
-                                ${months.map(month => `<div class="calendar-month">${month}</div>`).join('')}
-                            </div>
-                            <div class="calendar-days" id="calendar-days">
-                            </div>
-                        </div>
+                // Use DocumentFragment for better performance
+                const fragment = document.createDocumentFragment();
+                
+                // Create header
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.innerHTML = `
+                    <div class="calendar-year clickable" data-action="current-month" title="Kliknij aby zobaczyć aktualny miesiąc">${currentYear}</div>
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn" data-action="prev-year">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="calendar-nav-btn" data-action="next-year">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                 `;
                 
-                container.innerHTML = html;
+                // Create calendar grid
+                const calendarGrid = document.createElement('div');
+                calendarGrid.className = 'calendar-grid';
                 
-                // Dodaj event listeners dla nawigacji
-                document.getElementById('prev-year').addEventListener('click', () => {
-                    animateCalendarTransition(() => {
-                        currentYear--;
-                        renderActivityCalendar();
-                    });
-                });
+                const labelsDiv = document.createElement('div');
+                labelsDiv.className = 'calendar-labels';
+                labelsDiv.innerHTML = days.map(day => `<div>${day}</div>`).join('');
                 
-                document.getElementById('next-year').addEventListener('click', () => {
-                    animateCalendarTransition(() => {
-                        currentYear++;
-                        renderActivityCalendar();
-                    });
-                });
+                const contentDiv = document.createElement('div');
+                const monthsDiv = document.createElement('div');
+                monthsDiv.className = 'calendar-months';
+                monthsDiv.innerHTML = months.map(month => `<div class="calendar-month">${month}</div>`).join('');
                 
-
+                const daysDiv = document.createElement('div');
+                daysDiv.className = 'calendar-days';
+                daysDiv.id = 'calendar-days';
                 
-                // Dodaj event listener dla kliknięcia na rok
-                document.getElementById('year-clickable').addEventListener('click', () => {
-                    animateCalendarTransition(() => {
-                        selectedMonth = new Date().getMonth(); // Aktualny miesiąc
-                        renderActivityCalendar();
-                    });
-                });
+                contentDiv.appendChild(monthsDiv);
+                contentDiv.appendChild(daysDiv);
+                calendarGrid.appendChild(labelsDiv);
+                calendarGrid.appendChild(contentDiv);
                 
-
+                fragment.appendChild(header);
+                fragment.appendChild(calendarGrid);
+                
+                // Clear container and append fragment in one operation
+                container.innerHTML = '';
+                container.appendChild(fragment);
+                
+                // Use event delegation for better performance (only set up once)
+                if (!calendarEventDelegated) {
+                    setupCalendarEventDelegation(container);
+                    calendarEventDelegated = true;
+                }
                 
                 // Renderuj dni
                 renderCalendarDays();
@@ -7899,58 +8043,70 @@ const animeData = {
                                'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
                 const days = ['Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob', 'Nie'];
                 
-                let html = `
-                    <div class="calendar-header">
-                        <div class="calendar-month-title clickable" id="mobile-month-title" title="Kliknij aby zobaczyć podsumowanie miesiąca">${months[currentMonth]} ${currentYear}</div>
-                        <div class="calendar-nav">
-                            <button class="calendar-nav-btn" id="prev-month">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <button class="calendar-nav-btn" id="next-month">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="mobile-calendar-grid">
-                        <div class="mobile-calendar-labels">
-                            ${days.map(day => `<div class="mobile-calendar-label">${day}</div>`).join('')}
-                        </div>
-                        <div class="mobile-calendar-days" id="mobile-calendar-days">
-                        </div>
+                // Use DocumentFragment for better performance
+                const fragment = document.createDocumentFragment();
+                
+                // Create header
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.innerHTML = `
+                    <div class="calendar-month-title clickable" data-action="show-month-details" title="Kliknij aby zobaczyć podsumowanie miesiąca">${months[currentMonth]} ${currentYear}</div>
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn" data-action="prev-month">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="calendar-nav-btn" data-action="next-month">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                 `;
                 
-                container.innerHTML = html;
+                // Create mobile calendar grid
+                const mobileGrid = document.createElement('div');
+                mobileGrid.className = 'mobile-calendar-grid';
                 
-                // Dodaj event listeners dla nawigacji
-                document.getElementById('prev-month').addEventListener('click', () => {
-                    currentMonth--;
-                    if (currentMonth < 0) {
-                        currentMonth = 11;
-                        currentYear--;
-                    }
-                    renderActivityCalendar();
-                });
+                const labelsDiv = document.createElement('div');
+                labelsDiv.className = 'mobile-calendar-labels';
+                labelsDiv.innerHTML = days.map(day => `<div class="mobile-calendar-label">${day}</div>`).join('');
                 
-                document.getElementById('next-month').addEventListener('click', () => {
-                    currentMonth++;
-                    if (currentMonth > 11) {
-                        currentMonth = 0;
-                        currentYear++;
-                    }
-                    renderActivityCalendar();
-                });
+                const daysDiv = document.createElement('div');
+                daysDiv.className = 'mobile-calendar-days';
+                daysDiv.id = 'mobile-calendar-days';
                 
-                // Dodaj event listener dla kliknięcia na tytuł miesiąca (podsumowanie)
-                document.getElementById('mobile-month-title').addEventListener('click', () => {
-                    showMonthDetails(currentMonth);
-                });
+                mobileGrid.appendChild(labelsDiv);
+                mobileGrid.appendChild(daysDiv);
+                
+                fragment.appendChild(header);
+                fragment.appendChild(mobileGrid);
+                
+                // Clear container and append fragment in one operation
+                container.innerHTML = '';
+                container.appendChild(fragment);
+                
+                // Use event delegation for better performance (only set up once)
+                if (!calendarEventDelegated) {
+                    setupCalendarEventDelegation(container);
+                    setupMobileCalendarEventDelegation(container);
+                    calendarEventDelegated = true;
+                }
                 
                 // Renderuj dni mobilnego kalendarza
                 renderMobileCalendarDays();
                 
                 // Dodaj obsługę swipe dla mobile
                 addSwipeSupport(container);
+            }
+            
+            // Additional mobile-specific event delegation
+            function setupMobileCalendarEventDelegation(container) {
+                container.addEventListener('click', (e) => {
+                    const action = e.target.closest('[data-action]')?.dataset.action;
+                    
+                    if (action === 'show-month-details') {
+                        e.preventDefault();
+                        showMonthDetails(currentMonth);
+                    }
+                });
             }
             
             function renderMobileCalendarDays() {
@@ -7964,11 +8120,14 @@ const animeData = {
                 // Dostosuj do układu poniedziałek-niedziela
                 const adjustedStartDay = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
                 
-                let html = '';
+                // Use DocumentFragment for better performance
+                const fragment = document.createDocumentFragment();
                 
                 // Dodaj puste dni z poprzedniego miesiąca
                 for (let i = 0; i < adjustedStartDay; i++) {
-                    html += '<div class="mobile-calendar-day empty other-month"></div>';
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'mobile-calendar-day empty other-month';
+                    fragment.appendChild(emptyDay);
                 }
                 
                 // Dodaj dni bieżącego miesiąca
@@ -7983,12 +8142,18 @@ const animeData = {
                         `${dateStr}: ${episodes} odcinków` : 
                         `${dateStr}: Brak aktywności`;
                     
-                    html += `
-                        <div class="mobile-calendar-day level-${level}" data-date="${dateStr}" data-episodes="${episodes}">
-                            ${day}
-                            <div class="mobile-calendar-tooltip">${tooltip}</div>
-                        </div>
-                    `;
+                    const dayElement = document.createElement('div');
+                    dayElement.className = `mobile-calendar-day level-${level}`;
+                    dayElement.dataset.date = dateStr;
+                    dayElement.dataset.episodes = episodes;
+                    dayElement.textContent = day;
+                    
+                    const tooltipElement = document.createElement('div');
+                    tooltipElement.className = 'mobile-calendar-tooltip';
+                    tooltipElement.textContent = tooltip;
+                    dayElement.appendChild(tooltipElement);
+                    
+                    fragment.appendChild(dayElement);
                 }
                 
                 // Dodaj puste dni z następnego miesiąca, żeby wypełnić grid
@@ -7996,44 +8161,50 @@ const animeData = {
                 const remainingDays = 42 - totalDays; // 6 tygodni * 7 dni = 42
                 
                 for (let i = 0; i < remainingDays; i++) {
-                    html += '<div class="mobile-calendar-day empty other-month"></div>';
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'mobile-calendar-day empty other-month';
+                    fragment.appendChild(emptyDay);
                 }
                 
-                daysContainer.innerHTML = html;
+                // Clear container and append fragment in one operation
+                daysContainer.innerHTML = '';
+                daysContainer.appendChild(fragment);
                 
-                // Dodaj event listeners dla kliknięć na dni
-                document.querySelectorAll('.mobile-calendar-day[data-date]').forEach(day => {
-                    day.addEventListener('click', () => {
-                        const date = day.dataset.date;
-                        const episodes = parseInt(day.dataset.episodes) || 0;
-                        showDayDetails(date, episodes);
-                    });
-                });
+                // Event listeners are handled by delegation, no need to add here
             }
             
+            // Optimized animation using CSS transitions and requestAnimationFrame
             function animateCalendarTransition(callback) {
-                const daysContainer = document.getElementById('calendar-days');
+                const daysContainer = document.getElementById('calendar-days') || document.getElementById('mobile-calendar-days');
+                
                 if (!daysContainer) {
-                    callback();
+                    requestAnimationFrame(callback);
                     return;
                 }
                 
-                // Animacja fade out
-                daysContainer.classList.add('fade-out');
+                // Use CSS transform for smoother animation
+                daysContainer.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
+                daysContainer.style.opacity = '0';
+                daysContainer.style.transform = 'translateY(10px)';
                 
-                setTimeout(() => {
-                    callback();
-                    
-                    // Animacja fade in
+                // Execute callback after fade out
+                requestAnimationFrame(() => {
                     setTimeout(() => {
-                        daysContainer.classList.remove('fade-out');
-                        daysContainer.classList.add('fade-in');
+                        callback();
                         
-                        setTimeout(() => {
-                            daysContainer.classList.remove('fade-in');
-                        }, 400);
+                        // Fade in after update
+                        requestAnimationFrame(() => {
+                            daysContainer.style.opacity = '1';
+                            daysContainer.style.transform = 'translateY(0)';
+                            
+                            // Clean up after animation
+                            setTimeout(() => {
+                                daysContainer.style.transition = '';
+                                daysContainer.style.transform = '';
+                            }, 200);
+                        });
                     }, 50);
-                }, 200);
+                });
             }
             
             function renderDesktopMonthDays() {
@@ -8047,11 +8218,14 @@ const animeData = {
                 // Dostosuj do układu poniedziałek-niedziela
                 const adjustedStartDay = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
                 
-                let html = '';
+                // Use DocumentFragment for better performance
+                const fragment = document.createDocumentFragment();
                 
                 // Dodaj puste dni z poprzedniego miesiąca
                 for (let i = 0; i < adjustedStartDay; i++) {
-                    html += '<div class="desktop-month-day empty other-month"></div>';
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'desktop-month-day empty other-month';
+                    fragment.appendChild(emptyDay);
                 }
                 
                 // Dodaj dni bieżącego miesiąca
@@ -8066,12 +8240,18 @@ const animeData = {
                         `${dateStr}: ${episodes} odcinków` : 
                         `${dateStr}: Brak aktywności`;
                     
-                    html += `
-                        <div class="desktop-month-day level-${level}" data-date="${dateStr}" data-episodes="${episodes}">
-                            ${day}
-                            <div class="desktop-month-tooltip">${tooltip}</div>
-                        </div>
-                    `;
+                    const dayElement = document.createElement('div');
+                    dayElement.className = `desktop-month-day level-${level}`;
+                    dayElement.dataset.date = dateStr;
+                    dayElement.dataset.episodes = episodes;
+                    dayElement.textContent = day;
+                    
+                    const tooltipElement = document.createElement('div');
+                    tooltipElement.className = 'desktop-month-tooltip';
+                    tooltipElement.textContent = tooltip;
+                    dayElement.appendChild(tooltipElement);
+                    
+                    fragment.appendChild(dayElement);
                 }
                 
                 // Dodaj puste dni z następnego miesiąca, żeby wypełnić grid
@@ -8079,24 +8259,19 @@ const animeData = {
                 const remainingDays = 42 - totalDays; // 6 tygodni * 7 dni = 42
                 
                 for (let i = 0; i < remainingDays; i++) {
-                    html += '<div class="desktop-month-day empty other-month"></div>';
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'desktop-month-day empty other-month';
+                    fragment.appendChild(emptyDay);
                 }
                 
-                // Usuń istniejące dni (zachowaj etykiety)
+                // Remove existing days efficiently
                 const existingDays = daysContainer.querySelectorAll('.desktop-month-day');
                 existingDays.forEach(day => day.remove());
                 
-                // Dodaj nowe dni na końcu kontenera
-                daysContainer.insertAdjacentHTML('beforeend', html);
+                // Add all new days in one operation
+                daysContainer.appendChild(fragment);
                 
-                // Dodaj event listeners dla kliknięć na dni
-                document.querySelectorAll('.desktop-month-day[data-date]').forEach(day => {
-                    day.addEventListener('click', () => {
-                        const date = day.dataset.date;
-                        const episodes = parseInt(day.dataset.episodes) || 0;
-                        showDayDetails(date, episodes);
-                    });
-                });
+                // Event listeners are handled by delegation, no need to add here
             }
             
 
@@ -8108,7 +8283,21 @@ const animeData = {
                 renderYearlyView(daysContainer);
             }
             
+            // Optimized yearly view with DocumentFragment and efficient event handling
+            let yearlyViewCache = {};
+            let hoverEventsDelegated = false;
+            
             function renderYearlyView(daysContainer) {
+                const cacheKey = `${currentYear}`;
+                
+                // Use cache if available for same year
+                if (yearlyViewCache[cacheKey]) {
+                    daysContainer.innerHTML = '';
+                    daysContainer.appendChild(yearlyViewCache[cacheKey].cloneNode(true));
+                    setupYearlyViewHoverDelegation();
+                    return;
+                }
+                
                 const startDate = new Date(currentYear, 0, 1);
                 const endDate = new Date(currentYear, 11, 31);
                 
@@ -8122,132 +8311,133 @@ const animeData = {
                 const totalDays = Math.ceil((endDate - firstMonday) / (1000 * 60 * 60 * 24)) + 1;
                 const weeks = Math.ceil(totalDays / 7);
                 
-                // Przygotuj tablicę 2D: [dzień_tygodnia][tydzień]
-                const calendarGrid = Array(7).fill().map(() => Array(weeks).fill(null));
+                // Use DocumentFragment for optimal performance
+                const fragment = document.createDocumentFragment();
                 
-                // Wypełnij grid datami
+                // Create all elements using optimized loops
                 for (let week = 0; week < weeks; week++) {
                     for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
                         const currentDate = new Date(firstMonday);
                         currentDate.setDate(firstMonday.getDate() + (week * 7) + dayOfWeek);
                         
-                        // dayOfWeek = 0 to poniedziałek (firstMonday), dayOfWeek = 1 to wtorek, itd.
-                        // Chcemy: 0=poniedziałek, 1=wtorek, 2=środa, 3=czwartek, 4=piątek, 5=sobota, 6=niedziela
-                        const mappedDayOfWeek = dayOfWeek;
-                        
-                        // Użyj lokalnej daty zamiast ISO string aby uniknąć przesunięcia czasowego
-                        const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-                        const episodes = activityData[dateStr] || 0;
-                        const level = getActivityLevel(episodes);
                         const isCurrentYear = currentDate.getFullYear() === currentYear;
+                        const dayElement = document.createElement('div');
                         
-                        calendarGrid[mappedDayOfWeek][week] = {
-                            date: dateStr,
-                            episodes: episodes,
-                            level: level,
-                            isCurrentYear: isCurrentYear
-                        };
-                    }
-                }
-                
-                // Renderuj HTML - każdy rząd to jeden dzień tygodnia
-                let html = '';
-                // Renderuj każdy tydzień osobno, żeby poniedziałek był pierwszy
-                for (let week = 0; week < weeks; week++) {
-                    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-                        const day = calendarGrid[dayOfWeek][week];
+                        // Set grid position using CSS properties for better performance
+                        dayElement.style.gridRow = dayOfWeek + 1;
+                        dayElement.style.gridColumn = week + 1;
                         
-                        if (day.isCurrentYear) {
-                            const tooltip = day.episodes > 0 ? 
-                                `${day.date}: ${day.episodes} odcinków` : 
-                                `${day.date}: Brak aktywności`;
+                        if (isCurrentYear) {
+                            const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+                            const episodes = activityData[dateStr] || 0;
+                            const level = getActivityLevel(episodes);
                             
-                            html += `
-                                <div class="calendar-day level-${day.level}" data-date="${day.date}" data-episodes="${day.episodes}" style="grid-row: ${dayOfWeek + 1}; grid-column: ${week + 1};">
-                                    <div class="calendar-tooltip">${tooltip}</div>
-                                </div>
-                            `;
+                            dayElement.className = `calendar-day level-${level}`;
+                            dayElement.dataset.date = dateStr;
+                            dayElement.dataset.episodes = episodes;
+                            dayElement.dataset.month = currentDate.getMonth();
+                            dayElement.dataset.dayOfWeek = dayOfWeek;
+                            
+                            const tooltip = episodes > 0 ? 
+                                `${dateStr}: ${episodes} odcinków` : 
+                                `${dateStr}: Brak aktywności`;
+                            
+                            const tooltipElement = document.createElement('div');
+                            tooltipElement.className = 'calendar-tooltip';
+                            tooltipElement.textContent = tooltip;
+                            dayElement.appendChild(tooltipElement);
                         } else {
-                            html += `<div class="calendar-day empty" style="grid-row: ${dayOfWeek + 1}; grid-column: ${week + 1};"></div>`;
+                            dayElement.className = 'calendar-day empty';
                         }
+                        
+                        fragment.appendChild(dayElement);
                     }
                 }
                 
-                daysContainer.innerHTML = html;
+                // Cache the result for reuse
+                yearlyViewCache[cacheKey] = fragment.cloneNode(true);
                 
-                // Dodaj event listeners dla kliknięć na dni
-                document.querySelectorAll('.calendar-day[data-date]').forEach(day => {
-                    day.addEventListener('click', () => {
-                        const date = day.dataset.date;
-                        const episodes = parseInt(day.dataset.episodes) || 0;
-                        showDayDetails(date, episodes);
-                    });
+                // Clear container and append fragment in one operation
+                daysContainer.innerHTML = '';
+                daysContainer.appendChild(fragment);
+                
+                // Setup optimized hover events using delegation
+                setupYearlyViewHoverDelegation();
+            }
+            
+            // Optimized hover delegation for yearly view
+            function setupYearlyViewHoverDelegation() {
+                if (hoverEventsDelegated) return;
+                
+                const calendarGrid = document.querySelector('.calendar-grid');
+                if (!calendarGrid) return;
+                
+                // Use efficient event delegation for all hover effects
+                calendarGrid.addEventListener('mouseenter', (e) => {
+                    const target = e.target;
+                    
+                    // Handle day label hover
+                    if (target.closest('.calendar-labels > div')) {
+                        const labelIndex = Array.from(target.parentNode.children).indexOf(target);
+                        highlightDayOfWeek(labelIndex);
+                        return;
+                    }
+                    
+                    // Handle month label hover
+                    if (target.closest('.calendar-months > div')) {
+                        const monthIndex = Array.from(target.parentNode.children).indexOf(target);
+                        highlightMonth(monthIndex);
+                        return;
+                    }
+                }, true);
+                
+                calendarGrid.addEventListener('mouseleave', (e) => {
+                    const target = e.target;
+                    
+                    if (target.closest('.calendar-labels > div') || target.closest('.calendar-months > div')) {
+                        clearHighlights();
+                    }
+                }, true);
+                
+                // Handle month clicks
+                calendarGrid.addEventListener('click', (e) => {
+                    const monthLabel = e.target.closest('.calendar-months > div');
+                    if (monthLabel) {
+                        const monthIndex = Array.from(monthLabel.parentNode.children).indexOf(monthLabel);
+                        showMonthDetails(monthIndex);
+                    }
                 });
                 
-                // Dodaj event listeners dla hover na etykiety dni (zoptymalizowane)
-                const dayLabels = document.querySelectorAll('.calendar-labels > div');
-                const allCalendarDays = document.querySelectorAll('.calendar-day'); // Cache DOM query
-                
-                dayLabels.forEach((label, index) => {
-                    label.addEventListener('mouseenter', () => {
-                        // Przyciemnij wszystkie kwadraty
-                        allCalendarDays.forEach(day => {
-                            day.classList.add('dimmed');
-                        });
-                        
-                        // Podświetl kwadraty dla tego dnia tygodnia
-                        allCalendarDays.forEach(day => {
-                            const dayElement = day;
-                            const computedStyle = window.getComputedStyle(dayElement);
-                            const gridRow = computedStyle.gridRow;
-                            if (gridRow === `${index + 1}`) {
-                                dayElement.classList.remove('dimmed');
-                            }
-                        });
-                    });
-                    
-                    label.addEventListener('mouseleave', () => {
-                        // Usuń przyciemnienie ze wszystkich kwadratów
-                        allCalendarDays.forEach(day => {
-                            day.classList.remove('dimmed');
-                        });
-                    });
+                hoverEventsDelegated = true;
+            }
+            
+            // Optimized highlight functions using data attributes
+            function highlightDayOfWeek(dayIndex) {
+                const days = document.querySelectorAll('.calendar-day');
+                days.forEach(day => {
+                    if (day.dataset.dayOfWeek === dayIndex.toString()) {
+                        day.classList.remove('dimmed');
+                    } else {
+                        day.classList.add('dimmed');
+                    }
                 });
-                
-                // Dodaj event listeners dla hover na etykiety miesięcy (zoptymalizowane)
-                const monthLabels = document.querySelectorAll('.calendar-months > div');
-                monthLabels.forEach((label, index) => {
-                    label.addEventListener('mouseenter', () => {
-                        // Przyciemnij wszystkie kwadraty
-                        allCalendarDays.forEach(day => {
-                            day.classList.add('dimmed');
-                        });
-                        
-                        // Podświetl kwadraty dla tego miesiąca
-                        allCalendarDays.forEach(day => {
-                            const dayElement = day;
-                            if (dayElement.dataset.date) {
-                                const date = new Date(dayElement.dataset.date);
-                                const month = date.getMonth(); // 0-11 (styczeń=0, luty=1, itd.)
-                                
-                                if (month === index) {
-                                    dayElement.classList.remove('dimmed');
-                                }
-                            }
-                        });
-                    });
-                    
-                    label.addEventListener('mouseleave', () => {
-                        // Usuń przyciemnienie ze wszystkich kwadratów
-                        allCalendarDays.forEach(day => {
-                            day.classList.remove('dimmed');
-                        });
-                    });
-                    
-                    // Dodaj event listener dla kliknięcia na miesiąc
-                    label.addEventListener('click', () => {
-                        showMonthDetails(index);
-                    });
+            }
+            
+            function highlightMonth(monthIndex) {
+                const days = document.querySelectorAll('.calendar-day');
+                days.forEach(day => {
+                    if (day.dataset.month === monthIndex.toString()) {
+                        day.classList.remove('dimmed');
+                    } else {
+                        day.classList.add('dimmed');
+                    }
+                });
+            }
+            
+            function clearHighlights() {
+                const days = document.querySelectorAll('.calendar-day');
+                days.forEach(day => {
+                    day.classList.remove('dimmed');
                 });
             }
             
