@@ -3274,6 +3274,231 @@
         /* ================================
            END MODERN UI PACKAGE 🚀
            ================================ */
+
+        /* ================================
+           📱 MOBILE PERFORMANCE OPTIMIZATION
+           ================================ */
+        
+        @media (max-width: 768px) and (pointer: coarse) {
+            /* Disable complex animations on mobile for better performance */
+            
+            /* Remove heavy blur effects */
+            .section, .stat-card, .anime-card {
+                backdrop-filter: none !important;
+            }
+            
+            /* Simplify hover effects - remove transforms and heavy shadows */
+            .section:hover {
+                transform: none !important;
+                box-shadow: var(--card-shadow) !important;
+            }
+            
+            .anime-card:hover, .stat-card:hover {
+                transform: none !important;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+                filter: none !important;
+            }
+            
+            /* Disable rainbow and complex tier animations */
+            .tier-item[data-tier="SSS"] {
+                background: rgba(255, 215, 0, 0.2) !important;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+                border: 2px solid rgba(255, 215, 0, 0.5) !important;
+                animation: none !important;
+            }
+            
+            .tier-item[data-tier="SS"] {
+                animation: none !important;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+            }
+            
+            .tier-item[data-tier="S"] {
+                animation: none !important;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+            }
+            
+            /* Disable status pulse animations */
+            .anime-card.status-watching::after,
+            .anime-card.status-completed::after,
+            .anime-card.status-upcoming::after {
+                animation: none !important;
+            }
+            
+            .anime-card.status-watching .anime-title::before,
+            .anime-card.status-completed .anime-title::before,
+            .anime-card.status-upcoming .anime-title::before {
+                box-shadow: none !important;
+            }
+            
+            /* Simplify navigation animations */
+            .nav-item {
+                transition: color 0.2s ease !important;
+            }
+            
+            .nav-item:hover {
+                transform: none !important;
+                filter: none !important;
+            }
+            
+            .nav-item.active {
+                animation: none !important;
+                transform: translateX(10px) !important;
+            }
+            
+            /* Disable complex button animations */
+            .btn-accent::before, .btn-primary::before {
+                display: none !important;
+            }
+            
+            .btn-accent:hover, .btn-primary:hover, .btn-success:hover {
+                transform: none !important;
+                box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2) !important;
+            }
+            
+            /* Simplify form input animations */
+            .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+                animation: none !important;
+                transition: border-color 0.2s ease !important;
+            }
+            
+            /* Disable progress bar shine effect */
+            .progress-bar::before,
+            .progress-bar-enhanced::before {
+                display: none !important;
+            }
+            
+            /* Simplify calendar animations */
+            .calendar-day {
+                transition: background-color 0.2s ease !important;
+            }
+            
+            .calendar-day:hover {
+                transform: none !important;
+            }
+            
+            .calendar-day.has-activity {
+                animation: none !important;
+            }
+            
+            /* Disable modal animations */
+            .modal {
+                animation: none !important;
+            }
+            
+            .modal.show {
+                animation: none !important;
+            }
+            
+            /* Disable page section animations */
+            .section {
+                animation: none !important;
+            }
+            
+            /* Simplify tier item hover */
+            .tier-item:hover {
+                transform: none !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+                transition: box-shadow 0.2s ease !important;
+            }
+            
+            .tier-item.dragging {
+                animation: none !important;
+            }
+            
+            /* Disable neon effects */
+            .neon-text {
+                animation: none !important;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+            }
+            
+            .neon-border::before {
+                display: none !important;
+            }
+            
+            .holographic::before {
+                display: none !important;
+            }
+            
+            /* Disable utility animations */
+            .animate-fadeIn, .animate-slideLeft, .animate-slideRight, .animate-bounce {
+                animation: none !important;
+            }
+            
+            .animate-pulse {
+                animation: none !important;
+            }
+            
+            /* Disable stagger animations */
+            .anime-card, .stat-card {
+                animation-delay: 0s !important;
+            }
+            
+            /* Simplify floating elements */
+            .floating-element:hover {
+                transform: scale(1.05) !important;
+            }
+            
+            /* Disable particle effects */
+            .particles {
+                display: none !important;
+            }
+            
+            /* Disable loading shimmer on mobile */
+            .loading-shimmer {
+                background: rgba(255, 255, 255, 0.1) !important;
+                animation: none !important;
+            }
+            
+            /* Simplify scroll behavior */
+            html {
+                scroll-behavior: auto !important;
+            }
+            
+            /* Reduce counter animations */
+            .stat-value {
+                animation: none !important;
+            }
+            
+            /* Disable shine effects */
+            .stat-card::before, .anime-card::before {
+                display: none !important;
+            }
+            
+            /* Simplify subtle ambient effects */
+            .subtle-ambient {
+                background: none !important;
+                animation: none !important;
+            }
+            
+            /* Force GPU acceleration for essential elements only */
+            .anime-card, .stat-card, .nav-item {
+                will-change: auto !important;
+            }
+        }
+        
+        /* Additional optimization for very small screens */
+        @media (max-width: 480px) and (pointer: coarse) {
+            /* Further reduce animations on small mobile devices */
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+            
+            /* Only keep essential transitions */
+            .nav-item, button, input, select {
+                transition: background-color 0.2s ease, color 0.2s ease !important;
+            }
+            
+            /* Disable all transform effects */
+            .anime-card:hover, .stat-card:hover, .nav-item:hover, 
+            .btn-accent:hover, .btn-primary:hover, .tier-item:hover {
+                transform: none !important;
+            }
+        }
+        
+        /* ================================
+           END MOBILE PERFORMANCE OPTIMIZATION 📱
+           ================================ */
     </style>
 </head>
 <body>
@@ -5123,7 +5348,7 @@ const animeData = {
                 } else {
                     scrollTopBtn.style.display = 'none';
                 }
-            });
+            }, { passive: true });
             
             // Navbar functionality
             document.querySelectorAll('.nav-item').forEach(item => {
@@ -6128,14 +6353,21 @@ const animeData = {
                 }
             });
             
-            // Funkcja do śledzenia aktywnej sekcji
+            // Funkcja do śledzenia aktywnej sekcji (zoptymalizowana)
+            let trackingSections = null;
+            let trackingNavItems = null;
+            let trackingTicking = false;
+            
             function trackActiveSection() {
-                const sections = document.querySelectorAll('.section');
-                const navItems = document.querySelectorAll('.nav-item');
+                // Cache DOM queries
+                if (!trackingSections) {
+                    trackingSections = document.querySelectorAll('.section');
+                    trackingNavItems = document.querySelectorAll('.nav-item');
+                }
                 
                 let currentSection = '';
                 
-                sections.forEach(section => {
+                trackingSections.forEach(section => {
                     const sectionTop = section.offsetTop - 100;
                     const sectionBottom = sectionTop + section.offsetHeight;
                     
@@ -6144,17 +6376,26 @@ const animeData = {
                     }
                 });
                 
-                
-                navItems.forEach(item => {
+                trackingNavItems.forEach(item => {
                     item.classList.remove('active');
                     if (item.getAttribute('href') === `#${currentSection}`) {
                         item.classList.add('active');
                     }
                 });
             }
+            
+            function throttledTrackActiveSection() {
+                if (!trackingTicking) {
+                    requestAnimationFrame(() => {
+                        trackActiveSection();
+                        trackingTicking = false;
+                    });
+                    trackingTicking = true;
+                }
+            }
 
             // Nasłuchuj zdarzenia scroll
-            window.addEventListener('scroll', trackActiveSection);
+            window.addEventListener('scroll', throttledTrackActiveSection, { passive: true });
 
             // Wywołaj na początku, aby ustawić początkową sekcję
             trackActiveSection();
@@ -7700,17 +7941,19 @@ const animeData = {
                     });
                 });
                 
-                // Dodaj event listeners dla hover na etykiety dni
+                // Dodaj event listeners dla hover na etykiety dni (zoptymalizowane)
                 const dayLabels = document.querySelectorAll('.calendar-labels > div');
+                const allCalendarDays = document.querySelectorAll('.calendar-day'); // Cache DOM query
+                
                 dayLabels.forEach((label, index) => {
                     label.addEventListener('mouseenter', () => {
                         // Przyciemnij wszystkie kwadraty
-                        document.querySelectorAll('.calendar-day').forEach(day => {
+                        allCalendarDays.forEach(day => {
                             day.classList.add('dimmed');
                         });
                         
                         // Podświetl kwadraty dla tego dnia tygodnia
-                        document.querySelectorAll('.calendar-day').forEach(day => {
+                        allCalendarDays.forEach(day => {
                             const dayElement = day;
                             const computedStyle = window.getComputedStyle(dayElement);
                             const gridRow = computedStyle.gridRow;
@@ -7722,23 +7965,23 @@ const animeData = {
                     
                     label.addEventListener('mouseleave', () => {
                         // Usuń przyciemnienie ze wszystkich kwadratów
-                        document.querySelectorAll('.calendar-day').forEach(day => {
+                        allCalendarDays.forEach(day => {
                             day.classList.remove('dimmed');
                         });
                     });
                 });
                 
-                // Dodaj event listeners dla hover na etykiety miesięcy
+                // Dodaj event listeners dla hover na etykiety miesięcy (zoptymalizowane)
                 const monthLabels = document.querySelectorAll('.calendar-months > div');
                 monthLabels.forEach((label, index) => {
                     label.addEventListener('mouseenter', () => {
                         // Przyciemnij wszystkie kwadraty
-                        document.querySelectorAll('.calendar-day').forEach(day => {
+                        allCalendarDays.forEach(day => {
                             day.classList.add('dimmed');
                         });
                         
                         // Podświetl kwadraty dla tego miesiąca
-                        document.querySelectorAll('.calendar-day').forEach(day => {
+                        allCalendarDays.forEach(day => {
                             const dayElement = day;
                             if (dayElement.dataset.date) {
                                 const date = new Date(dayElement.dataset.date);
@@ -7753,7 +7996,7 @@ const animeData = {
                     
                     label.addEventListener('mouseleave', () => {
                         // Usuń przyciemnienie ze wszystkich kwadratów
-                        document.querySelectorAll('.calendar-day').forEach(day => {
+                        allCalendarDays.forEach(day => {
                             day.classList.remove('dimmed');
                         });
                     });
@@ -9495,20 +9738,27 @@ const animeData = {
 
             document.body.appendChild(fab);
 
-            // Show/hide based on scroll
+            // Show/hide based on scroll (optimized)
+            let fabTicking = false;
             window.addEventListener('scroll', () => {
-                if (window.scrollY > 300) {
-                    fab.style.display = 'flex';
-                    fab.style.opacity = '1';
-                } else {
-                    fab.style.opacity = '0';
-                    setTimeout(() => {
-                        if (window.scrollY <= 300) {
-                            fab.style.display = 'none';
+                if (!fabTicking) {
+                    requestAnimationFrame(() => {
+                        if (window.scrollY > 300) {
+                            fab.style.display = 'flex';
+                            fab.style.opacity = '1';
+                        } else {
+                            fab.style.opacity = '0';
+                            setTimeout(() => {
+                                if (window.scrollY <= 300) {
+                                    fab.style.display = 'none';
+                                }
+                            }, 300);
                         }
-                    }, 300);
+                        fabTicking = false;
+                    });
+                    fabTicking = true;
                 }
-            });
+            }, { passive: true });
 
             fab.style.display = 'none';
         }
@@ -9602,17 +9852,37 @@ const animeData = {
             });
         }
 
-        // Parallax effect for background elements
+        // Parallax effect for background elements (optimized with throttling)
         function addParallaxEffect() {
-            window.addEventListener('scroll', () => {
+            let ticking = false;
+            let parallaxElements = null;
+            
+            // Cache the parallax elements on first call
+            function getParallaxElements() {
+                if (!parallaxElements) {
+                    parallaxElements = document.querySelectorAll('.particles');
+                }
+                return parallaxElements;
+            }
+            
+            function updateParallax() {
                 const scrolled = window.pageYOffset;
-                const parallaxElements = document.querySelectorAll('.particles');
+                const elements = getParallaxElements();
                 
-                parallaxElements.forEach(element => {
+                elements.forEach(element => {
                     const speed = 0.5;
                     element.style.transform = `translateY(${scrolled * speed}px)`;
                 });
-            });
+                
+                ticking = false;
+            }
+            
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    requestAnimationFrame(updateParallax);
+                    ticking = true;
+                }
+            }, { passive: true });
         }
 
         // Apply consistent, elegant neon effects
