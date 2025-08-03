@@ -307,6 +307,37 @@
             color: var(--warning);
             border-color: var(--warning);
         }
+
+        /* Status bar on top of anime cards */
+        .anime-card {
+            position: relative;
+        }
+
+        .anime-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            border-radius: 20px 20px 0 0;
+            z-index: 1;
+        }
+
+        .anime-card.status-watching::before {
+            background: var(--info);
+            box-shadow: 0 0 8px rgba(9, 132, 227, 0.4);
+        }
+
+        .anime-card.status-completed::before {
+            background: var(--success);
+            box-shadow: 0 0 8px rgba(0, 184, 148, 0.4);
+        }
+
+        .anime-card.status-upcoming::before {
+            background: var(--warning);
+            box-shadow: 0 0 8px rgba(253, 203, 110, 0.4);
+        }
         
         .rating-container {
             display: flex;
@@ -399,10 +430,7 @@
             border: 1px solid var(--glass-border);
         }
         
-        .tier-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
+        /* Tier item hover moved to modern section below */
         
         .actions {
             display: flex;
@@ -668,57 +696,7 @@
             box-shadow: 4px 0 12px rgba(108, 92, 231, 0.4);
         }
         
-        /* SSS item styles */
-        .sss-item {
-            animation: glow 2s ease-in-out infinite alternate;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
-            background-size: 400% 400%;
-            animation: rainbow 3s linear infinite, glow 2s ease-in-out infinite alternate;
-            z-index: 1;
-            color: white;
-            text-shadow: 0 0 5px rgba(0,0,0,0.7);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        @keyframes glow {
-            from {
-                box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ff0000, 0 0 20px #ff0000;
-            }
-            to {
-                box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff0000, 0 0 40px #ff0000;
-            }
-        }
-
-        .sss-item::before {
-            content: "";
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                to bottom right,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0) 30%,
-                rgba(255, 255, 255, 0.5) 45%,
-                rgba(255, 255, 255, 0) 60%,
-                rgba(255, 255, 255, 0) 100%
-            );
-            transform: rotate(30deg);
-            animation: shine 3s infinite;
-            z-index: -1;
-        }
-
-        @keyframes shine {
-            0% {
-                transform: translateX(-100%) rotate(30deg);
-            }
-            100% {
-                transform: translateX(100%) rotate(30deg);
-            }
-        }
+        /* SSS tier styling is now handled by .tier-item[data-tier="SSS"] only */
         
         /* Floating action button */
         .fab {
@@ -2092,6 +2070,1080 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* ================================
+           🎨 ADVANCED ANIMATIONS PACKAGE
+           ================================ */
+
+        /* Modal animations */
+        .modal {
+            animation: modalFadeIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .modal.show {
+            animation: modalSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalFadeIn {
+            0% { 
+                opacity: 0;
+                backdrop-filter: blur(0px);
+            }
+            100% { 
+                opacity: 1;
+                backdrop-filter: blur(8px);
+            }
+        }
+
+        @keyframes modalSlideIn {
+            0% { 
+                opacity: 0;
+                transform: scale(0.7) translateY(-50px);
+                filter: blur(10px);
+            }
+            60% {
+                transform: scale(1.05) translateY(10px);
+                filter: blur(2px);
+            }
+            100% { 
+                opacity: 1;
+                transform: scale(1) translateY(0);
+                filter: blur(0px);
+            }
+        }
+
+        /* Page section animations */
+        .section {
+            animation: pageSlideUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        @keyframes pageSlideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+                filter: blur(5px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+                filter: blur(0px);
+            }
+        }
+
+        /* Card hover animations */
+        .anime-card, .stat-card, .tier-item {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .anime-card:hover, .stat-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            filter: brightness(1.1);
+        }
+
+        /* Button pulse animation */
+        .btn-accent, .btn-primary {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-accent::before, .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-accent:active::before, .btn-primary:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Navigation animations */
+        .nav-item {
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .nav-item:hover {
+            transform: translateY(-5px) scale(1.1);
+            filter: brightness(1.2);
+        }
+
+        .nav-item.active {
+            animation: navPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes navPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Loading animations */
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            0% {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Stats counter animation */
+        .stat-value {
+            animation: countUp 1s ease-out;
+        }
+
+        @keyframes countUp {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Progress bar animation */
+        .progress-bar {
+            animation: progressFill 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        @keyframes progressFill {
+            0% {
+                width: 0% !important;
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Calendar day animations */
+        .calendar-day {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .calendar-day:hover {
+            transform: scale(1.1) rotate(5deg);
+            z-index: 10;
+        }
+
+        .calendar-day.has-activity {
+            animation: activityPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes activityPulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+            }
+            50% { 
+                box-shadow: 0 0 0 10px rgba(52, 152, 219, 0);
+            }
+        }
+
+        /* Tier list animations */
+        .tier-item {
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .tier-item:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(108, 92, 231, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+
+        .tier-item.dragging {
+            animation: wiggle 0.5s ease-in-out infinite;
+            z-index: 1000;
+        }
+
+        @keyframes wiggle {
+            0%, 7% { transform: rotateZ(0deg); }
+            15% { transform: rotateZ(-15deg); }
+            20% { transform: rotateZ(10deg); }
+            25% { transform: rotateZ(-10deg); }
+            30% { transform: rotateZ(6deg); }
+            35% { transform: rotateZ(-4deg); }
+            40%, 100% { transform: rotateZ(0deg); }
+        }
+
+        /* Form input animations */
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            animation: inputFocus 0.3s ease-out;
+        }
+
+        @keyframes inputFocus {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 8px rgba(52, 152, 219, 0);
+            }
+        }
+
+        /* Success/Error animations */
+        @keyframes successBounce {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateY(-50px);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.1) translateY(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+
+
+        /* Stagger animations for lists */
+        .anime-card:nth-child(1) { animation-delay: 0.1s; }
+        .anime-card:nth-child(2) { animation-delay: 0.2s; }
+        .anime-card:nth-child(3) { animation-delay: 0.3s; }
+        .anime-card:nth-child(4) { animation-delay: 0.4s; }
+        .anime-card:nth-child(5) { animation-delay: 0.5s; }
+        .anime-card:nth-child(6) { animation-delay: 0.6s; }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Mobile responsive animations */
+        @media (max-width: 768px) {
+            .modal {
+                animation: modalSlideUp 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            }
+
+            @keyframes modalSlideUp {
+                0% {
+                    opacity: 0;
+                    transform: translateY(100%);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        }
+
+        /* Utility animation classes */
+        .animate-fadeIn { animation: fadeInUp 0.6s ease-out; }
+        .animate-slideLeft { animation: slideInLeft 0.6s ease-out; }
+        .animate-slideRight { animation: slideInRight 0.6s ease-out; }
+        .animate-bounce { animation: bounceIn 0.8s ease-out; }
+
+        .animate-pulse { animation: navPulse 2s ease-in-out infinite; }
+
+        /* ================================
+           END ANIMATIONS PACKAGE 🎨
+           ================================ */
+
+        /* ================================
+           🚀 MODERN UI PACKAGE 2024
+           ================================ */
+
+        /* Advanced Background with Better Readability */
+        body {
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 40% 40%, rgba(0, 206, 201, 0.1) 0%, transparent 60%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 40%, #16213e 100%);
+            background-attachment: fixed;
+            background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+        }
+
+        /* Enhanced Glassmorphism with Better Readability */
+        .section {
+            background: linear-gradient(135deg, 
+                rgba(20, 25, 45, 0.85) 0%, 
+                rgba(15, 20, 35, 0.9) 100%);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                0 2px 8px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        }
+
+        /* Enhanced Cards with Better Readability */
+        .stat-card, .anime-card {
+            background: linear-gradient(135deg, 
+                rgba(25, 30, 50, 0.9) 0%, 
+                rgba(20, 25, 40, 0.95) 100%);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                0 2px 8px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Enhanced Text Readability */
+        .stat-card, .anime-card, .section {
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .stat-label, .anime-title {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        .stat-value {
+            color: #ffffff;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .stat-card::before, .anime-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            transition: left 0.8s ease;
+        }
+
+        .stat-card:hover::before, .anime-card:hover::before {
+            left: 100%;
+        }
+
+        /* Old neon accents removed - tier items now have individual color hierarchy */
+
+        /* Advanced Navigation */
+        .semi-circle-nav {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0 50px 50px 0;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            background: transparent;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(108, 92, 231, 0.8) 0%, 
+                rgba(0, 206, 201, 0.8) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 16px;
+        }
+
+        .nav-item.active::before, .nav-item:hover::before {
+            opacity: 1;
+        }
+
+        .nav-item span, .nav-item i {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Modern Buttons */
+        .btn-accent, .btn-primary, .btn-success {
+            background: linear-gradient(135deg, 
+                var(--primary) 0%, 
+                var(--accent) 100%);
+            border: none;
+            border-radius: 16px;
+            padding: 14px 28px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 
+                0 8px 24px rgba(108, 92, 231, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-accent:hover, .btn-primary:hover, .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 32px rgba(108, 92, 231, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        /* Enhanced Form Inputs with Better Readability */
+        .form-group input, .form-group select, .form-group textarea {
+            background: linear-gradient(135deg, 
+                rgba(30, 35, 55, 0.9) 0%, 
+                rgba(25, 30, 45, 0.95) 100%);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1rem;
+            padding: 16px 20px;
+            transition: all 0.3s ease;
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.2),
+                0 2px 8px rgba(0, 0, 0, 0.1);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border: 1px solid rgba(108, 92, 231, 0.6);
+            box-shadow: 
+                0 0 0 3px rgba(108, 92, 231, 0.2),
+                inset 0 2px 4px rgba(0, 0, 0, 0.2),
+                0 4px 12px rgba(108, 92, 231, 0.1);
+            background: linear-gradient(135deg, 
+                rgba(35, 40, 60, 0.95) 0%, 
+                rgba(30, 35, 50, 1) 100%);
+            color: #ffffff;
+        }
+
+        .form-group label {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+            margin-bottom: 8px;
+        }
+
+        /* Modern Typography */
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, 
+                #667eea 0%, 
+                #764ba2 50%, 
+                #f093fb 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(135deg, 
+                #667eea 0%, 
+                #764ba2 50%, 
+                #f093fb 100%);
+            border-radius: 2px;
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, 
+                var(--primary) 0%, 
+                var(--accent) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 2rem;
+        }
+
+        /* Enhanced Modal Design with Better Readability */
+        .modal {
+            backdrop-filter: blur(16px);
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .episode-modal-content, .modal-content {
+            background: linear-gradient(135deg, 
+                rgba(20, 25, 45, 0.95) 0%, 
+                rgba(15, 20, 35, 0.98) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .episode-modal-header h3, .modal-header h3 {
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Progress Bars Enhanced */
+        .progress-bar {
+            background: linear-gradient(135deg, 
+                var(--primary) 0%, 
+                var(--accent) 100%);
+            border-radius: 10px;
+            box-shadow: 
+                0 4px 8px rgba(108, 92, 231, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+            animation: progressShine 2s infinite;
+        }
+
+        @keyframes progressShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Calendar Modernization */
+        .calendar-day {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .calendar-day:hover {
+            background: linear-gradient(135deg, 
+                rgba(108, 92, 231, 0.2) 0%, 
+                rgba(0, 206, 201, 0.2) 100%);
+            border: 1px solid rgba(108, 92, 231, 0.3);
+            box-shadow: 
+                0 8px 24px rgba(108, 92, 231, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        /* Tier List Enhancements */
+        .tier-row {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.08) 0%, 
+                rgba(255, 255, 255, 0.03) 100%);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, 
+                var(--primary) 0%, 
+                var(--accent) 100%);
+            border-radius: 4px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, 
+                var(--primary-dark) 0%, 
+                var(--accent) 100%);
+        }
+
+        /* Floating Action Elements */
+        .floating-element {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, 
+                var(--primary) 0%, 
+                var(--accent) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                0 8px 24px rgba(108, 92, 231, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .floating-element:hover {
+            transform: scale(1.1);
+            box-shadow: 
+                0 12px 32px rgba(108, 92, 231, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        /* Particle Effects */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, 
+                rgba(108, 92, 231, 0.8) 0%, 
+                transparent 70%);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        .particle:nth-child(odd) {
+            animation-duration: 8s;
+            background: radial-gradient(circle, 
+                rgba(0, 206, 201, 0.6) 0%, 
+                transparent 70%);
+        }
+
+        /* Mobile Responsiveness Enhanced */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 20px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .section {
+                border-radius: 16px;
+                margin-bottom: 2rem;
+                padding: 1.5rem;
+            }
+            
+            .stat-card, .anime-card {
+                border-radius: 12px;
+            }
+        }
+
+        /* Loading States */
+        .loading-shimmer {
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.1) 25%, 
+                rgba(255, 255, 255, 0.2) 50%, 
+                rgba(255, 255, 255, 0.1) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* ================================
+           ✨ SPECTACULAR NEON EFFECTS
+           ================================ */
+
+        /* Subtle Neon Glow Text Effects */
+        .neon-text {
+            color: #fff;
+            text-shadow: 
+                0 0 3px rgba(108, 92, 231, 0.4),
+                0 0 6px rgba(108, 92, 231, 0.3),
+                0 0 9px rgba(108, 92, 231, 0.2),
+                0 2px 4px rgba(0, 0, 0, 0.8);
+            animation: subtleNeonPulse 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes subtleNeonPulse {
+            0% {
+                text-shadow: 
+                    0 0 3px rgba(108, 92, 231, 0.4),
+                    0 0 6px rgba(108, 92, 231, 0.3),
+                    0 0 9px rgba(108, 92, 231, 0.2),
+                    0 2px 4px rgba(0, 0, 0, 0.8);
+            }
+            100% {
+                text-shadow: 
+                    0 0 5px rgba(108, 92, 231, 0.6),
+                    0 0 10px rgba(108, 92, 231, 0.4),
+                    0 0 15px rgba(108, 92, 231, 0.3),
+                    0 2px 4px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        /* Enhanced Card Glow on Hover */
+        .stat-card:hover, .anime-card:hover {
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                0 2px 8px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                0 0 30px rgba(108, 92, 231, 0.3),
+                0 0 50px rgba(0, 206, 201, 0.2);
+            border: 1px solid rgba(108, 92, 231, 0.4);
+        }
+
+        /* Elegant Neon Border for SSS Tier Only */
+        .neon-border {
+            position: relative;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            background: linear-gradient(135deg, rgba(25, 30, 50, 0.9), rgba(20, 25, 40, 0.95));
+            border-radius: 20px;
+            box-shadow: 
+                0 0 15px rgba(255, 215, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .neon-border::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                rgba(255, 215, 0, 0.4) 0%,
+                rgba(255, 140, 0, 0.3) 50%,
+                rgba(255, 215, 0, 0.4) 100%);
+            border-radius: 22px;
+            z-index: -1;
+            animation: elegantGoldGlow 6s ease-in-out infinite;
+        }
+
+        @keyframes elegantGoldGlow {
+            0%, 100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.02);
+            }
+        }
+
+        /* Holographic Effect */
+        .holographic {
+            background: linear-gradient(135deg, 
+                rgba(25, 30, 50, 0.9) 0%, 
+                rgba(20, 25, 40, 0.95) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .holographic::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 70%);
+            animation: holographicSweep 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes holographicSweep {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+            50% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+        }
+
+        /* Enhanced Navigation Glow */
+        .semi-circle-nav {
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 20px rgba(108, 92, 231, 0.2);
+        }
+
+        .nav-item.active {
+            box-shadow: 
+                0 0 20px rgba(108, 92, 231, 0.4),
+                inset 0 0 20px rgba(108, 92, 231, 0.1);
+        }
+
+        /* Tier Items Color Hierarchy */
+        
+        /* SSS Tier - RGB Rainbow */
+        .tier-item[data-tier="SSS"] {
+            background: linear-gradient(45deg, 
+                rgba(255, 0, 0, 0.15) 0%,     /* Red */
+                rgba(255, 127, 0, 0.15) 16%,  /* Orange */ 
+                rgba(255, 255, 0, 0.15) 33%,  /* Yellow */
+                rgba(0, 255, 0, 0.15) 50%,    /* Green */
+                rgba(0, 0, 255, 0.15) 66%,    /* Blue */
+                rgba(75, 0, 130, 0.15) 83%,   /* Indigo */
+                rgba(148, 0, 211, 0.15) 100%  /* Violet */
+            );
+            background-size: 200% 200%;
+            box-shadow: 
+                0 0 20px rgba(255, 255, 255, 0.3),
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            animation: rainbowShift 4s ease-in-out infinite, rainbowGlow 3s ease-in-out infinite alternate;
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+
+        @keyframes rainbowShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes rainbowGlow {
+            0% {
+                box-shadow: 
+                    0 0 20px rgba(255, 0, 0, 0.4),
+                    0 8px 32px rgba(0, 0, 0, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            }
+            25% {
+                box-shadow: 
+                    0 0 20px rgba(0, 255, 0, 0.4),
+                    0 8px 32px rgba(0, 0, 0, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            }
+            50% {
+                box-shadow: 
+                    0 0 20px rgba(0, 0, 255, 0.4),
+                    0 8px 32px rgba(0, 0, 0, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            }
+            75% {
+                box-shadow: 
+                    0 0 20px rgba(148, 0, 211, 0.4),
+                    0 8px 32px rgba(0, 0, 0, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            }
+            100% {
+                box-shadow: 
+                    0 0 25px rgba(255, 127, 0, 0.5),
+                    0 8px 32px rgba(0, 0, 0, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        /* SS Tier - Gold */
+        .tier-item[data-tier="SS"] {
+            background: linear-gradient(135deg, 
+                rgba(255, 215, 0, 0.2) 0%, 
+                rgba(255, 140, 0, 0.15) 100%);
+            box-shadow: 
+                0 0 15px rgba(255, 215, 0, 0.4),
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            animation: goldGlow 5s ease-in-out infinite alternate;
+            color: #fff;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+        }
+
+        @keyframes goldGlow {
+            0% {
+                box-shadow: 
+                    0 0 15px rgba(255, 215, 0, 0.4),
+                    0 8px 32px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            }
+            100% {
+                box-shadow: 
+                    0 0 30px rgba(255, 215, 0, 0.6),
+                    0 8px 32px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        /* S Tier - Silver */
+        .tier-item[data-tier="S"] {
+            background: linear-gradient(135deg, 
+                rgba(192, 192, 192, 0.2) 0%, 
+                rgba(169, 169, 169, 0.15) 100%);
+            box-shadow: 
+                0 0 15px rgba(192, 192, 192, 0.4),
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            border: 2px solid rgba(192, 192, 192, 0.5);
+            animation: silverGlow 6s ease-in-out infinite alternate;
+            color: #fff;
+            text-shadow: 0 0 6px rgba(192, 192, 192, 0.8);
+        }
+
+        @keyframes silverGlow {
+            0% {
+                box-shadow: 
+                    0 0 15px rgba(192, 192, 192, 0.4),
+                    0 8px 32px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            }
+            100% {
+                box-shadow: 
+                    0 0 25px rgba(192, 192, 192, 0.6),
+                    0 8px 32px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            }
+        }
+
+
+
+        /* Subtle Ambient Background Effect */
+        .subtle-ambient {
+            background: 
+                radial-gradient(circle at 25% 75%, rgba(108, 92, 231, 0.08) 0%, transparent 60%),
+                radial-gradient(circle at 75% 25%, rgba(0, 206, 201, 0.06) 0%, transparent 60%);
+            animation: subtleMove 20s ease-in-out infinite;
+        }
+
+        @keyframes subtleMove {
+            0%, 100% {
+                background: 
+                    radial-gradient(circle at 25% 75%, rgba(108, 92, 231, 0.08) 0%, transparent 60%),
+                    radial-gradient(circle at 75% 25%, rgba(0, 206, 201, 0.06) 0%, transparent 60%);
+            }
+            50% {
+                background: 
+                    radial-gradient(circle at 75% 75%, rgba(108, 92, 231, 0.06) 0%, transparent 60%),
+                    radial-gradient(circle at 25% 25%, rgba(0, 206, 201, 0.08) 0%, transparent 60%);
+            }
+        }
+
+        /* ================================
+           END SPECTACULAR NEON EFFECTS ✨
+           ================================ */
+
+        /* ================================
+           END MODERN UI PACKAGE 🚀
+           ================================ */
     </style>
 </head>
 <body>
@@ -3296,6 +4348,9 @@
                             break;
                     }
                     
+                    // Add status class to anime card for colored top bar
+                    animeCard.className = `anime-card ${statusClass}`;
+                    
                     // Calculate watch progress
                     const watchProgress = anime.status === 'completed' ? 100 : 
                                         Math.round((anime.watchedEpisodes / anime.totalEpisodes) * 100);
@@ -3598,7 +4653,9 @@
                     const tierItem = document.createElement('div');
                     tierItem.className = 'tier-item';
                     tierItem.textContent = anime.title;
-                    tierItem.title = `Średnia: ${anime.averageRating}\nGrafika: ${anime.ratings.graphics}\nMuzyka: ${anime.ratings.music}\nPostacie: ${anime.ratings.characters}\nFabuła: ${anime.ratings.story}\nŚmieszność: ${anime.ratings.fun}`;
+                    tierItem.dataset.animeId = anime.id;
+                    tierItem.style.cursor = 'pointer';
+                    tierItem.title = `Kliknij aby zobaczyć szczegóły\nŚrednia: ${anime.averageRating}`;
                     
                     // Determine which tier to place the anime in based on current category
                     let rating;
@@ -3609,23 +4666,40 @@
                     }
                     
                     if (rating === 11) {
-                        tierItem.classList.add('sss-item');
+                        tierItem.dataset.tier = 'SSS';
                         document.getElementById('tier-SSS').appendChild(tierItem.cloneNode(true));
                     } else if (rating === 10) {
+                        tierItem.dataset.tier = 'SS';
                         document.getElementById('tier-SS').appendChild(tierItem.cloneNode(true));
                     } else if (rating === 9) {
+                        tierItem.dataset.tier = 'S';
                         document.getElementById('tier-S').appendChild(tierItem.cloneNode(true));
                     } else if (rating === 8) {
+                        tierItem.dataset.tier = 'A';
                         document.getElementById('tier-A').appendChild(tierItem.cloneNode(true));
                     } else if (rating >= 6 && rating <= 7) {
+                        tierItem.dataset.tier = 'B';
                         document.getElementById('tier-B').appendChild(tierItem.cloneNode(true));
                     } else if (rating === 5) {
+                        tierItem.dataset.tier = 'C';
                         document.getElementById('tier-C').appendChild(tierItem.cloneNode(true));
                     } else if (rating >= 3 && rating <= 4) {
+                        tierItem.dataset.tier = 'D';
                         document.getElementById('tier-D').appendChild(tierItem.cloneNode(true));
                     } else if (rating >= 1 && rating <= 2) {
+                        tierItem.dataset.tier = 'F';
                         document.getElementById('tier-F').appendChild(tierItem.cloneNode(true));
                     }
+                });
+
+                // Add click event listeners to tier items
+                document.querySelectorAll('.tier-item').forEach(tierItem => {
+                    tierItem.addEventListener('click', function() {
+                        const animeId = parseInt(this.dataset.animeId);
+                        if (animeId) {
+                            showAnimeDetailsModal(animeId);
+                        }
+                    });
                 });
             }
             
@@ -5004,6 +6078,13 @@ const animeData = {
                     hideEditAnimeModal();
                 }
             });
+
+            // Zamykanie modalu szczegółów anime po kliknięciu poza nim
+            document.getElementById('anime-details-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideAnimeDetailsModal();
+                }
+            });
             
             // Initial render
             calculateAverage();
@@ -5012,6 +6093,13 @@ const animeData = {
             renderPlannerList();
             renderTierList();
             updateProfileStats();
+            
+            // Opóźnij inicjalizację nowoczesnego UI żeby elementy się załadowały
+            setTimeout(() => {
+                if (typeof initModernUI === 'function') {
+                    initModernUI();
+                }
+            }, 1000);
             
             // Wyczyść przeterminowane kody przy starcie (asynchronicznie)
             cleanExpiredCodes().catch(error => {
@@ -7059,6 +8147,203 @@ const animeData = {
             function hideEditAnimeModal() {
                 document.getElementById('edit-anime-modal').classList.remove('show');
             }
+
+            // Modal szczegółów anime
+            function showAnimeDetailsModal(animeId) {
+                const anime = animeList.find(a => a.id === animeId);
+                if (!anime) return;
+
+                const modal = document.getElementById('anime-details-modal');
+                document.getElementById('anime-details-modal-title').textContent = anime.title;
+
+                // Calculate watch progress
+                const watchProgress = anime.status === 'completed' ? 100 : 
+                                    Math.round((anime.watchedEpisodes / anime.totalEpisodes) * 100);
+
+                // Status styling
+                let statusClass = '';
+                let statusText = '';
+                switch(anime.status) {
+                    case 'watching':
+                        statusClass = 'status-watching';
+                        statusText = 'Oglądane';
+                        break;
+                    case 'completed':
+                        statusClass = 'status-completed';
+                        statusText = 'Obejrzane';
+                        break;
+                    case 'upcoming':
+                        statusClass = 'status-upcoming';
+                        statusText = 'Nadchodzące';
+                        break;
+                }
+
+                // Format time
+                function formatTime(minutes, format = 'mixed') {
+                    if (format === 'hours') {
+                        const hours = Math.floor(minutes / 60);
+                        const mins = minutes % 60;
+                        return hours > 0 ? `${hours}h ${mins}min` : `${mins}min`;
+                    }
+                    
+                    const days = Math.floor(minutes / 1440);
+                    const hours = Math.floor((minutes % 1440) / 60);
+                    const mins = minutes % 60;
+                    
+                    if (days > 0) {
+                        return `${days}d ${hours}h ${mins}min`;
+                    } else if (hours > 0) {
+                        return `${hours}h ${mins}min`;
+                    } else {
+                        return `${mins}min`;
+                    }
+                }
+
+                // Calculate total time
+                let totalTime = 0;
+                let rewatchCount = 0;
+                let mainTime = 0;
+                let rewatchTime = 0;
+
+                if (anime.seasons && Array.isArray(anime.seasons) && anime.seasons.length > 1) {
+                    anime.seasons.forEach((eps, seasonIndex) => {
+                        const episodeLength = anime.seasonEpisodeLengths && anime.seasonEpisodeLengths[seasonIndex] ? 
+                                            anime.seasonEpisodeLengths[seasonIndex] : anime.episodeLength;
+                        const seasonRewatches = anime.seasonRewatches && anime.seasonRewatches[seasonIndex] ? 
+                                              anime.seasonRewatches[seasonIndex] : 0;
+                        
+                        mainTime += eps * episodeLength;
+                        rewatchTime += eps * episodeLength * seasonRewatches;
+                        rewatchCount += seasonRewatches;
+                    });
+                } else {
+                    const watched = anime.status === 'completed' ? anime.totalEpisodes : anime.watchedEpisodes;
+                    mainTime = watched * anime.episodeLength;
+                    const animeRewatches = anime.rewatches || 0;
+                    rewatchTime = watched * anime.episodeLength * animeRewatches;
+                    rewatchCount = animeRewatches;
+                }
+
+                totalTime = mainTime + rewatchTime;
+
+                // Tags HTML
+                let tagsHtml = '';
+                if (anime.tags && anime.tags.length) {
+                    tagsHtml = `
+                        <div style="margin: 1rem 0;">
+                            <strong style="color: var(--primary);">Tagi:</strong>
+                            <div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 6px;">
+                                ${anime.tags.map(tag => `<span class="anime-tag">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Seasons info
+                let seasonsHtml = '';
+                if (anime.seasons && Array.isArray(anime.seasons) && anime.seasons.length > 1) {
+                    seasonsHtml = `
+                        <div style="margin: 1rem 0;">
+                            <strong style="color: var(--primary);">Sezony (${anime.seasons.length}):</strong>
+                            <div style="margin-top: 0.5rem;">
+                                ${anime.seasons.map((eps, index) => {
+                                    const seasonRewatch = anime.seasonRewatches && anime.seasonRewatches[index] ? anime.seasonRewatches[index] : 0;
+                                    const seasonLength = anime.seasonEpisodeLengths && anime.seasonEpisodeLengths[index] ? anime.seasonEpisodeLengths[index] : anime.episodeLength;
+                                    return `
+                                        <div style="background: rgba(0,0,0,0.2); padding: 8px; margin: 4px 0; border-radius: 6px; border-left: 3px solid var(--accent);">
+                                            Sezon ${index + 1}: ${eps} odcinków (${seasonLength}min/odcinek)
+                                            ${seasonRewatch > 0 ? `<span style="color: var(--warning);">• ${seasonRewatch}x rewatch</span>` : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const content = `
+                    <div style="padding: 1rem;">
+                        ${anime.image ? `
+                            <div style="text-align: center; margin-bottom: 1rem;">
+                                <img src="${anime.image}" alt="${anime.title}" style="max-width: 100%; max-height: 200px; border-radius: 12px; object-fit: cover;">
+                            </div>
+                        ` : ''}
+                        
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <span class="anime-status ${statusClass}" style="font-size: 1.1rem; padding: 8px 16px; border-radius: 20px; border: 2px solid;">${statusText}</span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                            <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 0.9rem; color: var(--gray);">Postęp</div>
+                                <div style="font-size: 1.3rem; font-weight: bold; color: var(--primary);">${anime.watchedEpisodes}/${anime.totalEpisodes}</div>
+                                <div style="font-size: 0.8rem; color: var(--gray);">${watchProgress}%</div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 0.9rem; color: var(--gray);">Czas oglądania</div>
+                                <div style="font-size: 1.3rem; font-weight: bold; color: var(--accent);">${formatTime(totalTime, 'hours')}</div>
+                                ${rewatchCount > 0 ? `<div style="font-size: 0.8rem; color: var(--warning);">${rewatchCount}x rewatch</div>` : ''}
+                            </div>
+                        </div>
+
+                        ${seasonsHtml}
+
+                        <div style="margin: 1rem 0;">
+                            <strong style="color: var(--primary);">Oceny:</strong>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 0.5rem;">
+                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                                    <strong>Grafika:</strong> <span style="color: var(--accent);">${anime.ratings.graphics}/11</span>
+                                </div>
+                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                                    <strong>Muzyka:</strong> <span style="color: var(--accent);">${anime.ratings.music}/11</span>
+                                </div>
+                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                                    <strong>Postacie:</strong> <span style="color: var(--accent);">${anime.ratings.characters}/11</span>
+                                </div>
+                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                                    <strong>Fabuła:</strong> <span style="color: var(--accent);">${anime.ratings.story}/11</span>
+                                </div>
+                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                                    <strong>Śmieszność:</strong> <span style="color: var(--accent);">${anime.ratings.fun}/11</span>
+                                </div>
+                                <div style="background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 8px; border-radius: 6px; text-align: center;">
+                                    <strong style="color: white;">ŚREDNIA: ${anime.averageRating}/11</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${tagsHtml}
+
+                        ${anime.completedDate ? `
+                            <div style="margin: 1rem 0; background: rgba(0,184,148,0.2); padding: 12px; border-radius: 8px; border-left: 3px solid var(--success);">
+                                <strong style="color: var(--success);"><i class="fas fa-calendar-check"></i> Ukończono:</strong> ${new Date(anime.completedDate).toLocaleDateString('pl-PL')}
+                            </div>
+                        ` : ''}
+
+                        ${anime.lastWatchedDate ? `
+                            <div style="margin: 1rem 0; background: rgba(9,132,227,0.2); padding: 12px; border-radius: 8px; border-left: 3px solid var(--info);">
+                                <strong style="color: var(--info);"><i class="fas fa-clock"></i> Ostatnio oglądano:</strong> ${new Date(anime.lastWatchedDate).toLocaleDateString('pl-PL')}
+                            </div>
+                        ` : ''}
+
+                        <div style="text-align: center; margin-top: 1.5rem;">
+                            <button onclick="showEditAnimeModal(${anime.id}); hideAnimeDetailsModal();" class="btn-primary" style="margin-right: 0.5rem;">
+                                <i class="fas fa-edit"></i> Edytuj
+                            </button>
+                            <button onclick="showEpisodeModal(${anime.id}); hideAnimeDetailsModal();" class="btn-success">
+                                <i class="fas fa-plus"></i> Dodaj odcinki
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('anime-details-content').innerHTML = content;
+                modal.classList.add('show');
+            }
+
+            function hideAnimeDetailsModal() {
+                document.getElementById('anime-details-modal').classList.remove('show');
+            }
             
             function toggleEditCompletedDateField() {
                 const status = document.getElementById('edit-status').value;
@@ -7188,6 +8473,9 @@ const animeData = {
             document.getElementById('edit-clear-date-btn').addEventListener('click', function() {
                 document.getElementById('edit-completed-date').value = '';
             });
+
+            // Event listener dla modalu szczegółów anime
+            document.getElementById('anime-details-modal-close').addEventListener('click', hideAnimeDetailsModal);
             
             // Event listeners dla obliczania średniej w modalu edycji
             ['edit-graphics', 'edit-music', 'edit-characters', 'edit-story', 'edit-fun'].forEach(id => {
@@ -7867,6 +9155,413 @@ const animeData = {
                 }, 500);
             }
         });
+
+        // ================================
+        // 🎨 ANIMATION HELPERS
+        // ================================
+
+        // Function to add success animation
+        function showSuccessAnimation(element) {
+            element.style.animation = 'successBounce 0.6s ease-out';
+            setTimeout(() => {
+                element.style.animation = '';
+            }, 600);
+        }
+
+        // Function to add error animation
+        function showErrorAnimation(element) {
+            element.style.animation = 'errorShake 0.5s ease-in-out';
+            setTimeout(() => {
+                element.style.animation = '';
+            }, 500);
+        }
+
+        // Function to animate stats counter
+        function animateCounter(element, start, end, duration = 1000) {
+            const range = end - start;
+            const increment = end > start ? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                element.textContent = current;
+                
+                if (current === end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+
+
+
+        // Function to animate calendar days with activity
+        function animateActivityDays() {
+            const activityDays = document.querySelectorAll('.calendar-day[style*="background"]');
+            activityDays.forEach(day => {
+                if (!day.classList.contains('has-activity')) {
+                    day.classList.add('has-activity');
+                }
+            });
+        }
+
+        // Function to add stagger animation to lists
+        function staggerAnimate(selector, animationClass = 'animate-fadeIn') {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.1}s`;
+                el.classList.add(animationClass);
+            });
+        }
+
+        // Function to animate tier list items during drag
+        function startDragAnimation(element) {
+            element.classList.add('dragging');
+        }
+
+        function stopDragAnimation(element) {
+            element.classList.remove('dragging');
+        }
+
+        // Function to add button ripple effect
+        function addRippleEffect(button, event) {
+            const ripple = document.createElement('span');
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255,255,255,0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: rippleEffect 0.6s ease-out;
+                pointer-events: none;
+            `;
+            
+            button.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+
+        // Add ripple effect keyframe
+        const animationStyle = document.createElement('style');
+        animationStyle.textContent = `
+            @keyframes rippleEffect {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(animationStyle);
+
+        // Apply animations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize modern UI effects
+            initModernUI();
+            
+            // Add stagger animations to initial elements
+            setTimeout(() => {
+                staggerAnimate('.stat-card', 'animate-fadeIn');
+                animateActivityDays();
+            }, 500);
+
+            // Add ripple effect to all buttons
+            document.querySelectorAll('.btn-accent, .btn-primary, .btn-success, .btn-danger').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    addRippleEffect(this, e);
+                });
+            });
+
+            // Add success/error animations to form submissions
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const submitButton = this.querySelector('[type="submit"]');
+                    if (submitButton) {
+                        showSuccessAnimation(submitButton);
+                    }
+                });
+            });
+        });
+
+        // ================================
+        // 🚀 MODERN UI EFFECTS
+        // ================================
+
+        // Create particle background
+        function createParticleBackground() {
+            const particlesContainer = document.createElement('div');
+            particlesContainer.className = 'particles';
+            document.body.appendChild(particlesContainer);
+
+            // Create floating particles
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Enhanced loading states
+        function showLoadingShimmer(element) {
+            element.classList.add('loading-shimmer');
+            setTimeout(() => {
+                element.classList.remove('loading-shimmer');
+            }, 2000);
+        }
+
+        // Create floating action button
+        function createFloatingActionButton() {
+            const fab = document.createElement('div');
+            fab.className = 'floating-element';
+            fab.style.bottom = '20px';
+            fab.style.right = '20px';
+            fab.innerHTML = '<i class="fas fa-arrow-up" style="color: white;"></i>';
+            fab.title = 'Przewiń do góry';
+            
+            fab.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            document.body.appendChild(fab);
+
+            // Show/hide based on scroll
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    fab.style.display = 'flex';
+                    fab.style.opacity = '1';
+                } else {
+                    fab.style.opacity = '0';
+                    setTimeout(() => {
+                        if (window.scrollY <= 300) {
+                            fab.style.display = 'none';
+                        }
+                    }, 300);
+                }
+            });
+
+            fab.style.display = 'none';
+        }
+
+        // Simple, clean hover effects for cards (tier-item has its own CSS hover)
+        function enhanceCardInteractions() {
+            const cards = document.querySelectorAll('.stat-card, .anime-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px) scale(1.02)';
+                    this.style.filter = 'brightness(1.05)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.filter = '';
+                    this.style.transform = '';
+                });
+            });
+        }
+
+        // Dynamic color theme based on time
+        function setDynamicTheme() {
+            const hour = new Date().getHours();
+            const root = document.documentElement;
+            
+            if (hour >= 6 && hour < 12) {
+                // Morning theme
+                root.style.setProperty('--primary', '#667eea');
+                root.style.setProperty('--accent', '#764ba2');
+            } else if (hour >= 12 && hour < 18) {
+                // Afternoon theme  
+                root.style.setProperty('--primary', '#f093fb');
+                root.style.setProperty('--accent', '#f5576c');
+            } else if (hour >= 18 && hour < 22) {
+                // Evening theme
+                root.style.setProperty('--primary', '#4facfe');
+                root.style.setProperty('--accent', '#00f2fe');
+            } else {
+                // Night theme
+                root.style.setProperty('--primary', '#a8edea');
+                root.style.setProperty('--accent', '#fed6e3');
+            }
+        }
+
+        // Progressive loading of sections
+        function progressiveLoad() {
+            const sections = document.querySelectorAll('.section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                        
+                        // Add stagger animation to children
+                        const children = entry.target.querySelectorAll('.stat-card, .anime-card, .form-group');
+                        children.forEach((child, index) => {
+                            setTimeout(() => {
+                                child.style.opacity = '1';
+                                child.style.transform = 'translateY(0)';
+                            }, index * 100);
+                        });
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            sections.forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(30px)';
+                section.style.transition = 'all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)';
+                observer.observe(section);
+            });
+        }
+
+        // Clean, elegant navigation without chaotic indicators
+        function enhanceNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    item.style.transform = 'translateY(-3px) scale(1.05)';
+                    item.style.filter = 'brightness(1.2)';
+                });
+                
+                item.addEventListener('mouseleave', () => {
+                    if (!item.classList.contains('active')) {
+                        item.style.transform = '';
+                        item.style.filter = '';
+                    }
+                });
+            });
+        }
+
+        // Parallax effect for background elements
+        function addParallaxEffect() {
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const parallaxElements = document.querySelectorAll('.particles');
+                
+                parallaxElements.forEach(element => {
+                    const speed = 0.5;
+                    element.style.transform = `translateY(${scrolled * speed}px)`;
+                });
+            });
+        }
+
+        // Apply consistent, elegant neon effects
+        function applyNeonEffects() {
+            // Add subtle neon glow to main headers only
+            const mainHeaders = document.querySelectorAll('h1');
+            mainHeaders.forEach(header => {
+                if (!header.classList.contains('neon-text')) {
+                    header.classList.add('neon-text');
+                }
+            });
+
+            // Tier items now have their own built-in color hierarchy (RGB/Gold/Silver)
+
+            // Add subtle holographic effect to modal headers only
+            const modalHeaders = document.querySelectorAll('.episode-modal-header, .modal-header');
+            modalHeaders.forEach(header => {
+                header.classList.add('holographic');
+            });
+
+            // NO random glitch effects - they're chaotic
+        }
+
+        // Enhanced text readability
+        function enhanceTextReadability() {
+            // Add better text shadows to all text elements
+            const textElements = document.querySelectorAll('p, span, div, label, input, select, textarea');
+            textElements.forEach(el => {
+                if (!el.style.textShadow && el.offsetParent) {
+                    el.style.textShadow = '0 1px 3px rgba(0, 0, 0, 0.5)';
+                }
+            });
+
+            // Ensure white text for important elements
+            const importantText = document.querySelectorAll('.stat-value, .anime-title, h3, .nav-item span');
+            importantText.forEach(el => {
+                el.style.color = 'rgba(255, 255, 255, 0.95)';
+                el.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.8)';
+            });
+        }
+
+        // Elegant glow for special elements
+        function addElegantGlow() {
+            // Only active nav items get subtle pulse
+            const activeNavItems = document.querySelectorAll('.nav-item.active');
+            activeNavItems.forEach(el => {
+                el.style.animation = 'subtleNeonPulse 4s ease-in-out infinite alternate';
+            });
+            
+            // Tier items already have their own animations via CSS
+        }
+
+        // Initialize all modern UI effects
+        function initModernUI() {
+            createParticleBackground();
+            createFloatingActionButton();
+            enhanceCardInteractions();
+            setDynamicTheme();
+            progressiveLoad();
+            enhanceNavigation();
+            addParallaxEffect();
+            
+            // Apply elegant effects
+            setTimeout(() => {
+                applyNeonEffects();
+                enhanceTextReadability();
+                addElegantGlow();
+            }, 500);
+
+            // Apply loading shimmers to initial cards
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.stat-card, .anime-card');
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        showLoadingShimmer(card);
+                    }, index * 200);
+                });
+            }, 1000);
+
+            // Reapply effects when content changes
+            const observer = new MutationObserver(() => {
+                setTimeout(() => {
+                    enhanceTextReadability();
+                    addElegantGlow();
+                }, 100);
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+
+            // Update theme every hour
+            setInterval(setDynamicTheme, 3600000);
+        }
+
+        // ================================
+        // END MODERN UI EFFECTS 🚀
+        // ================================
+
+        // ================================
+        // END ANIMATION HELPERS 🎨
+        // ================================
     </script>
     
     <!-- Modal do dodawania odcinków -->
@@ -8152,6 +9847,21 @@ const animeData = {
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal szczegółów anime -->
+    <div class="episode-modal" id="anime-details-modal">
+        <div class="episode-modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div class="episode-modal-header">
+                <h3 id="anime-details-modal-title">Szczegóły anime</h3>
+                <button class="episode-modal-close" id="anime-details-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="anime-details-content">
+                <!-- Content will be dynamically filled -->
+            </div>
         </div>
     </div>
 </body>
