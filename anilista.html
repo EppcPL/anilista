@@ -4,19 +4,192 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anime Toolkit</title>
-                      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-                  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-                  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-                  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-                  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    
+    <!-- Performance optimizations for mobile -->
+    <meta name="theme-color" content="#6c5ce7">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Load fonts with display=swap for better FCP -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+    
+    <!-- Load Font Awesome asynchronously -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"></noscript>
+    
+    <!-- Defer non-critical JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" defer></script>
     <style>
-        html {
-    scroll-behavior: smooth;
-}
+        /* ================================
+           🚀 CRITICAL CSS FOR MOBILE FCP
+           ================================ */
+        
+        /* Essential styles loaded first for faster FCP */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #f5f6fa;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Critical layout styles */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Essential navigation - simplified for mobile */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                padding-bottom: 80px;
+            }
+            
+            .semi-circle-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 60px;
+                background: rgba(30, 39, 46, 0.95);
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                z-index: 1000;
+                border-radius: 0;
+            }
+            
+            .nav-item {
+                color: #dfe6e9;
+                text-decoration: none;
+                font-size: 0.7rem;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                padding: 8px 4px;
+                transition: color 0.2s ease;
+            }
+            
+            .nav-item i {
+                font-size: 1.1rem;
+            }
+            
+            .nav-item.active {
+                color: #6c5ce7;
+            }
+        }
+        
+        /* Critical section styles */
+        .section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .section {
+                margin-bottom: 1.5rem;
+                padding: 1rem;
+                border-radius: 12px;
+            }
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #6c5ce7;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #f5f6fa;
+        }
+        
+        /* Critical button styles */
+        button {
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        
+        button:hover {
+            background: #5649c0;
+        }
+        
+        /* Critical form styles */
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #f5f6fa;
+            font-size: 1rem;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #dfe6e9;
+        }
+        
+        /* Hide non-critical elements initially on mobile */
+        @media (max-width: 768px) {
+            .loading-hidden {
+                display: none;
+            }
+        }
+        
+        /* ================================
+           END CRITICAL CSS 🚀
+           ================================ */
 
-.section {
-    scroll-margin-top: 80px;
-}
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .section {
+            scroll-margin-top: 80px;
+        }
         :root {
             --primary: #6c5ce7;
             --primary-dark: #5649c0;
@@ -3495,6 +3668,70 @@
                 transform: none !important;
             }
         }
+        
+        /* ================================
+           📱 MOBILE CSS SIZE OPTIMIZATION  
+           ================================ */
+        
+        @media (max-width: 768px) {
+            /* Disable unused desktop styles on mobile */
+            .tier-SSS { display: none !important; }
+            .rainbow { display: none !important; }
+            .particles { display: none !important; }
+            
+            /* Simplify complex selectors for mobile */
+            .anime-card::before, .anime-card::after { display: none !important; }
+            .stat-card::before, .stat-card::after { display: none !important; }
+            .section::before, .section::after { display: none !important; }
+            
+            /* Remove complex gradients */
+            .tier-item[data-tier="SSS"],
+            .tier-item[data-tier="SS"],
+            .tier-item[data-tier="S"] {
+                background: rgba(108, 92, 231, 0.3) !important;
+                border: 1px solid rgba(108, 92, 231, 0.5) !important;
+            }
+            
+            /* Disable custom fonts fallback faster */
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            }
+            
+            /* Simplify shadows */
+            .section, .anime-card, .stat-card {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+            }
+            
+            /* Remove unused border-radius for performance */
+            .anime-card, .stat-card {
+                border-radius: 8px !important;
+            }
+            
+            /* Disable complex background attachments */
+            body {
+                background-attachment: scroll !important;
+                background: #1a1a2e !important;
+            }
+            
+            /* Simplify variables usage */
+            :root {
+                --primary: #6c5ce7;
+                --danger: #d63031;
+                --success: #00b894;
+                --gray: #dfe6e9;
+                --lighter: #ffffff;
+                --glass-border: rgba(255, 255, 255, 0.2);
+            }
+        }
+        
+        /* ================================
+           🚀 PROGRESSIVE ENHANCEMENT
+           ================================ */
+        
+        /* Load heavy styles only after page load */
+        .loaded .complex-animation { animation: fadeIn 0.3s ease; }
+        .loaded .complex-gradient { background: linear-gradient(135deg, var(--primary), var(--accent)); }
+        .loaded .complex-shadow { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
         
         /* ================================
            END MOBILE PERFORMANCE OPTIMIZATION 📱
@@ -9985,6 +10222,182 @@ const animeData = {
 
         // ================================
         // END ANIMATION HELPERS 🎨
+        // ================================
+
+        // ================================
+        // 📱 MOBILE PERFORMANCE OPTIMIZATION
+        // ================================
+        
+        // Performance optimizations for mobile devices
+        function initMobileOptimizations() {
+            const isMobile = window.innerWidth <= 768 && 'ontouchstart' in window;
+            
+            if (isMobile) {
+                // Mark page as loaded for progressive enhancement
+                setTimeout(() => {
+                    document.body.classList.add('loaded');
+                }, 100);
+                
+                // Disable heavy animations on mobile
+                disableHeavyAnimations();
+                
+                // Optimize rendering performance
+                optimizeRendering();
+                
+                // Lazy load non-critical content
+                initLazyLoading();
+                
+                // Reduce memory usage
+                optimizeMemoryUsage();
+            }
+        }
+        
+        function disableHeavyAnimations() {
+            // Remove complex CSS classes that cause performance issues
+            const heavyElements = document.querySelectorAll('.tier-item[data-tier="SSS"], .rainbow, .particles, .neon-border');
+            heavyElements.forEach(el => {
+                el.style.animation = 'none';
+                el.style.transform = 'none';
+                el.style.filter = 'none';
+            });
+            
+            // Disable intersection observer for animations on mobile
+            if (window.IntersectionObserver) {
+                const observer = new IntersectionObserver(() => {}, { threshold: 0 });
+                observer.disconnect();
+            }
+        }
+        
+        function optimizeRendering() {
+            // Use passive event listeners for better scroll performance
+            const scrollOptions = { passive: true };
+            window.addEventListener('scroll', () => {}, scrollOptions);
+            window.addEventListener('touchstart', () => {}, scrollOptions);
+            window.addEventListener('touchmove', () => {}, scrollOptions);
+            
+            // Reduce repaint by setting will-change only when needed
+            const cards = document.querySelectorAll('.anime-card, .stat-card');
+            cards.forEach(card => {
+                card.addEventListener('touchstart', () => {
+                    card.style.willChange = 'transform';
+                }, scrollOptions);
+                
+                card.addEventListener('touchend', () => {
+                    card.style.willChange = 'auto';
+                }, scrollOptions);
+            });
+        }
+        
+        function initLazyLoading() {
+            // Defer loading of non-critical sections
+            const nonCriticalSections = document.querySelectorAll('#tier-lista, #planer, #eksport');
+            
+            const lazyObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.remove('loading-hidden');
+                        lazyObserver.unobserve(entry.target);
+                    }
+                });
+            }, { 
+                threshold: 0.1,
+                rootMargin: '50px'
+            });
+            
+            nonCriticalSections.forEach(section => {
+                section.classList.add('loading-hidden');
+                lazyObserver.observe(section);
+            });
+        }
+        
+        function optimizeMemoryUsage() {
+            // Remove unused event listeners on mobile
+            const removeUnusedListeners = () => {
+                // Clear animation frame requests
+                if (window.requestAnimationFrame) {
+                    let rafId;
+                    const cancelAllRaf = () => {
+                        if (rafId) cancelAnimationFrame(rafId);
+                    };
+                    window.addEventListener('beforeunload', cancelAllRaf);
+                }
+                
+                // Throttle expensive operations
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(() => {
+                        // Only essential resize handling
+                        updateProfileStats();
+                    }, 250);
+                }, { passive: true });
+            };
+            
+            removeUnusedListeners();
+        }
+        
+        // Critical resource preloading
+        function preloadCriticalResources() {
+            // Preload next section content when user scrolls
+            let hasPreloaded = false;
+            
+            window.addEventListener('scroll', () => {
+                if (!hasPreloaded && window.scrollY > 200) {
+                    hasPreloaded = true;
+                    
+                    // Preload next section images
+                    const images = document.querySelectorAll('img[data-src]');
+                    images.forEach(img => {
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                        }
+                    });
+                }
+            }, { passive: true });
+        }
+        
+        // Font optimization
+        function optimizeFonts() {
+            // Use font-display: swap for better FCP
+            const fontStyle = document.createElement('style');
+            fontStyle.textContent = `
+                @font-face {
+                    font-family: 'Poppins';
+                    font-display: swap;
+                }
+            `;
+            document.head.appendChild(fontStyle);
+            
+            // Fallback to system fonts faster on mobile
+            if (window.innerWidth <= 768) {
+                document.body.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            }
+        }
+        
+        // Initialize mobile optimizations
+        if (window.innerWidth <= 768 && 'ontouchstart' in window) {
+            // Run immediately for critical optimizations
+            optimizeFonts();
+            
+            // Run after DOM is ready
+            document.addEventListener('DOMContentLoaded', () => {
+                initMobileOptimizations();
+                preloadCriticalResources();
+            });
+            
+            // Run after page load for non-critical optimizations
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    // Additional memory optimizations after page is fully loaded
+                    const unusedElements = document.querySelectorAll('.loading-hidden');
+                    unusedElements.forEach(el => el.style.display = 'none');
+                }, 1000);
+            });
+        }
+        
+        // ================================
+        // END MOBILE PERFORMANCE OPTIMIZATION 📱
         // ================================
     </script>
     
