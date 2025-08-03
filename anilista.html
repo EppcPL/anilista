@@ -175,7 +175,14 @@
         /* Hide non-critical elements initially on mobile */
         @media (max-width: 768px) {
             .loading-hidden {
-                display: none;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+            
+            .loading-hidden.loaded {
+                opacity: 1;
+                pointer-events: auto;
             }
         }
         
@@ -3675,7 +3682,6 @@
         
         @media (max-width: 768px) {
             /* Disable unused desktop styles on mobile */
-            .tier-SSS { display: none !important; }
             .rainbow { display: none !important; }
             .particles { display: none !important; }
             
@@ -10295,18 +10301,35 @@ const animeData = {
             const lazyObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
+                        entry.target.classList.add('loaded');
                         entry.target.classList.remove('loading-hidden');
                         lazyObserver.unobserve(entry.target);
                     }
                 });
             }, { 
-                threshold: 0.1,
-                rootMargin: '50px'
+                threshold: 0.05,
+                rootMargin: '100px'
             });
             
             nonCriticalSections.forEach(section => {
                 section.classList.add('loading-hidden');
                 lazyObserver.observe(section);
+            });
+            
+            // Also show sections when navigation is clicked
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(navItem => {
+                navItem.addEventListener('click', (e) => {
+                    const href = navItem.getAttribute('href');
+                    if (href && href.startsWith('#')) {
+                        const targetSection = document.querySelector(href);
+                        if (targetSection && targetSection.classList.contains('loading-hidden')) {
+                            targetSection.classList.add('loaded');
+                            targetSection.classList.remove('loading-hidden');
+                            lazyObserver.unobserve(targetSection);
+                        }
+                    }
+                });
             });
         }
         
@@ -10389,10 +10412,13 @@ const animeData = {
             // Run after page load for non-critical optimizations
             window.addEventListener('load', () => {
                 setTimeout(() => {
-                    // Additional memory optimizations after page is fully loaded
-                    const unusedElements = document.querySelectorAll('.loading-hidden');
-                    unusedElements.forEach(el => el.style.display = 'none');
-                }, 1000);
+                    // Show any remaining hidden sections after page is fully loaded
+                    const hiddenSections = document.querySelectorAll('.loading-hidden');
+                    hiddenSections.forEach(section => {
+                        section.classList.add('loaded');
+                        section.classList.remove('loading-hidden');
+                    });
+                }, 2000);
             });
         }
         
