@@ -3546,60 +3546,7 @@
                 document.querySelectorAll('.edit-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const id = parseInt(this.dataset.id);
-                        const animeToEdit = animeList.find(anime => anime.id === id);
-                        
-                        if (animeToEdit) {
-                            document.getElementById('title').value = animeToEdit.title;
-                            document.getElementById('status').value = animeToEdit.status;
-                            document.getElementById('total-episodes').value = animeToEdit.totalEpisodes;
-                            document.getElementById('episode-length').value = animeToEdit.episodeLength;
-                            document.getElementById('watched-episodes').value = animeToEdit.watchedEpisodes;
-                            
-                            // Wypełnij pole daty ukończenia jeśli istnieje
-                            if (animeToEdit.completedDate) {
-                                document.getElementById('completed-date').value = animeToEdit.completedDate;
-                            } else {
-                                document.getElementById('completed-date').value = '';
-                            }
-                            toggleCompletedDateField();
-                            document.getElementById('graphics').value = animeToEdit.ratings.graphics;
-                            document.getElementById('music').value = animeToEdit.ratings.music;
-                            document.getElementById('characters').value = animeToEdit.ratings.characters;
-                            document.getElementById('story').value = animeToEdit.ratings.story;
-                            document.getElementById('fun').value = animeToEdit.ratings.fun;
-                            document.getElementById('anime-tags').value = animeToEdit.tags ? animeToEdit.tags.join('; ') : '';
-                            editIdInput.value = animeToEdit.id;
-                            
-                            // Set image preview if available
-                            if (animeToEdit.image) {
-                                currentImageData = animeToEdit.image;
-                                showImagePreview(currentImageData);
-                                // Dodaję przycisk Usuń zdjęcie pod podglądem
-                                imagePreview.innerHTML += `<button type='button' id='remove-image-btn' class='btn-danger' style='width:100%;margin-top:8px;'><i class='fas fa-trash'></i> Usuń zdjęcie</button>`;
-                                document.getElementById('remove-image-btn').onclick = function() {
-                                    if (confirm('Czy na pewno chcesz usunąć zdjęcie?')) {
-                                        animeToEdit.image = null;
-                                        currentImageData = null;
-                                        showImagePlaceholder();
-                                    }
-                                };
-                            } else {
-                                currentImageData = null;
-                                showImagePlaceholder();
-                            }
-
-                            // Fill season inputs if needed
-                            fillSeasonInputsIfNeeded(animeToEdit);
-                            
-                            formTitle.innerHTML = '<i class="fas fa-edit"></i> Edytuj anime';
-                            submitBtn.innerHTML = '<i class="fas fa-save"></i> Zapisz zmiany';
-                            cancelEditBtn.style.display = 'inline-block';
-                            
-                            calculateAverage();
-                            
-                            // Scroll to form
-                            document.getElementById('dodaj').scrollIntoView({ behavior: 'smooth' });
-                        }
+                        showEditAnimeModal(id);
                     });
                 });
 
@@ -5049,6 +4996,13 @@ const animeData = {
                         modal.classList.remove('show');
                     }
                 });
+            });
+            
+            // Zamykanie modalu edycji anime po kliknięciu poza nim
+            document.getElementById('edit-anime-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideEditAnimeModal();
+                }
             });
             
             // Initial render
@@ -7049,10 +7003,81 @@ const animeData = {
                 currentAnimeId = null;
             }
             
+            // Modal edycji anime
+            function showEditAnimeModal(animeId) {
+                const anime = animeList.find(a => a.id === animeId);
+                if (!anime) return;
+                
+                const modal = document.getElementById('edit-anime-modal');
+                
+                // Wypełnij formularz
+                document.getElementById('edit-anime-id').value = anime.id;
+                document.getElementById('edit-title').value = anime.title;
+                document.getElementById('edit-status').value = anime.status;
+                document.getElementById('edit-total-episodes').value = anime.totalEpisodes;
+                document.getElementById('edit-episode-length').value = anime.episodeLength;
+                document.getElementById('edit-watched-episodes').value = anime.watchedEpisodes;
+                document.getElementById('edit-graphics').value = anime.ratings.graphics;
+                document.getElementById('edit-music').value = anime.ratings.music;
+                document.getElementById('edit-characters').value = anime.ratings.characters;
+                document.getElementById('edit-story').value = anime.ratings.story;
+                document.getElementById('edit-fun').value = anime.ratings.fun;
+                document.getElementById('edit-anime-tags').value = anime.tags ? anime.tags.join('; ') : '';
+                
+                // Wypełnij datę ukończenia jeśli istnieje
+                if (anime.completedDate) {
+                    document.getElementById('edit-completed-date').value = anime.completedDate;
+                } else {
+                    document.getElementById('edit-completed-date').value = '';
+                }
+                
+                // Pokaż/ukryj pole daty ukończenia
+                toggleEditCompletedDateField();
+                
+                // Oblicz i pokaż średnią
+                calculateEditAverage();
+                
+                modal.classList.add('show');
+            }
+            
+            function hideEditAnimeModal() {
+                document.getElementById('edit-anime-modal').classList.remove('show');
+            }
+            
+            function toggleEditCompletedDateField() {
+                const status = document.getElementById('edit-status').value;
+                const completedDateGroup = document.getElementById('edit-completed-date-group');
+                if (status === 'completed') {
+                    completedDateGroup.style.display = 'block';
+                } else {
+                    completedDateGroup.style.display = 'none';
+                }
+            }
+            
+            function calculateEditAverage() {
+                const graphics = parseInt(document.getElementById('edit-graphics').value);
+                const music = parseInt(document.getElementById('edit-music').value);
+                const characters = parseInt(document.getElementById('edit-characters').value);
+                const story = parseInt(document.getElementById('edit-story').value);
+                const fun = parseInt(document.getElementById('edit-fun').value);
+                
+                const average = (graphics + music + characters + story + fun) / 5;
+                document.getElementById('edit-average-display').textContent = average.toFixed(1);
+            }
+            
             // Event listeners dla modala
             document.getElementById('episode-modal-close').addEventListener('click', hideEpisodeModal);
             document.getElementById('day-summary-close').addEventListener('click', () => {
                 document.getElementById('day-summary-modal').classList.remove('show');
+            });
+            
+            // Event listeners dla modalu edycji anime
+            document.getElementById('edit-anime-modal-close').addEventListener('click', hideEditAnimeModal);
+            document.getElementById('edit-status').addEventListener('change', toggleEditCompletedDateField);
+            
+            // Event listeners dla obliczania średniej w modalu edycji
+            ['edit-graphics', 'edit-music', 'edit-characters', 'edit-story', 'edit-fun'].forEach(id => {
+                document.getElementById(id).addEventListener('input', calculateEditAverage);
             });
 
             document.getElementById('episode-decrease').addEventListener('click', () => {
@@ -7141,6 +7166,65 @@ const animeData = {
                 hideEpisodeModal();
                 const message = activityOnly ? 'Aktywność została dodana!' : 'Odcinki zostały dodane!';
                 showNotification(message, 'success');
+            });
+            
+            // Obsługa formularza edycji anime
+            document.getElementById('edit-anime-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const animeId = parseInt(document.getElementById('edit-anime-id').value);
+                const anime = animeList.find(a => a.id === animeId);
+                if (!anime) return;
+                
+                // Pobierz dane z formularza
+                const title = document.getElementById('edit-title').value.trim();
+                if (!title) {
+                    alert('Proszę wprowadzić tytuł anime');
+                    return;
+                }
+                
+                const status = document.getElementById('edit-status').value;
+                const totalEpisodes = parseInt(document.getElementById('edit-total-episodes').value);
+                const episodeLength = parseInt(document.getElementById('edit-episode-length').value);
+                const watchedEpisodes = parseInt(document.getElementById('edit-watched-episodes').value);
+                const completedDate = document.getElementById('edit-completed-date').value;
+                
+                // Pobierz tagi
+                const tagsRaw = document.getElementById('edit-anime-tags').value.trim();
+                let tags = [];
+                if (tagsRaw) {
+                    tags = tagsRaw.split(/[;\n]/).map(tag => tag.trim()).filter(tag => tag.length > 0);
+                }
+                
+                // Aktualizuj anime
+                anime.title = title;
+                anime.status = status;
+                anime.totalEpisodes = totalEpisodes;
+                anime.episodeLength = episodeLength;
+                anime.watchedEpisodes = Math.min(watchedEpisodes, totalEpisodes);
+                anime.ratings.graphics = parseInt(document.getElementById('edit-graphics').value);
+                anime.ratings.music = parseInt(document.getElementById('edit-music').value);
+                anime.ratings.characters = parseInt(document.getElementById('edit-characters').value);
+                anime.ratings.story = parseInt(document.getElementById('edit-story').value);
+                anime.ratings.fun = parseInt(document.getElementById('edit-fun').value);
+                anime.tags = tags;
+                anime.averageRating = parseFloat(((anime.ratings.graphics + anime.ratings.music + anime.ratings.characters + anime.ratings.story + anime.ratings.fun) / 5).toFixed(1));
+                
+                // Ustaw datę ukończenia
+                if (status === 'completed' && completedDate) {
+                    anime.completedDate = completedDate;
+                } else if (status !== 'completed') {
+                    anime.completedDate = null;
+                }
+                
+                // Zapisz zmiany
+                saveAnimeList();
+                renderAnimeList();
+                renderTierList();
+                updateProfileStats();
+                
+                hideEditAnimeModal();
+                showNotification('Anime zostało zaktualizowane!', 'success');
             });
             
             // Dodaj funkcję do wyświetlania anime z danym tagiem
@@ -7746,6 +7830,96 @@ const animeData = {
             <div style="text-align: center; padding: 1rem;">
                 <div id="qr-reader" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal edycji anime -->
+    <div class="episode-modal" id="edit-anime-modal">
+        <div class="episode-modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+            <div class="episode-modal-header">
+                <h3 id="edit-anime-modal-title">Edytuj anime</h3>
+                <button class="episode-modal-close" id="edit-anime-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="edit-anime-form">
+                <input type="hidden" id="edit-anime-id">
+                
+                <div class="form-group">
+                    <label for="edit-title"><i class="fas fa-heading"></i> Tytuł anime</label>
+                    <input type="text" id="edit-title" required placeholder="Wpisz tytuł anime">
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-anime-tags"><i class="fas fa-tags"></i> Tagi (oddziel średnikiem ; lub enterem)</label>
+                    <input type="text" id="edit-anime-tags" placeholder="np. isekai; komedia; sport">
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-status"><i class="fas fa-bookmark"></i> Status</label>
+                    <select id="edit-status" required>
+                        <option value="watching">Oglądane</option>
+                        <option value="completed">Obejrzane</option>
+                        <option value="upcoming">Nadchodzące</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-total-episodes"><i class="fas fa-list-ol"></i> Łączna liczba odcinków</label>
+                    <input type="number" id="edit-total-episodes" min="1" value="12">
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-episode-length"><i class="fas fa-clock"></i> Długość odcinka (minuty)</label>
+                    <input type="number" id="edit-episode-length" min="1" value="24">
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-watched-episodes"><i class="fas fa-eye"></i> Obejrzane odcinki</label>
+                    <input type="number" id="edit-watched-episodes" min="0" value="0">
+                </div>
+                
+                <div class="form-group" id="edit-completed-date-group" style="display:none;">
+                    <label for="edit-completed-date"><i class="fas fa-calendar-check"></i> Data ukończenia</label>
+                    <input type="date" id="edit-completed-date">
+                </div>
+                
+                <div class="ratings-container">
+                    <h3 style="margin: 1.5rem 0 1rem 0;"><i class="fas fa-star"></i> Oceny (1-11)</h3>
+                    <div class="ratings-grid">
+                        <div class="rating-item">
+                            <label for="edit-graphics">Grafika</label>
+                            <input type="number" id="edit-graphics" min="1" max="11" value="5">
+                        </div>
+                        <div class="rating-item">
+                            <label for="edit-music">Muzyka</label>
+                            <input type="number" id="edit-music" min="1" max="11" value="5">
+                        </div>
+                        <div class="rating-item">
+                            <label for="edit-characters">Postacie</label>
+                            <input type="number" id="edit-characters" min="1" max="11" value="5">
+                        </div>
+                        <div class="rating-item">
+                            <label for="edit-story">Fabuła</label>
+                            <input type="number" id="edit-story" min="1" max="11" value="5">
+                        </div>
+                        <div class="rating-item">
+                            <label for="edit-fun">Śmieszność</label>
+                            <input type="number" id="edit-fun" min="1" max="11" value="5">
+                        </div>
+                        <div class="rating-item">
+                            <label>Średnia</label>
+                            <span id="edit-average-display" class="average-display">5.0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 2rem;">
+                    <button type="submit" class="btn-success" style="width: 100%;">
+                        <i class="fas fa-save"></i> Zapisz zmiany
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </body>
