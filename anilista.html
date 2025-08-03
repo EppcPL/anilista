@@ -246,6 +246,49 @@
             background: var(--primary);
             transition: var(--transition);
         }
+
+        /* Gradient left borders based on status */
+        .anime-card.status-watching::after {
+            background: linear-gradient(180deg, 
+                var(--info) 0%, 
+                rgba(9, 132, 227, 0.8) 50%, 
+                var(--info) 100%);
+            box-shadow: 0 0 8px rgba(9, 132, 227, 0.6);
+            animation: statusPulse 3s ease-in-out infinite;
+        }
+
+        .anime-card.status-completed::after {
+            background: linear-gradient(180deg, 
+                var(--success) 0%, 
+                rgba(0, 184, 148, 0.8) 50%, 
+                var(--success) 100%);
+            box-shadow: 0 0 8px rgba(0, 184, 148, 0.6);
+            animation: statusPulse 3s ease-in-out infinite;
+        }
+
+        .anime-card.status-upcoming::after {
+            background: linear-gradient(180deg, 
+                var(--warning) 0%, 
+                rgba(253, 203, 110, 0.8) 50%, 
+                var(--warning) 100%);
+            box-shadow: 0 0 8px rgba(253, 203, 110, 0.6);
+            animation: statusPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0% { 
+                opacity: 1; 
+                transform: scaleY(1);
+            }
+            50% { 
+                opacity: 0.8; 
+                transform: scaleY(0.95);
+            }
+            100% { 
+                opacity: 1; 
+                transform: scaleY(1);
+            }
+        }
         
         .anime-card:hover {
             transform: translateY(-5px);
@@ -279,6 +322,35 @@
             height: 6px;
             background: var(--primary);
             border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        /* Gradient status dots for anime titles */
+        .anime-card.status-watching .anime-title::before {
+            background: radial-gradient(circle, 
+                var(--info) 0%, 
+                rgba(9, 132, 227, 0.9) 70%, 
+                rgba(9, 132, 227, 0.6) 100%);
+            box-shadow: 0 0 6px rgba(9, 132, 227, 0.8), 
+                        0 0 12px rgba(9, 132, 227, 0.4);
+        }
+
+        .anime-card.status-completed .anime-title::before {
+            background: radial-gradient(circle, 
+                var(--success) 0%, 
+                rgba(0, 184, 148, 0.9) 70%, 
+                rgba(0, 184, 148, 0.6) 100%);
+            box-shadow: 0 0 6px rgba(0, 184, 148, 0.8), 
+                        0 0 12px rgba(0, 184, 148, 0.4);
+        }
+
+        .anime-card.status-upcoming .anime-title::before {
+            background: radial-gradient(circle, 
+                var(--warning) 0%, 
+                rgba(253, 203, 110, 0.9) 70%, 
+                rgba(253, 203, 110, 0.6) 100%);
+            box-shadow: 0 0 6px rgba(253, 203, 110, 0.8), 
+                        0 0 12px rgba(253, 203, 110, 0.4);
         }
         
         .anime-status {
@@ -2711,6 +2783,64 @@
             100% { left: 100%; }
         }
 
+        /* Enhanced Progress Bars with Shine Effect */
+        /* For inline progress bars in tables and lists */
+        div[style*="background:var(--success)"],
+        div[style*="background:var(--warning)"],
+        div[style*="background:var(--danger)"],
+        div[style*="background:linear-gradient"] {
+            position: relative;
+            overflow: hidden;
+        }
+
+        div[style*="background:var(--success)"]:not([style*="rgba"])::before,
+        div[style*="background:var(--warning)"]:not([style*="rgba"])::before,
+        div[style*="background:var(--danger)"]:not([style*="rgba"])::before,
+        div[style*="background:linear-gradient"]:not([style*="rgba"])::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.4), 
+                rgba(255, 255, 255, 0.6),
+                rgba(255, 255, 255, 0.4),
+                transparent);
+            animation: progressShine 2.5s infinite;
+            z-index: 1;
+        }
+
+        /* Progress bar class-based style */
+        .progress-bar-enhanced {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 4px;
+            box-shadow: 
+                0 2px 8px rgba(108, 92, 231, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-bar-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.4), 
+                rgba(255, 255, 255, 0.7),
+                rgba(255, 255, 255, 0.4),
+                transparent);
+            animation: progressShine 2s infinite;
+            z-index: 1;
+        }
+
         /* Calendar Modernization */
         .calendar-day {
             background: linear-gradient(135deg, 
@@ -3166,7 +3296,7 @@
                     <div class="stat-label"><i class="fas fa-star"></i> Ocena ogólna</div>
                     <div class="stat-value" id="average-rating">0.0</div>
                     <div class="progress-container">
-                        <div class="progress-bar" id="average-rating-bar" style="width: 0%"></div>
+                                                    <div class="progress-bar progress-bar-enhanced" id="average-rating-bar" style="width: 0%"></div>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -3194,7 +3324,7 @@
                     <div class="stat-label"><i class="fas fa-tasks"></i> Postęp</div>
                     <div class="stat-value" id="watch-progress">0%</div>
                     <div class="progress-container">
-                        <div class="progress-bar" id="watch-progress-bar" style="width: 0%"></div>
+                                                    <div class="progress-bar progress-bar-enhanced" id="watch-progress-bar" style="width: 0%"></div>
                     </div>
                 </div>
 
@@ -6646,7 +6776,7 @@ const animeData = {
                         <td style='padding:8px 4px;'>${anime.watchedEpisodes}/${anime.totalEpisodes}</td>
                         <td style='padding:8px 4px;'>
                             <div style='background:rgba(0,0,0,0.3);border-radius:4px;height:8px;width:100px;position:relative;'>
-                                <div style='background:${progressColor};height:100%;border-radius:4px;width:${anime.progress}%;'></div>
+                                <div class='progress-bar-enhanced' style='background:${progressColor};height:100%;border-radius:4px;width:${anime.progress}%;'></div>
                                 <span style='position:absolute;top:-18px;right:0;font-size:0.8rem;color:var(--gray);'>${anime.progress}%</span>
                             </div>
                         </td>
@@ -6797,7 +6927,7 @@ const animeData = {
                         <td style='padding:8px 4px;'>${formatTime(anime.fullTime)}</td>
                         <td style='padding:8px 4px;'>
                             <div style='background:rgba(0,0,0,0.3);border-radius:4px;height:8px;width:100px;position:relative;'>
-                                <div style='background:${progressBarColor};height:100%;border-radius:4px;width:${progressPercent}%;'></div>
+                                <div class='progress-bar-enhanced' style='background:${progressBarColor};height:100%;border-radius:4px;width:${progressPercent}%;'></div>
                                 <span style='position:absolute;top:-18px;right:0;font-size:0.8rem;color:var(--gray);'>${progressPercent}%</span>
                             </div>
                         </td>
@@ -8226,6 +8356,24 @@ const animeData = {
 
                 totalTime = mainTime + rewatchTime;
 
+                // Rating color function
+                function getRatingColor(rating) {
+                    if (rating === 11) return '#FFD700'; // Gold
+                    if (rating >= 9) return '#00FF00'; // Bright Green
+                    if (rating >= 7) return '#90EE90'; // Light Green
+                    if (rating >= 5) return '#FFFF00'; // Yellow
+                    if (rating >= 3) return '#FFA500'; // Orange
+                    return '#FF4757'; // Red
+                }
+
+                function getRatingGradient(rating) {
+                    const color = getRatingColor(rating);
+                    if (rating === 11) {
+                        return `linear-gradient(135deg, ${color}, #DAA520)`;
+                    }
+                    return `linear-gradient(135deg, ${color}, ${color}99)`;
+                }
+
                 // Tags HTML
                 let tagsHtml = '';
                 if (anime.tags && anime.tags.length) {
@@ -8291,23 +8439,29 @@ const animeData = {
                         <div style="margin: 1rem 0;">
                             <strong style="color: var(--primary);">Oceny:</strong>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 0.5rem;">
-                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
-                                    <strong>Grafika:</strong> <span style="color: var(--accent);">${anime.ratings.graphics}/11</span>
+                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; border-left: 3px solid ${getRatingColor(anime.ratings.graphics)}; position: relative; overflow: hidden;">
+                                    <strong>Grafika:</strong> <span style="color: ${getRatingColor(anime.ratings.graphics)}; font-weight: bold; text-shadow: 0 0 4px ${getRatingColor(anime.ratings.graphics)};">${anime.ratings.graphics}/11</span>
+                                    <div style="position: absolute; bottom: 0; left: 0; height: 3px; width: ${(anime.ratings.graphics / 11) * 100}%; background: ${getRatingColor(anime.ratings.graphics)}; border-radius: 0 0 6px 0;" class="progress-bar-enhanced"></div>
                                 </div>
-                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
-                                    <strong>Muzyka:</strong> <span style="color: var(--accent);">${anime.ratings.music}/11</span>
+                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; border-left: 3px solid ${getRatingColor(anime.ratings.music)}; position: relative; overflow: hidden;">
+                                    <strong>Muzyka:</strong> <span style="color: ${getRatingColor(anime.ratings.music)}; font-weight: bold; text-shadow: 0 0 4px ${getRatingColor(anime.ratings.music)};">${anime.ratings.music}/11</span>
+                                    <div style="position: absolute; bottom: 0; left: 0; height: 3px; width: ${(anime.ratings.music / 11) * 100}%; background: ${getRatingColor(anime.ratings.music)}; border-radius: 0 0 6px 0;" class="progress-bar-enhanced"></div>
                                 </div>
-                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
-                                    <strong>Postacie:</strong> <span style="color: var(--accent);">${anime.ratings.characters}/11</span>
+                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; border-left: 3px solid ${getRatingColor(anime.ratings.characters)}; position: relative; overflow: hidden;">
+                                    <strong>Postacie:</strong> <span style="color: ${getRatingColor(anime.ratings.characters)}; font-weight: bold; text-shadow: 0 0 4px ${getRatingColor(anime.ratings.characters)};">${anime.ratings.characters}/11</span>
+                                    <div style="position: absolute; bottom: 0; left: 0; height: 3px; width: ${(anime.ratings.characters / 11) * 100}%; background: ${getRatingColor(anime.ratings.characters)}; border-radius: 0 0 6px 0;" class="progress-bar-enhanced"></div>
                                 </div>
-                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
-                                    <strong>Fabuła:</strong> <span style="color: var(--accent);">${anime.ratings.story}/11</span>
+                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; border-left: 3px solid ${getRatingColor(anime.ratings.story)}; position: relative; overflow: hidden;">
+                                    <strong>Fabuła:</strong> <span style="color: ${getRatingColor(anime.ratings.story)}; font-weight: bold; text-shadow: 0 0 4px ${getRatingColor(anime.ratings.story)};">${anime.ratings.story}/11</span>
+                                    <div style="position: absolute; bottom: 0; left: 0; height: 3px; width: ${(anime.ratings.story / 11) * 100}%; background: ${getRatingColor(anime.ratings.story)}; border-radius: 0 0 6px 0;" class="progress-bar-enhanced"></div>
                                 </div>
-                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
-                                    <strong>Śmieszność:</strong> <span style="color: var(--accent);">${anime.ratings.fun}/11</span>
+                                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; border-left: 3px solid ${getRatingColor(anime.ratings.fun)}; position: relative; overflow: hidden;">
+                                    <strong>Śmieszność:</strong> <span style="color: ${getRatingColor(anime.ratings.fun)}; font-weight: bold; text-shadow: 0 0 4px ${getRatingColor(anime.ratings.fun)};">${anime.ratings.fun}/11</span>
+                                    <div style="position: absolute; bottom: 0; left: 0; height: 3px; width: ${(anime.ratings.fun / 11) * 100}%; background: ${getRatingColor(anime.ratings.fun)}; border-radius: 0 0 6px 0;" class="progress-bar-enhanced"></div>
                                 </div>
-                                <div style="background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 8px; border-radius: 6px; text-align: center;">
-                                    <strong style="color: white;">ŚREDNIA: ${anime.averageRating}/11</strong>
+                                <div style="background: ${getRatingGradient(anime.averageRating)}; padding: 8px; border-radius: 6px; text-align: center; position: relative; overflow: hidden;">
+                                    <strong style="color: white; text-shadow: 0 0 8px rgba(0,0,0,0.8);">ŚREDNIA: ${anime.averageRating}/11</strong>
+                                    <div style="position: absolute; bottom: 0; left: 0; height: 4px; width: ${(anime.averageRating / 11) * 100}%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent); border-radius: 0 0 6px 6px;" class="progress-bar-enhanced"></div>
                                 </div>
                             </div>
                         </div>
