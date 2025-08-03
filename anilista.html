@@ -7004,6 +7004,10 @@ const animeData = {
             }
             
             // Modal edycji anime
+            let editCurrentImageData = null;
+            const editImageUpload = document.getElementById('edit-image-upload');
+            const editImagePreview = document.getElementById('edit-image-preview');
+            
             function showEditAnimeModal(animeId) {
                 const anime = animeList.find(a => a.id === animeId);
                 if (!anime) return;
@@ -7036,6 +7040,15 @@ const animeData = {
                 
                 // Wypełnij pola sezonów jeśli są
                 fillEditSeasonInputsIfNeeded(anime);
+                
+                // Ustaw obrazek jeśli istnieje
+                if (anime.image) {
+                    editCurrentImageData = anime.image;
+                    showEditImagePreview(editCurrentImageData);
+                } else {
+                    editCurrentImageData = null;
+                    showEditImagePlaceholder();
+                }
                 
                 // Oblicz i pokaż średnią
                 calculateEditAverage();
@@ -7130,6 +7143,39 @@ const animeData = {
                 }
             }
             
+            // Funkcje obsługi zdjęć w modalu edycji
+            function showEditImagePreview(imageData) {
+                editImagePreview.innerHTML = `
+                    <img src="${imageData}" alt="Podgląd obrazka">
+                    <button type='button' id='edit-remove-image-btn' class='btn-danger' style='width:100%;margin-top:8px;'>
+                        <i class='fas fa-trash'></i> Usuń zdjęcie
+                    </button>
+                `;
+                
+                // Dodaj event listener do przycisku usuwania
+                document.getElementById('edit-remove-image-btn').onclick = function() {
+                    if (confirm('Czy na pewno chcesz usunąć zdjęcie?')) {
+                        editCurrentImageData = null;
+                        showEditImagePlaceholder();
+                    }
+                };
+            }
+            
+            function showEditImagePlaceholder() {
+                editImagePreview.innerHTML = `
+                    <div class="image-preview-placeholder">
+                        <i class="fas fa-image"></i>
+                        <span>Brak wybranego obrazka</span>
+                    </div>
+                `;
+            }
+            
+            function resetEditImageUpload() {
+                editCurrentImageData = null;
+                showEditImagePlaceholder();
+                editImageUpload.value = '';
+            }
+            
             // Event listeners dla modala
             document.getElementById('episode-modal-close').addEventListener('click', hideEpisodeModal);
             document.getElementById('day-summary-close').addEventListener('click', () => {
@@ -7139,6 +7185,9 @@ const animeData = {
             // Event listeners dla modalu edycji anime
             document.getElementById('edit-anime-modal-close').addEventListener('click', hideEditAnimeModal);
             document.getElementById('edit-status').addEventListener('change', toggleEditCompletedDateField);
+            document.getElementById('edit-clear-date-btn').addEventListener('click', function() {
+                document.getElementById('edit-completed-date').value = '';
+            });
             
             // Event listeners dla obliczania średniej w modalu edycji
             ['edit-graphics', 'edit-music', 'edit-characters', 'edit-story', 'edit-fun'].forEach(id => {
@@ -7162,6 +7211,25 @@ const animeData = {
                 if (e.target.classList.contains('edit-season-episodes')) {
                     updateEditTotalEpisodesFromSeasons();
                 }
+            });
+            
+            // Event listeners dla zdjęć w modalu edycji
+            document.getElementById('edit-select-image-btn').addEventListener('click', function() {
+                editImageUpload.value = '';
+                editImageUpload.click();
+            });
+            
+            editImageUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        editCurrentImageData = ev.target.result;
+                        showEditImagePreview(editCurrentImageData);
+                    };
+                    reader.readAsDataURL(file);
+                }
+                editImageUpload.value = '';
             });
 
             document.getElementById('episode-decrease').addEventListener('click', () => {
@@ -7345,6 +7413,13 @@ const animeData = {
                     anime.completedDate = completedDate;
                 } else if (status !== 'completed') {
                     anime.completedDate = null;
+                }
+                
+                // Zapisz zdjęcie
+                if (editCurrentImageData) {
+                    anime.image = editCurrentImageData;
+                } else {
+                    anime.image = null;
                 }
                 
                 // Zapisz zmiany
@@ -8016,7 +8091,29 @@ const animeData = {
                 
                 <div class="form-group" id="edit-completed-date-group" style="display:none;">
                     <label for="edit-completed-date"><i class="fas fa-calendar-check"></i> Data ukończenia</label>
-                    <input type="date" id="edit-completed-date">
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="date" id="edit-completed-date" style="flex: 1;">
+                        <button type="button" id="edit-clear-date-btn" class="btn-secondary" style="padding: 0.5rem;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--gray);">
+                        <i class="fas fa-info-circle"></i> Daty ukończenia i ostatniego oglądania będą automatycznie śledzone przy zwiększaniu aktywności.
+                    </div>
+                </div>
+                
+                <div class="form-group image-upload-container">
+                    <label><i class="fas fa-image"></i> Obrazek anime</label>
+                    <input type="file" id="edit-image-upload" accept="image/*" style="display: none;">
+                    <button type="button" id="edit-select-image-btn" class="btn-accent" style="width: 100%; margin-bottom: 1rem;">
+                        <i class="fas fa-upload"></i> Wybierz obrazek
+                    </button>
+                    <div class="image-preview" id="edit-image-preview">
+                        <div class="image-preview-placeholder">
+                            <i class="fas fa-image"></i>
+                            <span>Brak wybranego obrazka</span>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="ratings-container">
