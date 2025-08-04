@@ -1241,6 +1241,79 @@
             margin-top: 1rem;
         }
         
+        .activity-calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .activity-calendar-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .toggle-calendar-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .toggle-calendar-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        
+        .always-show-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--lighter);
+        }
+        
+        .always-show-checkbox input {
+            width: auto;
+            margin: 0;
+        }
+        
+        .calendar-content {
+            display: none;
+        }
+        
+        .calendar-content.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Hide controls on mobile */
+        @media (max-width: 768px) {
+            .desktop-only {
+                display: none !important;
+            }
+            
+            .calendar-content {
+                display: block !important;
+            }
+        }
+        
         .calendar-header {
             display: flex;
             justify-content: space-between;
@@ -3896,8 +3969,20 @@
             
             <!-- Kalendarz aktywności -->
             <div class="activity-calendar">
-                <h3><i class="fas fa-calendar-alt"></i> Kalendarz aktywności</h3>
-                <div id="calendar-container"></div>
+                <div class="activity-calendar-header">
+                    <h3><i class="fas fa-calendar-alt"></i> Kalendarz aktywności</h3>
+                    <div class="activity-calendar-controls desktop-only">
+                        <label class="always-show-checkbox">
+                            <input type="checkbox" id="always-show-calendar"> 
+                            <span class="checkmark"></span>
+                            Zawsze pokazuj
+                        </label>
+                        <button id="toggle-calendar-btn" class="toggle-calendar-btn">
+                            <i class="fas fa-eye"></i> Pokaż kalendarz
+                        </button>
+                    </div>
+                </div>
+                <div id="calendar-container" class="calendar-content"></div>
             </div>
         </div>
         
@@ -4196,6 +4281,95 @@
                 return watchedInSeason >= seasonEpisodes;
             }
             return false;
+        }
+
+        // Calendar toggle functionality
+        function initCalendarToggle() {
+            const toggleBtn = document.getElementById('toggle-calendar-btn');
+            const alwaysShowCheckbox = document.getElementById('always-show-calendar');
+            const calendarContent = document.getElementById('calendar-container');
+            
+            if (!toggleBtn || !alwaysShowCheckbox || !calendarContent) return;
+            
+            // Check if we're on mobile (hide functionality on mobile)
+            if (window.innerWidth <= 768) {
+                document.querySelector('.activity-calendar-controls').style.display = 'none';
+                calendarContent.classList.add('show');
+                return;
+            }
+            
+            // Load saved preferences
+            const alwaysShow = localStorage.getItem('calendarAlwaysShow') === 'true';
+            const wasShown = localStorage.getItem('calendarShown') === 'true';
+            
+            // Set checkbox state
+            alwaysShowCheckbox.checked = alwaysShow;
+            
+            // Set initial calendar state
+            let isCalendarVisible = false;
+            if (alwaysShow || wasShown) {
+                showCalendar();
+            } else {
+                hideCalendar();
+            }
+            
+            function showCalendar() {
+                calendarContent.classList.add('show');
+                toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Ukryj kalendarz';
+                isCalendarVisible = true;
+                localStorage.setItem('calendarShown', 'true');
+                
+                // Render calendar if not already rendered or if it needs refresh
+                if (!calendarContent.hasChildNodes() || calendarContent.innerHTML.trim() === '') {
+                    setTimeout(() => {
+                        renderActivityCalendar();
+                    }, 100);
+                }
+            }
+            
+            function hideCalendar() {
+                calendarContent.classList.remove('show');
+                toggleBtn.innerHTML = '<i class="fas fa-eye"></i> Pokaż kalendarz';
+                isCalendarVisible = false;
+                localStorage.setItem('calendarShown', 'false');
+            }
+            
+            // Toggle button click handler
+            toggleBtn.addEventListener('click', function() {
+                if (isCalendarVisible) {
+                    hideCalendar();
+                } else {
+                    showCalendar();
+                }
+            });
+            
+            // Always show checkbox handler
+            alwaysShowCheckbox.addEventListener('change', function() {
+                const alwaysShow = this.checked;
+                localStorage.setItem('calendarAlwaysShow', alwaysShow.toString());
+                
+                if (alwaysShow && !isCalendarVisible) {
+                    showCalendar();
+                }
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth <= 768) {
+                    // Mobile - always show calendar and hide controls
+                    document.querySelector('.activity-calendar-controls').style.display = 'none';
+                    calendarContent.classList.add('show');
+                } else {
+                    // Desktop - show controls
+                    document.querySelector('.activity-calendar-controls').style.display = 'flex';
+                    // Restore previous state
+                    const alwaysShow = localStorage.getItem('calendarAlwaysShow') === 'true';
+                    const wasShown = localStorage.getItem('calendarShown') === 'true';
+                    if (!(alwaysShow || wasShown)) {
+                        calendarContent.classList.remove('show');
+                    }
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -7835,6 +8009,17 @@ const animeData = {
                     // Sprawdź czy to mobile
                     isMobileView = window.innerWidth <= 768;
                     
+                    // On desktop, only render if calendar should be visible
+                    if (!isMobileView) {
+                        const alwaysShow = localStorage.getItem('calendarAlwaysShow') === 'true';
+                        const wasShown = localStorage.getItem('calendarShown') === 'true';
+                        const shouldShow = container.classList.contains('show');
+                        
+                        if (!alwaysShow && !wasShown && !shouldShow) {
+                            return; // Don't render if calendar should be hidden
+                        }
+                    }
+                    
                     // Use requestAnimationFrame for smooth rendering
                     requestAnimationFrame(() => {
                         if (isMobileView) {
@@ -7852,6 +8037,7 @@ const animeData = {
             
             // Cache DOM elements and event handlers to prevent memory leaks
             let calendarEventDelegated = false;
+            let hoverEventsDelegated = false;
             
             function renderDesktopMonthView(container) {
                 const months = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 
@@ -7869,6 +8055,9 @@ const animeData = {
                     <div class="calendar-nav">
                         <button class="calendar-nav-btn" data-action="prev-month">
                             <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="calendar-nav-btn" data-action="show-month-details" title="Podsumowanie miesiąca">
+                            <i class="fas fa-chart-bar"></i>
                         </button>
                         <button class="calendar-nav-btn" data-action="next-month">
                             <i class="fas fa-chevron-right"></i>
@@ -7961,6 +8150,13 @@ const animeData = {
                                 selectedMonth = new Date().getMonth();
                                 renderActivityCalendar();
                             });
+                            break;
+                            
+                        case 'show-month-details':
+                            e.preventDefault();
+                            // Use selectedMonth for desktop month view, currentMonth for mobile
+                            const monthToShow = selectedMonth !== null ? selectedMonth : currentMonth;
+                            showMonthDetails(monthToShow);
                             break;
                     }
                     
@@ -8285,7 +8481,6 @@ const animeData = {
             
             // Optimized yearly view with DocumentFragment and efficient event handling
             let yearlyViewCache = {};
-            let hoverEventsDelegated = false;
             
             function renderYearlyView(daysContainer) {
                 const cacheKey = `${currentYear}`;
@@ -9591,8 +9786,20 @@ const animeData = {
                 document.getElementById('completed-date').value = '';
             });
             
-            // Initial render of activity calendar
-            renderActivityCalendar();
+            // Initialize calendar toggle functionality
+            initCalendarToggle();
+            
+            // Initial render of activity calendar (only if should be visible)
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                renderActivityCalendar();
+            } else {
+                const alwaysShow = localStorage.getItem('calendarAlwaysShow') === 'true';
+                const wasShown = localStorage.getItem('calendarShown') === 'true';
+                if (alwaysShow || wasShown) {
+                    renderActivityCalendar();
+                }
+            }
             
             // Initialize active code display
             updateActiveCodeDisplay();
