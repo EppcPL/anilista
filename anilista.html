@@ -8099,10 +8099,20 @@ const animeData = {
                         case 'prev-month':
                             e.preventDefault();
                             animateCalendarTransition(() => {
-                                selectedMonth--;
-                                if (selectedMonth < 0) {
-                                    selectedMonth = 11;
-                                    currentYear--;
+                                if (isMobileView) {
+                                    // Na mobile modyfikuj currentMonth
+                                    currentMonth--;
+                                    if (currentMonth < 0) {
+                                        currentMonth = 11;
+                                        currentYear--;
+                                    }
+                                } else {
+                                    // Na desktop modyfikuj selectedMonth
+                                    selectedMonth--;
+                                    if (selectedMonth < 0) {
+                                        selectedMonth = 11;
+                                        currentYear--;
+                                    }
                                 }
                                 renderActivityCalendar();
                             });
@@ -8111,10 +8121,20 @@ const animeData = {
                         case 'next-month':
                             e.preventDefault();
                             animateCalendarTransition(() => {
-                                selectedMonth++;
-                                if (selectedMonth > 11) {
-                                    selectedMonth = 0;
-                                    currentYear++;
+                                if (isMobileView) {
+                                    // Na mobile modyfikuj currentMonth
+                                    currentMonth++;
+                                    if (currentMonth > 11) {
+                                        currentMonth = 0;
+                                        currentYear++;
+                                    }
+                                } else {
+                                    // Na desktop modyfikuj selectedMonth
+                                    selectedMonth++;
+                                    if (selectedMonth > 11) {
+                                        selectedMonth = 0;
+                                        currentYear++;
+                                    }
                                 }
                                 renderActivityCalendar();
                             });
