@@ -26,6 +26,7 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" defer></script>
+    <script src="episodes-counter.js" defer></script>
     <style>
         /* ================================
            🚀 CRITICAL CSS FOR MOBILE FCP
@@ -1476,6 +1477,33 @@
         /* Animacje przejścia dla kalendarza */
         .calendar-grid {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Animacje przełączania widoków kafelka transferu */
+        #generate-view, #import-view {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        #generate-view.fade-out {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        #import-view.fade-in {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        #import-view.fade-out {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+
+        #generate-view.fade-in {
+            opacity: 1;
+            transform: translateX(0);
         }
         
         .calendar-days {
@@ -3894,13 +3922,38 @@
                     </div>
                 </div>
 
-                <div class="stat-card clickable" id="generate-code-card">
-                    <div class="stat-label"><i class="fas fa-qrcode"></i> Generuj kod</div>
-                    <div class="stat-value" style="font-size: 1.5rem; color: var(--success);">
-                        <i class="fas fa-upload"></i>
+                <!-- Kafelek transferu z animacją -->
+                <div class="stat-card" id="transfer-card">
+                    <!-- Widok generowania (domyślny) -->
+                    <div id="generate-view">
+                        <div class="stat-label"><i class="fas fa-qrcode"></i> Generuj kod</div>
+                        <div class="stat-value" style="font-size: 1.5rem; color: var(--success);">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--gray); margin-top: 0.5rem;">
+                        </div>
+                        <button class="btn-success" id="generate-code-btn" style="width: 100%; margin-top: 1rem; padding: 8px 16px; font-size: 0.9rem;">
+                            <i class="fas fa-qrcode"></i> Generuj kod
+                        </button>
+                        <button class="btn-secondary" id="switch-to-import-btn" style="width: 100%; margin-top: 0.5rem; padding: 6px 12px; font-size: 0.8rem;">
+                            <i class="fas fa-download"></i> Wgraj kod
+                        </button>
                     </div>
-                    <div style="font-size: 0.8rem; color: var(--gray); margin-top: 0.5rem;">
-                        Kliknij aby wygenerować kod transferu
+                    
+                    <!-- Widok wgrywania (ukryty) -->
+                    <div id="import-view" style="display: none;">
+                        <div class="stat-label"><i class="fas fa-download"></i> Wgraj kod</div>
+                        <div class="stat-value" style="font-size: 1.5rem; color: var(--accent);">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--gray); margin-top: 0.5rem;">
+                        </div>
+                        <button class="btn-accent" id="import-code-btn" style="width: 100%; margin-top: 1rem; padding: 8px 16px; font-size: 0.9rem;">
+                            <i class="fas fa-download"></i> Wgraj kod
+                        </button>
+                        <button class="btn-secondary" id="switch-to-generate-btn" style="width: 100%; margin-top: 0.5rem; padding: 6px 12px; font-size: 0.8rem;">
+                            <i class="fas fa-qrcode"></i> Generuj kod
+                        </button>
                     </div>
                 </div>
                 
@@ -3921,23 +3974,10 @@
                             <i class="fas fa-search"></i> Sprawdź kod
                         </button>
                     </div>
-                </div>
-
-                <div class="stat-card" id="import-code-card">
-                    <div class="stat-label"><i class="fas fa-download"></i> Wgraj kod</div>
-                    <div class="stat-value" style="font-size: 1rem; color: var(--accent);">
-                        <input type="text" 
-                               id="import-code-input-inline" 
-                               placeholder="Wpisz kod 6-cyfrowy"
-                               maxlength="6"
-                               autocomplete="off"
-                               style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--darker); color: var(--lighter); font-size: 0.9rem; text-align: center;">
-                    </div>
-                    <div style="display: none;" id="import-preview-inline">
-                        <div class="transfer-info" style="border-left-color: var(--success); margin-top: 0.5rem; font-size: 0.8rem;">
-                            <strong>Znaleziono dane:</strong>
-                            <div id="import-preview-content-inline"></div>
-                        </div>
+                    <div style="margin-top: 0.5rem;">
+                        <button class="btn-primary" id="import-code-from-active-btn" style="width: 100%; padding: 6px 12px; font-size: 0.8rem; background: var(--success); border-color: var(--success); color: white; font-weight: 500;">
+                            <i class="fas fa-download"></i> Wgraj kod transferu
+                        </button>
                     </div>
                 </div>
 
@@ -4797,7 +4837,6 @@
                 const watchProgressBar = document.getElementById('watch-progress-bar');
                 watchProgressBar.style.width = watchProgress + '%';
 
-                
                 // Total watch time (including rewatches)
                 let totalMinutes = 0;
                 let totalRewatchMinutes = 0;
@@ -6298,7 +6337,7 @@ const animeData = {
             
             function updateActiveCodeDisplay() {
                 const activeCodeCard = document.getElementById('active-code-card');
-                const generateCodeCard = document.getElementById('generate-code-card');
+                const transferCard = document.getElementById('transfer-card');
                 const activeCodeDisplay = document.getElementById('active-code-display');
                 const activeCodeTimer = document.getElementById('active-code-timer');
                 
@@ -6306,12 +6345,12 @@ const animeData = {
                 
                 console.log('🔍 updateActiveCodeDisplay - activeCode:', activeCode);
                 console.log('🔍 updateActiveCodeDisplay - activeCodeCard:', activeCodeCard);
-                console.log('🔍 updateActiveCodeDisplay - generateCodeCard:', generateCodeCard);
+                console.log('🔍 updateActiveCodeDisplay - transferCard:', transferCard);
                 
                 if (activeCode) {
-                    // Pokaż aktywny kod i ukryj przycisk generowania
+                    // Pokaż aktywny kod i ukryj kafelek transferu
                     activeCodeCard.style.display = 'block';
-                    generateCodeCard.style.display = 'none';
+                    transferCard.style.display = 'none';
                     
                     activeCodeDisplay.textContent = activeCode.code;
                     
@@ -6338,11 +6377,11 @@ const animeData = {
                     // Zapisz interval ID żeby można było go wyczyścić
                     activeCodeCard.dataset.timerInterval = timerInterval;
                     
-                    console.log('🔍 updateActiveCodeDisplay - Pokazuję aktywny kod, ukrywam przycisk generowania');
+                    console.log('🔍 updateActiveCodeDisplay - Pokazuję aktywny kod, ukrywam kafelek transferu');
                 } else {
-                    // Ukryj aktywny kod i pokaż przycisk generowania
+                    // Ukryj aktywny kod i pokaż kafelek transferu
                     activeCodeCard.style.display = 'none';
-                    generateCodeCard.style.display = 'block';
+                    transferCard.style.display = 'block';
                     
                     // Wyczyść timer jeśli istnieje
                     if (activeCodeCard.dataset.timerInterval) {
@@ -6350,7 +6389,7 @@ const animeData = {
                         delete activeCodeCard.dataset.timerInterval;
                     }
                     
-                    console.log('🔍 updateActiveCodeDisplay - Ukrywam aktywny kod, pokazuję przycisk generowania');
+                    console.log('🔍 updateActiveCodeDisplay - Ukrywam aktywny kod, pokazuję kafelek transferu');
                 }
             }
             
@@ -6491,7 +6530,7 @@ const animeData = {
             }
 
             // Obsługa generowania kodu
-            document.getElementById('generate-code-card').addEventListener('click', async function() {
+            document.getElementById('generate-code-btn').addEventListener('click', async function() {
                 console.log('🔍 Generate button clicked');
                 // Sprawdź czy już istnieje aktywny kod
                 const activeCode = getActiveCode();
@@ -6572,6 +6611,57 @@ const animeData = {
                 }
             });
             
+            // Obsługa przełączania widoku kafelka
+            document.getElementById('switch-to-import-btn').addEventListener('click', function() {
+                const generateView = document.getElementById('generate-view');
+                const importView = document.getElementById('import-view');
+                
+                // Animacja przejścia
+                generateView.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    generateView.style.display = 'none';
+                    generateView.classList.remove('fade-out');
+                    importView.style.display = 'block';
+                    importView.classList.add('fade-in');
+                    
+                    // Usuń klasę po zakończeniu animacji
+                    setTimeout(() => {
+                        importView.classList.remove('fade-in');
+                    }, 300);
+                }, 300);
+            });
+
+            document.getElementById('switch-to-generate-btn').addEventListener('click', function() {
+                const generateView = document.getElementById('generate-view');
+                const importView = document.getElementById('import-view');
+                
+                // Animacja przejścia
+                importView.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    importView.style.display = 'none';
+                    importView.classList.remove('fade-out');
+                    generateView.style.display = 'block';
+                    generateView.classList.add('fade-in');
+                    
+                    // Usuń klasę po zakończeniu animacji
+                    setTimeout(() => {
+                        generateView.classList.remove('fade-in');
+                    }, 300);
+                }, 300);
+            });
+
+            // Obsługa wgrywania kodu - otwiera modal
+            document.getElementById('import-code-btn').addEventListener('click', function() {
+                const modal = document.getElementById('import-code-modal');
+                modal.classList.add('show');
+                // Skup się na polu input
+                setTimeout(() => {
+                    document.getElementById('import-code-input').focus();
+                }, 100);
+            });
+
             // Obsługa kopiowania aktywnego kodu
             document.getElementById('copy-active-code-btn').addEventListener('click', function() {
                 const activeCode = getActiveCode();
@@ -6630,6 +6720,16 @@ const animeData = {
                     button.innerHTML = originalText;
                     button.disabled = false;
                 }
+            });
+
+            // Obsługa wgrywania kodu z kafelka aktywnego kodu
+            document.getElementById('import-code-from-active-btn').addEventListener('click', function() {
+                const modal = document.getElementById('import-code-modal');
+                modal.classList.add('show');
+                // Skup się na polu input
+                setTimeout(() => {
+                    document.getElementById('import-code-input').focus();
+                }, 100);
             });
 
 
@@ -9957,162 +10057,7 @@ const animeData = {
                 qrScannerModal.classList.remove('show');
             });
 
-            // Obsługa wpisywania kodu w polu inline
-            document.getElementById('import-code-input-inline').addEventListener('input', function() {
-                const code = this.value.replace(/\D/g, ''); // Tylko cyfry
-                this.value = code;
-                
-                if (code.length === 6) {
-                    checkImportCode(code);
-                    // Automatycznie wykonaj import po 6 cyfrach
-                    setTimeout(() => performImport(code), 500);
-                } else {
-                    // Ukryj podgląd jeśli kod jest niepełny
-                    document.getElementById('import-preview-inline').style.display = 'none';
-                }
-            });
 
-
-
-            // Funkcja sprawdzania kodu importu
-            async function checkImportCode(code) {
-                const preview = document.getElementById('import-preview-inline');
-                const previewContent = document.getElementById('import-preview-content-inline');
-                
-                try {
-                    // Pokaż loading
-                    previewContent.innerHTML = '<div style="text-align: center; padding: 0.5rem;"><i class="fas fa-spinner fa-spin"></i> Sprawdzanie kodu...</div>';
-                    preview.style.display = 'block';
-                    
-                    // Sprawdź kod na serwerze
-                    const transferData = await getDataFromCode(code);
-                    
-                    if (transferData) {
-                        // Pokaż podgląd danych
-                        const animeCount = transferData.animeList ? transferData.animeList.length : 0;
-                        const plannerCount = transferData.plannerList ? transferData.plannerList.length : 0;
-                        const activityDays = transferData.activityData ? Object.keys(transferData.activityData).length : 0;
-                        
-                        previewContent.innerHTML = `
-                            <div style="margin: 0.25rem 0;">📺 Anime: ${animeCount}</div>
-                            <div style="margin: 0.25rem 0;">📋 Planer: ${plannerCount}</div>
-                            <div style="margin: 0.25rem 0;">📅 Dni aktywności: ${activityDays}</div>
-                            <div style="margin: 0.25rem 0; font-size: 0.7rem; color: var(--gray);">
-                                Wygenerowano: ${new Date(transferData.createdAt).toLocaleString('pl-PL')}
-                            </div>
-                        `;
-                        
-                        preview.style.display = 'block';
-                    } else {
-                        // Błędny kod
-                        previewContent.innerHTML = '<div style="color: var(--danger);">Nieprawidłowy lub wygasły kod!</div>';
-                        preview.style.display = 'block';
-                    }
-                } catch (error) {
-                    console.error('Błąd sprawdzania kodu:', error);
-                    previewContent.innerHTML = '<div style="color: var(--danger);">Błąd podczas sprawdzania kodu!</div>';
-                    preview.style.display = 'block';
-                }
-            }
-
-            // Funkcja wykonująca import
-            async function performImport(code) {
-                try {
-                    // Pokaż loading w polu input
-                    const input = document.getElementById('import-code-input-inline');
-                    const originalValue = input.value;
-                    input.value = 'Importowanie...';
-                    input.disabled = true;
-                    
-                    const transferData = await getDataFromCode(code);
-                    
-                    if (!transferData) {
-                        showNotification('Kod jest nieprawidłowy lub wygasł!', 'danger');
-                        return;
-                    }
-                    
-                    if (confirm('Czy na pewno chcesz wgrać te dane? Obecne dane zostaną połączone z importowanymi.')) {
-                        // Połącz dane
-                        if (transferData.animeList && Array.isArray(transferData.animeList)) {
-                            // Dodaj nowe anime, unikając duplikatów po tytule
-                            transferData.animeList.forEach(importedAnime => {
-                                const exists = animeList.find(existing => existing.title === importedAnime.title);
-                                if (!exists) {
-                                    // Nadaj nowe ID żeby uniknąć konfliktów
-                                    importedAnime.id = Date.now() + Math.random();
-                                    animeList.push(importedAnime);
-                                }
-                            });
-                        }
-                        
-                        if (transferData.plannerList && Array.isArray(transferData.plannerList)) {
-                            // Dodaj nowe pozycje planera
-                            transferData.plannerList.forEach(importedItem => {
-                                const exists = plannerList.find(existing => existing.title === importedItem.title);
-                                if (!exists) {
-                                    importedItem.id = Date.now() + Math.random();
-                                    plannerList.push(importedItem);
-                                }
-                            });
-                        }
-                        
-                        if (transferData.activityData && typeof transferData.activityData === 'object') {
-                            // Połącz dane aktywności
-                            Object.keys(transferData.activityData).forEach(date => {
-                                if (!activityData[date]) {
-                                    activityData[date] = 0;
-                                }
-                                activityData[date] += transferData.activityData[date];
-                            });
-                        }
-                        
-                        if (transferData.activityDetails && typeof transferData.activityDetails === 'object') {
-                            // Połącz szczegóły aktywności
-                            Object.keys(transferData.activityDetails).forEach(date => {
-                                if (!activityDetails[date]) {
-                                    activityDetails[date] = [];
-                                }
-                                activityDetails[date] = activityDetails[date].concat(transferData.activityDetails[date] || []);
-                            });
-                        }
-                        
-                        // Zapisz wszystko lokalnie
-                        saveAnimeList();
-                        savePlannerList();
-                        saveActivityData();
-                        
-                        // Usuń kod
-                        await removeCode(code);
-                        
-                        // Sprawdź czy to był aktywny kod użytkownika i wyczyść go
-                        const activeCode = getActiveCode();
-                        if (activeCode && activeCode.code === code) {
-                            clearActiveCode();
-                            updateActiveCodeDisplay();
-                        }
-                        
-                        // Wyczyść pole tekstowe i podgląd
-                        document.getElementById('import-code-input-inline').value = '';
-                        document.getElementById('import-preview-inline').style.display = 'none';
-                        
-                        // Odśwież widoki
-                        renderAnimeList();
-                        renderPlannerList();
-                        renderActivityCalendar();
-                        
-                        showNotification('Dane zostały pomyślnie zaimportowane!', 'success');
-                    }
-                } catch (error) {
-                    console.error('Błąd importu:', error);
-                    showNotification('Błąd podczas importu danych!', 'danger');
-                } finally {
-                    // Przywróć pole input
-                    const input = document.getElementById('import-code-input-inline');
-                    input.disabled = false;
-                    input.value = '';
-                }
-            }
-            
             // Obsługa zmiany rozmiaru okna
             window.addEventListener('resize', () => {
                 const wasMobile = isMobileView;
@@ -10184,9 +10129,15 @@ const animeData = {
                 console.log('Znaleziono kod w URL:', codeFromUrl);
                 // Krótkie opóźnienie żeby strona się załadowała
                 setTimeout(() => {
-                    document.getElementById('import-code-input-inline').value = codeFromUrl;
-                    checkImportCode(codeFromUrl);
-                    setTimeout(() => performImport(codeFromUrl), 1000);
+                    // Otwórz modal i wstaw kod
+                    const modal = document.getElementById('import-code-modal');
+                    const input = document.getElementById('import-code-input');
+                    modal.classList.add('show');
+                    input.value = codeFromUrl;
+                    input.focus();
+                    
+                    // Automatycznie sprawdź kod
+                    input.dispatchEvent(new Event('input'));
                 }, 500);
             }
         });
