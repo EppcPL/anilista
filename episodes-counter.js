@@ -97,25 +97,26 @@
         
         modal.innerHTML = `
             <div style="
-                background: white;
+                background: #2d3748;
                 border-radius: 15px;
                 padding: 30px;
                 max-width: 500px;
                 width: 90%;
                 max-height: 80vh;
                 overflow-y: auto;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+                border: 1px solid #4a5568;
             ">
                 <div style="
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                     margin-bottom: 25px;
-                    border-bottom: 2px solid #f0f0f0;
+                    border-bottom: 2px solid #4a5568;
                     padding-bottom: 15px;
                 ">
-                    <h2 style="margin: 0; color: #333; font-size: 24px;">
-                        <i class="fas fa-chart-line" style="color: #007bff; margin-right: 10px;"></i>
+                    <h2 style="margin: 0; color: #e2e8f0; font-size: 24px;">
+                        <i class="fas fa-chart-line" style="color: #63b3ed; margin-right: 10px;"></i>
                         Statystyki Oglądania
                     </h2>
                     <button onclick="this.closest('.episodes-modal').remove()" style="
@@ -123,14 +124,14 @@
                         border: none;
                         font-size: 24px;
                         cursor: pointer;
-                        color: #999;
+                        color: #a0aec0;
                         padding: 5px;
                     ">&times;</button>
                 </div>
                 
                 <div style="margin-bottom: 25px;">
                     <div style="
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        background: linear-gradient(135deg, #4c51bf 0%, #553c9a 100%);
                         color: white;
                         padding: 20px;
                         border-radius: 10px;
@@ -153,52 +154,52 @@
                     margin-bottom: 25px;
                 ">
                     <div style="
-                        background: #f8f9fa;
+                        background: #4a5568;
                         padding: 20px;
                         border-radius: 10px;
                         text-align: center;
-                        border-left: 4px solid #28a745;
+                        border-left: 4px solid #48bb78;
                     ">
-                        <div style="font-size: 24px; font-weight: bold; color: #28a745; margin-bottom: 5px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #48bb78; margin-bottom: 5px;">
                             ${stats.activeDays}
                         </div>
-                        <div style="font-size: 14px; color: #666;">
+                        <div style="font-size: 14px; color: #a0aec0;">
                             Aktywnych dni
                         </div>
                     </div>
                     
                     <div style="
-                        background: #f8f9fa;
+                        background: #4a5568;
                         padding: 20px;
                         border-radius: 10px;
                         text-align: center;
-                        border-left: 4px solid #007bff;
+                        border-left: 4px solid #63b3ed;
                     ">
-                        <div style="font-size: 24px; font-weight: bold; color: #007bff; margin-bottom: 5px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #63b3ed; margin-bottom: 5px;">
                             ${stats.averagePerDay}
                         </div>
-                        <div style="font-size: 14px; color: #666;">
+                        <div style="font-size: 14px; color: #a0aec0;">
                             Średnio/dzień
                         </div>
                     </div>
                 </div>
                 
                 <div style="
-                    background: #fff3cd;
-                    border: 1px solid #ffeaa7;
+                    background: #744210;
+                    border: 1px solid #975a16;
                     border-radius: 10px;
                     padding: 20px;
                     margin-bottom: 25px;
                     text-align: center;
                 ">
-                    <div style="font-size: 18px; font-weight: bold; color: #856404; margin-bottom: 10px;">
+                    <div style="font-size: 18px; font-weight: bold; color: #fbd38d; margin-bottom: 10px;">
                         <i class="fas fa-trophy" style="margin-right: 8px;"></i>
                         Najbardziej aktywny dzień
                     </div>
-                    <div style="font-size: 24px; font-weight: bold; color: #856404;">
+                    <div style="font-size: 24px; font-weight: bold; color: #fbd38d;">
                         ${stats.mostActiveDay.date}
                     </div>
-                    <div style="font-size: 16px; color: #856404;">
+                    <div style="font-size: 16px; color: #fbd38d;">
                         ${stats.mostActiveDay.episodes} odcinków
                     </div>
                 </div>
@@ -206,13 +207,13 @@
                 <div>
                     <h3 style="
                         margin: 0 0 15px 0;
-                        color: #333;
+                        color: #e2e8f0;
                         font-size: 18px;
                         text-align: center;
-                        border-bottom: 1px solid #eee;
+                        border-bottom: 1px solid #4a5568;
                         padding-bottom: 10px;
                     ">
-                        <i class="fas fa-medal" style="color: #ffc107; margin-right: 8px;"></i>
+                        <i class="fas fa-medal" style="color: #f6ad55; margin-right: 8px;"></i>
                         3 Najbardziej aktywne dni
                     </h3>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -221,14 +222,14 @@
                                 display: flex;
                                 justify-content: space-between;
                                 align-items: center;
-                                background: ${index === 0 ? '#fff3cd' : '#f8f9fa'};
+                                background: ${index === 0 ? '#744210' : '#4a5568'};
                                 padding: 15px;
                                 border-radius: 8px;
-                                border-left: 4px solid ${index === 0 ? '#ffc107' : index === 1 ? '#c0c0c0' : '#cd7f32'};
+                                border-left: 4px solid ${index === 0 ? '#f6ad55' : index === 1 ? '#a0aec0' : '#d69e2e'};
                             ">
                                 <div style="display: flex; align-items: center;">
                                     <span style="
-                                        background: ${index === 0 ? '#ffc107' : index === 1 ? '#c0c0c0' : '#cd7f32'};
+                                        background: ${index === 0 ? '#f6ad55' : index === 1 ? '#a0aec0' : '#d69e2e'};
                                         color: white;
                                         width: 24px;
                                         height: 24px;
@@ -240,10 +241,10 @@
                                         font-weight: bold;
                                         margin-right: 12px;
                                     ">${index + 1}</span>
-                                    <span style="font-weight: bold; color: #333;">${day.date}</span>
+                                    <span style="font-weight: bold; color: #e2e8f0;">${day.date}</span>
                                 </div>
                                 <span style="
-                                    background: ${index === 0 ? '#ffc107' : index === 1 ? '#c0c0c0' : '#cd7f32'};
+                                    background: ${index === 0 ? '#f6ad55' : index === 1 ? '#a0aec0' : '#d69e2e'};
                                     color: white;
                                     padding: 4px 12px;
                                     border-radius: 15px;
@@ -276,6 +277,14 @@
         try {
             const animeListData = localStorage.getItem('animeList');
             const plannerListData = localStorage.getItem('plannerList');
+            const activityData = localStorage.getItem('activityData');
+            const activityDetails = localStorage.getItem('activityDetails');
+            
+            // Debug info - można usunąć po sprawdzeniu
+            console.log('Episodes Counter: Debug - animeListData:', animeListData ? 'istnieje' : 'brak');
+            console.log('Episodes Counter: Debug - plannerListData:', plannerListData ? 'istnieje' : 'brak');
+            console.log('Episodes Counter: Debug - activityData:', activityData ? 'istnieje' : 'brak');
+            console.log('Episodes Counter: Debug - activityDetails:', activityDetails ? 'istnieje' : 'brak');
             
             let totalEpisodes = 0;
             let allActivities = [];
@@ -283,25 +292,17 @@
             // Przetwórz animeList
             if (animeListData) {
                 const animeList = JSON.parse(animeListData);
+                // console.log('Episodes Counter: Debug - animeList:', animeList);
+                
                 if (Array.isArray(animeList)) {
-                    animeList.forEach(anime => {
+                    animeList.forEach((anime, index) => {
                         if (anime.status === 'completed') {
                             totalEpisodes += parseInt(anime.totalEpisodes) || 0;
                         } else {
                             totalEpisodes += parseInt(anime.watchedEpisodes) || 0;
                         }
                         
-                        // Zbierz aktywności
-                        if (anime.activities && Array.isArray(anime.activities)) {
-                            anime.activities.forEach(activity => {
-                                if (activity.date && activity.episodes) {
-                                    allActivities.push({
-                                        date: activity.date,
-                                        episodes: parseInt(activity.episodes) || 0
-                                    });
-                                }
-                            });
-                        }
+                        // Usunięto zbieranie aktywności z anime.activities - dane są w activityData
                     });
                 }
             }
@@ -309,28 +310,38 @@
             // Przetwórz plannerList
             if (plannerListData) {
                 const plannerList = JSON.parse(plannerListData);
+                // console.log('Episodes Counter: Debug - plannerList:', plannerList);
+                
                 if (Array.isArray(plannerList)) {
-                    plannerList.forEach(anime => {
+                    plannerList.forEach((anime, index) => {
                         if (anime.status === 'completed') {
                             totalEpisodes += parseInt(anime.totalEpisodes) || 0;
                         } else {
                             totalEpisodes += parseInt(anime.watchedEpisodes) || 0;
                         }
                         
-                        // Zbierz aktywności
-                        if (anime.activities && Array.isArray(anime.activities)) {
-                            anime.activities.forEach(activity => {
-                                if (activity.date && activity.episodes) {
-                                    allActivities.push({
-                                        date: activity.date,
-                                        episodes: parseInt(activity.episodes) || 0
-                                    });
-                                }
-                            });
-                        }
+                        // Usunięto zbieranie aktywności z anime.activities - dane są w activityData
                     });
                 }
             }
+            
+            // Pobierz dane aktywności z właściwych miejsc
+            if (activityData) {
+                const parsedActivityData = JSON.parse(activityData);
+                // console.log('Episodes Counter: Debug - parsedActivityData:', parsedActivityData);
+                
+                // Konwertuj dane aktywności na format dla statystyk
+                Object.entries(parsedActivityData).forEach(([date, episodes]) => {
+                    if (episodes > 0) {
+                        allActivities.push({
+                            date: date,
+                            episodes: parseInt(episodes) || 0
+                        });
+                    }
+                });
+            }
+            
+            // console.log('Episodes Counter: Debug - allActivities:', allActivities);
             
             // Oblicz statystyki aktywności
             const activityByDate = {};
@@ -341,6 +352,8 @@
                     activityByDate[activity.date] = activity.episodes;
                 }
             });
+            
+            // console.log('Episodes Counter: Debug - activityByDate:', activityByDate);
             
             const activeDays = Object.keys(activityByDate).length;
             const totalActivityEpisodes = Object.values(activityByDate).reduce((sum, episodes) => sum + episodes, 0);
@@ -363,13 +376,16 @@
                 .slice(0, 3)
                 .map(([date, episodes]) => ({ date, episodes }));
             
-            return {
+            const result = {
                 totalEpisodes,
                 activeDays,
                 averagePerDay,
                 mostActiveDay,
                 top3Days
             };
+            
+            // console.log('Episodes Counter: Debug - wynik:', result);
+            return result;
             
         } catch (error) {
             console.error('Episodes Counter: Błąd podczas obliczania statystyk:', error);
@@ -487,6 +503,10 @@
                 e.target.closest('.fa-minus')
             )) {
                 setTimeout(updateEpisodesCount, 300);
+                // Jeśli modal jest otwarty, zaktualizuj go
+                if (modal && modal.parentNode) {
+                    setTimeout(showDetailedStats, 500);
+                }
             }
         });
         
@@ -498,6 +518,10 @@
                 e.target.id === 'add-anime-form'
             )) {
                 setTimeout(updateEpisodesCount, 500);
+                // Jeśli modal jest otwarty, zaktualizuj go
+                if (modal && modal.parentNode) {
+                    setTimeout(showDetailedStats, 700);
+                }
             }
         });
         
@@ -507,6 +531,17 @@
         window.addEventListener('animeAdded', updateEpisodesCount);
         window.addEventListener('animeRemoved', updateEpisodesCount);
         window.addEventListener('profileStatsUpdated', updateEpisodesCount);
+        
+        // Nasłuchuj na zmiany w activityData
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'activityData' || e.key === 'activityDetails') {
+                setTimeout(updateEpisodesCount, 100);
+                // Jeśli modal jest otwarty, zaktualizuj go
+                if (modal && modal.parentNode) {
+                    setTimeout(showDetailedStats, 200);
+                }
+            }
+        });
     }
     
     // Funkcja inicjalizująca
