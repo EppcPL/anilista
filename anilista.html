@@ -2197,6 +2197,163 @@
             border-color: var(--success);
         }
         
+        /* Style dla przycisków top 3 */
+        .top3-toggle {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .top3-toggle:hover {
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--lighter);
+            border-color: var(--primary);
+        }
+        
+        .top3-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Style dla najlepszych i najgorszych anime */
+        .best-worst-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .best-anime-card {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.2) 0%, rgba(40, 167, 69, 0.1) 100%);
+            border: 2px solid var(--success);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(40, 167, 69, 0.2);
+        }
+        
+        .best-anime-card::before {
+            content: '🏆';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            opacity: 0.7;
+        }
+        
+        .worst-anime-card {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(220, 53, 69, 0.1) 100%);
+            border: 2px solid var(--danger);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(220, 53, 69, 0.2);
+        }
+        
+        .worst-anime-card::before {
+            content: '💔';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            opacity: 0.7;
+        }
+        
+        .best-anime-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .worst-anime-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--danger);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .best-anime-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .worst-anime-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .best-anime-rating {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--success);
+            text-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+        }
+        
+        .worst-anime-rating {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--danger);
+            text-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+        }
+        
+        .top3-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+        
+        .top3-item:hover {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        
+        .top3-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+        
+        .top3-item-title {
+            color: var(--lighter);
+            font-weight: 500;
+        }
+        
+        .top3-item-date {
+            font-size: 0.8rem;
+            color: var(--gray);
+            font-style: italic;
+        }
+        
+        .top3-item-rating {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
         .priority-badge.priority-średni {
             color: var(--warning);
             border-color: var(--warning);
@@ -8256,6 +8413,11 @@ const animeData = {
                             const monthToShow = selectedMonth !== null ? selectedMonth : currentMonth;
                             showMonthDetails(monthToShow);
                             break;
+                            
+                        case 'yearly-summary':
+                            e.preventDefault();
+                            showYearlySummary(currentYear);
+                            break;
                     }
                     
                     // Handle calendar day clicks
@@ -8283,6 +8445,9 @@ const animeData = {
                     <div class="calendar-nav">
                         <button class="calendar-nav-btn" data-action="prev-year">
                             <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="calendar-nav-btn" data-action="yearly-summary" title="Podsumowanie roczne">
+                            <i class="fas fa-chart-pie"></i>
                         </button>
                         <button class="calendar-nav-btn" data-action="next-year">
                             <i class="fas fa-chevron-right"></i>
@@ -9247,6 +9412,358 @@ const animeData = {
                 document.getElementById('edit-anime-modal').classList.remove('show');
             }
 
+            // Modal podsumowania rocznego
+            function showYearlySummary(year) {
+                const modal = document.getElementById('yearly-summary-modal');
+                const titleEl = document.getElementById('yearly-summary-title');
+                const contentEl = document.getElementById('yearly-summary-content');
+                
+                titleEl.innerHTML = `Podsumowanie roku <span id="yearly-summary-year">${year}</span>`;
+                
+                // Oblicz statystyki roczne
+                const stats = calculateYearlyStats(year);
+                
+                // Generuj HTML podsumowania
+                let html = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">${stats.mostActiveMonth.name}</div>
+                            <div class="day-summary-stat-label">Najbardziej aktywny miesiąc</div>
+                            <div style="font-size: 0.8rem; color: var(--gray); margin-top: 0.25rem;">${stats.mostActiveMonth.episodes} odcinków</div>
+                        </div>
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">${stats.mostActiveDay.name}</div>
+                            <div class="day-summary-stat-label">Najbardziej aktywny dzień</div>
+                            <div style="font-size: 0.8rem; color: var(--gray); margin-top: 0.25rem;">${stats.mostActiveDay.episodes} odcinków</div>
+                        </div>
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">${stats.favoriteTag.name}</div>
+                            <div class="day-summary-stat-label">Ulubiony tag</div>
+                            <div style="font-size: 0.8rem; color: var(--gray); margin-top: 0.25rem;">${stats.favoriteTag.episodes} odcinków</div>
+                        </div>
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">${stats.totalAnime}</div>
+                            <div class="day-summary-stat-label">Obejrzane anime</div>
+                        </div>
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">${stats.totalEpisodes}</div>
+                            <div class="day-summary-stat-label">Obejrzane odcinki</div>
+                        </div>
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">${stats.totalWatchTime}</div>
+                            <div class="day-summary-stat-label">Czas oglądania</div>
+                        </div>
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">${stats.longestStreak}</div>
+                            <div class="day-summary-stat-label">Najdłuższy streak</div>
+                        </div>
+                        <div class="day-summary-stat">
+                            <div class="day-summary-stat-value">${stats.averageRating}</div>
+                            <div class="day-summary-stat-label">Średnia ocena</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Najlepsze i najgorsze anime
+                html += `
+                    <div class="best-worst-container">
+                        <div class="best-anime-card">
+                            <div class="best-anime-label">Najlepsze obejrzane</div>
+                            <div class="best-anime-title">${stats.bestAnime.title}</div>
+                            <div class="best-anime-rating">${stats.bestAnime.rating}</div>
+                        </div>
+                        <div class="worst-anime-card">
+                            <div class="worst-anime-label">Najgorsze obejrzane</div>
+                            <div class="worst-anime-title">${stats.worstAnime.title}</div>
+                            <div class="worst-anime-rating">${stats.worstAnime.rating}</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Top 3 z przełączaniem
+                html += `
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="margin-bottom: 1rem; color: var(--lighter);">
+                            <i class="fas fa-trophy"></i> Top 3
+                        </h4>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                            <button class="btn-secondary top3-toggle active" data-category="graphics">
+                                <i class="fas fa-palette"></i> Grafika
+                            </button>
+                            <button class="btn-secondary top3-toggle" data-category="music">
+                                <i class="fas fa-music"></i> Muzyka
+                            </button>
+                            <button class="btn-secondary top3-toggle" data-category="fun">
+                                <i class="fas fa-laugh"></i> Śmieszność
+                            </button>
+                        </div>
+                        <div id="top3-content">
+                            ${generateTop3HTML(stats.top3.graphics, 'graphics')}
+                        </div>
+                    </div>
+                `;
+                
+                // Lista obejrzanych tytułów
+                html += `
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="margin-bottom: 1rem; color: var(--lighter);">
+                            <i class="fas fa-list"></i> Lista obejrzanych tytułów
+                        </h4>
+                        <div style="max-height: 300px; overflow-y: auto; border: 1px solid var(--glass-border); border-radius: 8px; padding: 1rem;">
+                `;
+                
+                stats.watchedAnime.forEach(anime => {
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--glass-border);">
+                            <span style="color: var(--lighter);">${anime.title}</span>
+                            <span style="color: var(--primary); font-weight: 500;">${anime.rating}</span>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+                
+                contentEl.innerHTML = html;
+                
+                // Dodaj obsługę przełączania top 3
+                contentEl.querySelectorAll('.top3-toggle').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        contentEl.querySelectorAll('.top3-toggle').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        const category = this.dataset.category;
+                        const top3Content = document.getElementById('top3-content');
+                        top3Content.innerHTML = generateTop3HTML(stats.top3[category], category);
+                    });
+                });
+                
+                modal.classList.add('show');
+            }
+            
+            function calculateYearlyStats(year) {
+                const yearStart = `${year}-01-01`;
+                const yearEnd = `${year}-12-31`;
+                
+                // Zbierz wszystkie aktywności z danego roku
+                const yearActivities = {};
+                const monthStats = {};
+                const dayStats = {};
+                const tagStats = {};
+                const animeStats = {};
+                const watchedAnime = [];
+                
+                // Inicjalizuj miesiące
+                const months = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 
+                               'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+                months.forEach((month, index) => {
+                    monthStats[index] = { name: month, episodes: 0 };
+                });
+                
+                // Przeanalizuj aktywności
+                Object.keys(activityData).forEach(date => {
+                    if (date >= yearStart && date <= yearEnd) {
+                        const episodes = activityData[date] || 0;
+                        if (episodes > 0) {
+                            yearActivities[date] = episodes;
+                            
+                            // Statystyki miesięczne
+                            const month = parseInt(date.split('-')[1]) - 1;
+                            monthStats[month].episodes += episodes;
+                            
+                            // Statystyki dzienne
+                            const dayOfWeek = new Date(date).getDay();
+                            const dayNames = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
+                            if (!dayStats[dayOfWeek]) {
+                                dayStats[dayOfWeek] = { name: dayNames[dayOfWeek], episodes: 0 };
+                            }
+                            dayStats[dayOfWeek].episodes += episodes;
+                            
+                            // Statystyki anime i tagów
+                            const details = activityDetails[date] || [];
+                            details.forEach(detail => {
+                                const anime = animeList.find(a => a.id === detail.animeId);
+                                if (anime) {
+                                    // Dodaj do obejrzanych anime jeśli jeszcze nie było
+                                    if (!watchedAnime.find(a => a.id === anime.id)) {
+                                        watchedAnime.push({
+                                            id: anime.id,
+                                            title: anime.title,
+                                            rating: anime.averageRating
+                                        });
+                                    }
+                                    
+                                    // Statystyki tagów
+                                    if (anime.tags && Array.isArray(anime.tags)) {
+                                        anime.tags.forEach(tag => {
+                                            if (!tagStats[tag]) {
+                                                tagStats[tag] = { name: tag, episodes: 0 };
+                                            }
+                                            tagStats[tag].episodes += detail.episodes;
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+                
+                // Znajdź najbardziej aktywny miesiąc
+                const mostActiveMonth = Object.values(monthStats).reduce((max, month) => 
+                    month.episodes > max.episodes ? month : max, { episodes: 0, name: 'Brak' });
+                
+                // Znajdź najbardziej aktywny dzień
+                const mostActiveDay = Object.values(dayStats).reduce((max, day) => 
+                    day.episodes > max.episodes ? day : max, { episodes: 0, name: 'Brak' });
+                
+                // Znajdź ulubiony tag
+                const favoriteTag = Object.values(tagStats).reduce((max, tag) => 
+                    tag.episodes > max.episodes ? tag : max, { episodes: 0, name: 'Brak' });
+                
+                // Oblicz całkowite statystyki
+                const totalEpisodes = Object.values(yearActivities).reduce((sum, episodes) => sum + episodes, 0);
+                const totalAnime = watchedAnime.length;
+                
+                // Oblicz czas oglądania
+                let totalMinutes = 0;
+                Object.keys(yearActivities).forEach(date => {
+                    const details = activityDetails[date] || [];
+                    details.forEach(detail => {
+                        const anime = animeList.find(a => a.id === detail.animeId);
+                        const episodeLength = anime ? anime.episodeLength : 24;
+                        totalMinutes += detail.episodes * episodeLength;
+                    });
+                });
+                
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                const totalWatchTime = hours > 0 ? 
+                    `${hours}h ${minutes > 0 ? minutes + 'm' : ''}` : 
+                    `${minutes}m`;
+                
+                // Oblicz najdłuższy streak
+                const longestStreak = calculateLongestStreak(Object.keys(yearActivities).sort());
+                
+                // Oblicz średnią ocenę
+                const averageRating = watchedAnime.length > 0 ? 
+                    (watchedAnime.reduce((sum, anime) => sum + anime.rating, 0) / watchedAnime.length).toFixed(2) : 
+                    '0.00';
+                
+                // Znajdź najlepsze i najgorsze anime
+                const bestAnime = watchedAnime.reduce((best, anime) => 
+                    anime.rating > best.rating ? anime : best, { rating: 0, title: 'Brak' });
+                const worstAnime = watchedAnime.reduce((worst, anime) => 
+                    anime.rating < worst.rating ? anime : worst, { rating: 11, title: 'Brak' });
+                
+                // Przygotuj top 3 dla różnych kategorii
+                const top3 = {
+                    graphics: [],
+                    music: [],
+                    fun: []
+                };
+                
+                watchedAnime.forEach(anime => {
+                    const animeObj = animeList.find(a => a.id === anime.id);
+                    if (animeObj) {
+                        top3.graphics.push({ 
+                            title: anime.title, 
+                            rating: animeObj.ratings.graphics,
+                            completedDate: animeObj.completedDate 
+                        });
+                        top3.music.push({ 
+                            title: anime.title, 
+                            rating: animeObj.ratings.music,
+                            completedDate: animeObj.completedDate 
+                        });
+                        top3.fun.push({ 
+                            title: anime.title, 
+                            rating: animeObj.ratings.fun,
+                            completedDate: animeObj.completedDate 
+                        });
+                    }
+                });
+                
+                // Sortuj i weź top 3
+                Object.keys(top3).forEach(category => {
+                    top3[category] = top3[category]
+                        .sort((a, b) => b.rating - a.rating)
+                        .slice(0, 3);
+                });
+                
+                return {
+                    mostActiveMonth,
+                    mostActiveDay,
+                    favoriteTag,
+                    totalAnime,
+                    totalEpisodes,
+                    totalWatchTime,
+                    longestStreak,
+                    averageRating,
+                    bestAnime,
+                    worstAnime,
+                    top3,
+                    watchedAnime: watchedAnime.sort((a, b) => b.rating - a.rating)
+                };
+            }
+            
+            function generateTop3HTML(items, category) {
+                if (items.length === 0) {
+                    return '<div style="text-align: center; color: var(--gray); padding: 2rem;">Brak danych</div>';
+                }
+                
+                let html = '';
+                items.forEach((item, index) => {
+                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
+                    html += `
+                        <div class="top3-item">
+                            <div class="top3-item-info">
+                                <div class="top3-item-title">${medal} ${item.title}</div>
+                                <div class="top3-item-date">${item.completedDate ? formatDate(item.completedDate) : 'Data nieznana'}</div>
+                            </div>
+                            <div class="top3-item-rating">${item.rating}</div>
+                        </div>
+                    `;
+                });
+                return html;
+            }
+            
+            function calculateLongestStreak(dates) {
+                if (dates.length === 0) return '0 dni';
+                
+                let longestStreak = 1;
+                let currentStreak = 1;
+                
+                for (let i = 1; i < dates.length; i++) {
+                    const prevDate = new Date(dates[i - 1]);
+                    const currentDate = new Date(dates[i]);
+                    const dayDiff = (currentDate - prevDate) / (1000 * 60 * 60 * 24);
+                    
+                    if (dayDiff === 1) {
+                        currentStreak++;
+                    } else {
+                        longestStreak = Math.max(longestStreak, currentStreak);
+                        currentStreak = 1;
+                    }
+                }
+                
+                longestStreak = Math.max(longestStreak, currentStreak);
+                return `${longestStreak} ${longestStreak === 1 ? 'dzień' : longestStreak <= 4 ? 'dni' : 'dni'}`;
+            }
+            
+            function formatDate(dateString) {
+                if (!dateString) return 'Data nieznana';
+                
+                const date = new Date(dateString);
+                const options = { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                };
+                return date.toLocaleDateString('pl-PL', options);
+            }
+
             // Modal szczegółów anime
             function showAnimeDetailsModal(animeId) {
                 const anime = animeList.find(a => a.id === animeId);
@@ -10055,6 +10572,11 @@ const animeData = {
                     delete qrScannerModal.dataset.scanner;
                 }
                 qrScannerModal.classList.remove('show');
+            });
+
+            // Obsługa zamykania modala podsumowania rocznego
+            document.getElementById('yearly-summary-close').addEventListener('click', function() {
+                document.getElementById('yearly-summary-modal').classList.remove('show');
             });
 
 
@@ -11069,6 +11591,21 @@ const animeData = {
                 </button>
             </div>
             <div id="anime-details-content">
+                <!-- Content will be dynamically filled -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal podsumowania rocznego -->
+    <div class="episode-modal" id="yearly-summary-modal">
+        <div class="episode-modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <div class="episode-modal-header">
+                <h3 id="yearly-summary-title">Podsumowanie roku <span id="yearly-summary-year"></span></h3>
+                <button class="episode-modal-close" id="yearly-summary-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="yearly-summary-content">
                 <!-- Content will be dynamically filled -->
             </div>
         </div>
