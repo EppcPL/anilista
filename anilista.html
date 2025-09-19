@@ -2088,6 +2088,34 @@
             color: var(--gray);
         }
         
+        .clickable-stat {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .clickable-stat:hover {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .clickable-stat::after {
+            content: '👆';
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .clickable-stat:hover::after {
+            opacity: 1;
+        }
+        
         .day-summary-anime-list {
             margin-top: 1.5rem;
         }
@@ -9426,15 +9454,20 @@ const animeData = {
                 // Generuj HTML podsumowania
                 let html = `
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                        <div class="day-summary-stat">
+                        <div class="day-summary-stat clickable-stat" data-type="month">
                             <div class="day-summary-stat-value">${stats.mostActiveMonth.name}</div>
                             <div class="day-summary-stat-label">Najbardziej aktywny miesiąc</div>
                             <div style="font-size: 0.8rem; color: var(--gray); margin-top: 0.25rem;">${stats.mostActiveMonth.episodes} odcinków</div>
                         </div>
-                        <div class="day-summary-stat">
-                            <div class="day-summary-stat-value">${stats.mostActiveDay.name}</div>
-                            <div class="day-summary-stat-label">Najbardziej aktywny dzień</div>
-                            <div style="font-size: 0.8rem; color: var(--gray); margin-top: 0.25rem;">${stats.mostActiveDay.episodes} odcinków</div>
+                        <div class="day-summary-stat clickable-stat" data-type="dayOfWeek">
+                            <div class="day-summary-stat-value">${stats.mostActiveDayOfWeek.name}</div>
+                            <div class="day-summary-stat-label">Najbardziej aktywny dzień tygodnia</div>
+                            <div style="font-size: 0.8rem; color: var(--gray); margin-top: 0.25rem;">${stats.mostActiveDayOfWeek.episodes} odcinków</div>
+                        </div>
+                        <div class="day-summary-stat clickable-stat" data-type="specificDay">
+                            <div class="day-summary-stat-value">${stats.mostActiveSpecificDay.name}</div>
+                            <div class="day-summary-stat-label">Najbardziej aktywny dzień roku</div>
+                            <div style="font-size: 0.8rem; color: var(--gray); margin-top: 0.25rem;">${stats.mostActiveSpecificDay.episodes} odcinków</div>
                         </div>
                         <div class="day-summary-stat">
                             <div class="day-summary-stat-value">${stats.favoriteTag.name}</div>
@@ -9540,7 +9573,76 @@ const animeData = {
                     });
                 });
                 
+                // Dodaj obsługę klikania kafelków z rozbudowanymi podsumowaniami
+                contentEl.querySelectorAll('.clickable-stat').forEach(stat => {
+                    stat.addEventListener('click', function() {
+                        const type = this.dataset.type;
+                        showDetailedStatModal(type, stats);
+                    });
+                });
+                
                 modal.classList.add('show');
+            }
+            
+            // Modal szczegółowych statystyk
+            function showDetailedStatModal(type, stats) {
+                const modal = document.createElement('div');
+                modal.className = 'episode-modal show';
+                modal.style.zIndex = '10001';
+                
+                let title = '';
+                let content = '';
+                
+                switch(type) {
+                    case 'month':
+                        title = 'Najbardziej aktywne miesiące';
+                        const sortedMonths = Object.values(stats.monthStats)
+                            .sort((a, b) => b.episodes - a.episodes)
+                            .slice(0, 3);
+                        content = generateTop3HTML(sortedMonths, 'month');
+                        break;
+                    case 'dayOfWeek':
+                        title = 'Najbardziej aktywne dni tygodnia';
+                        const sortedDays = Object.values(stats.dayStats)
+                            .sort((a, b) => b.episodes - a.episodes)
+                            .slice(0, 3);
+                        content = generateTop3HTML(sortedDays, 'dayOfWeek');
+                        break;
+                    case 'specificDay':
+                        title = 'Najbardziej aktywne dni w roku';
+                        const sortedSpecificDays = Object.values(stats.specificDayStats)
+                            .sort((a, b) => b.episodes - a.episodes)
+                            .slice(0, 3);
+                        content = generateTop3HTML(sortedSpecificDays, 'specificDay');
+                        break;
+                }
+                
+                modal.innerHTML = `
+                    <div class="episode-modal-content">
+                        <div class="episode-modal-header">
+                            <h3>${title}</h3>
+                            <button class="episode-modal-close detailed-stat-close">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="episode-modal-body">
+                            ${content}
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Obsługa zamknięcia
+                modal.querySelector('.detailed-stat-close').addEventListener('click', () => {
+                    document.body.removeChild(modal);
+                });
+                
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        document.body.removeChild(modal);
+                    }
+                });
             }
             
             function calculateYearlyStats(year) {
@@ -9550,7 +9652,8 @@ const animeData = {
                 // Zbierz wszystkie aktywności z danego roku
                 const yearActivities = {};
                 const monthStats = {};
-                const dayStats = {};
+                const dayStats = {}; // dni tygodnia (poniedziałek, wtorek, etc.)
+                const specificDayStats = {}; // konkretne dni w roku (2024-12-11, etc.)
                 const tagStats = {};
                 const animeStats = {};
                 const watchedAnime = [];
@@ -9573,13 +9676,23 @@ const animeData = {
                             const month = parseInt(date.split('-')[1]) - 1;
                             monthStats[month].episodes += episodes;
                             
-                            // Statystyki dzienne
+                            // Statystyki dzienne (dni tygodnia)
                             const dayOfWeek = new Date(date).getDay();
                             const dayNames = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
                             if (!dayStats[dayOfWeek]) {
                                 dayStats[dayOfWeek] = { name: dayNames[dayOfWeek], episodes: 0 };
                             }
                             dayStats[dayOfWeek].episodes += episodes;
+                            
+                            // Statystyki konkretnych dni w roku
+                            const dayName = dayNames[dayOfWeek];
+                            const dayNumber = parseInt(date.split('-')[2]);
+                            const monthName = months[parseInt(date.split('-')[1]) - 1];
+                            specificDayStats[date] = { 
+                                name: `${dayNumber} ${monthName} ${dayName}`, 
+                                episodes: episodes,
+                                date: date
+                            };
                             
                             // Statystyki anime i tagów
                             const details = activityDetails[date] || [];
@@ -9614,8 +9727,12 @@ const animeData = {
                 const mostActiveMonth = Object.values(monthStats).reduce((max, month) => 
                     month.episodes > max.episodes ? month : max, { episodes: 0, name: 'Brak' });
                 
-                // Znajdź najbardziej aktywny dzień
-                const mostActiveDay = Object.values(dayStats).reduce((max, day) => 
+                // Znajdź najbardziej aktywny dzień tygodnia
+                const mostActiveDayOfWeek = Object.values(dayStats).reduce((max, day) => 
+                    day.episodes > max.episodes ? day : max, { episodes: 0, name: 'Brak' });
+                
+                // Znajdź najbardziej aktywny konkretny dzień w roku
+                const mostActiveSpecificDay = Object.values(specificDayStats).reduce((max, day) => 
                     day.episodes > max.episodes ? day : max, { episodes: 0, name: 'Brak' });
                 
                 // Znajdź ulubiony tag
@@ -9694,7 +9811,8 @@ const animeData = {
                 
                 return {
                     mostActiveMonth,
-                    mostActiveDay,
+                    mostActiveDayOfWeek,
+                    mostActiveSpecificDay,
                     favoriteTag,
                     totalAnime,
                     totalEpisodes,
@@ -9704,7 +9822,12 @@ const animeData = {
                     bestAnime,
                     worstAnime,
                     top3,
-                    watchedAnime: watchedAnime.sort((a, b) => b.rating - a.rating)
+                    watchedAnime: watchedAnime.sort((a, b) => b.rating - a.rating),
+                    // Dodatkowe dane dla rozbudowanych podsumowań
+                    dayStats,
+                    specificDayStats,
+                    monthStats,
+                    tagStats
                 };
             }
             
@@ -9716,15 +9839,30 @@ const animeData = {
                 let html = '';
                 items.forEach((item, index) => {
                     const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
-                    html += `
-                        <div class="top3-item">
-                            <div class="top3-item-info">
-                                <div class="top3-item-title">${medal} ${item.title}</div>
-                                <div class="top3-item-date">${item.completedDate ? formatDate(item.completedDate) : 'Data nieznana'}</div>
+                    
+                    // Obsługa różnych typów danych
+                    if (category === 'dayOfWeek' || category === 'specificDay' || category === 'month') {
+                        html += `
+                            <div class="top3-item">
+                                <div class="top3-item-info">
+                                    <div class="top3-item-title">${medal} ${item.name}</div>
+                                    <div class="top3-item-date">${item.episodes} odcinków</div>
+                                </div>
+                                <div class="top3-item-rating">${item.episodes}</div>
                             </div>
-                            <div class="top3-item-rating">${item.rating}</div>
-                        </div>
-                    `;
+                        `;
+                    } else {
+                        // Oryginalna obsługa dla anime
+                        html += `
+                            <div class="top3-item">
+                                <div class="top3-item-info">
+                                    <div class="top3-item-title">${medal} ${item.title}</div>
+                                    <div class="top3-item-date">${item.completedDate ? formatDate(item.completedDate) : 'Data nieznana'}</div>
+                                </div>
+                                <div class="top3-item-rating">${item.rating}</div>
+                            </div>
+                        `;
+                    }
                 });
                 return html;
             }
