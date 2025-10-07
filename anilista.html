@@ -7290,10 +7290,15 @@ const animeData = {
                     const rewatchVal = rewatchValues[i] || 0;
                     const episodeLength = episodeLengths[i] || '';
                     const seasonDate = seasonCompletedDates && seasonCompletedDates[i] ? seasonCompletedDates[i] : '';
+                    
+                    // Sprawdź czy sezon ma zapisane dane (jest "zablokowany")
+                    const hasData = val !== '' && val > 0;
+                    const lockIcon = hasData ? '<i class="fas fa-lock" style="color:var(--success);margin-left:8px;" title="Sezon ma zapisane dane"></i>' : '';
+                    
                     seasonsContainer.innerHTML += `
-                        <div style='margin-bottom:12px;padding:12px;background:rgba(0,0,0,0.2);border-radius:8px;border:1px solid var(--glass-border);'>
+                        <div style='margin-bottom:12px;padding:12px;background:rgba(0,0,0,0.2);border-radius:8px;border:1px solid ${hasData ? 'var(--success)' : 'var(--glass-border)'};'>
                             <div style='margin-bottom:8px;'>
-                                <label style='font-weight:600;color:var(--lighter);'>Sezon ${i+1}:</label>
+                                <label style='font-weight:600;color:var(--lighter);'>Sezon ${i+1}:${lockIcon}</label>
                                 <input type='number' class='season-episodes' min='1' value='${val}' style='width:80px;display:inline-block;margin-left:8px;padding:6px;border-radius:4px;border:1px solid var(--glass-border);background:rgba(0,0,0,0.3);color:var(--lighter);'>
                                 <span style='margin-left:8px;color:var(--gray);font-size:0.9rem;'>odcinków</span>
                                 <input type='number' class='season-episode-length' min='1' value='${episodeLength}' placeholder='24' style='width:80px;display:inline-block;margin-left:12px;padding:6px;border-radius:4px;border:1px solid var(--glass-border);background:rgba(0,0,0,0.3);color:var(--lighter);'>
@@ -7328,8 +7333,34 @@ const animeData = {
 
             seasonCountInput.addEventListener('input', function() {
                 const count = parseInt(this.value);
+                
                 if (count > 1) {
-                    renderSeasonInputs(count);
+                    // Zachowaj istniejące wartości przed zmianą
+                    const existingValues = [];
+                    const existingRewatches = [];
+                    const existingLengths = [];
+                    const existingDates = [];
+                    
+                    const seasonInputs = seasonsContainer.querySelectorAll('.season-episodes');
+                    const rewatchInputs = seasonsContainer.querySelectorAll('.season-rewatch');
+                    const lengthInputs = seasonsContainer.querySelectorAll('.season-episode-length');
+                    const dateInputs = seasonsContainer.querySelectorAll('.season-completed-date');
+                    
+                    seasonInputs.forEach((input, index) => {
+                        existingValues[index] = parseInt(input.value) || '';
+                    });
+                    rewatchInputs.forEach((input, index) => {
+                        existingRewatches[index] = parseInt(input.value) || 0;
+                    });
+                    lengthInputs.forEach((input, index) => {
+                        existingLengths[index] = parseInt(input.value) || '';
+                    });
+                    dateInputs.forEach((input, index) => {
+                        existingDates[index] = input.value || '';
+                    });
+                    
+                    // Renderuj z zachowanymi wartościami
+                    renderSeasonInputs(count, existingValues, existingRewatches, existingLengths, existingDates);
                 } else {
                     seasonsContainer.innerHTML = '';
                     seasonsContainer.style.display = 'none';
@@ -10155,10 +10186,15 @@ const animeData = {
                     const rewatchVal = rewatchValues[i] || 0;
                     const episodeLength = episodeLengths[i] || '';
                     const seasonDate = seasonCompletedDates && seasonCompletedDates[i] ? seasonCompletedDates[i] : '';
+                    
+                    // Sprawdź czy sezon ma zapisane dane (jest "zablokowany")
+                    const hasData = val !== '' && val > 0;
+                    const lockIcon = hasData ? '<i class="fas fa-lock" style="color:var(--success);margin-left:8px;" title="Sezon ma zapisane dane"></i>' : '';
+                    
                     editSeasonsContainer.innerHTML += `
-                        <div style='margin-bottom:12px;padding:12px;background:rgba(0,0,0,0.2);border-radius:8px;border:1px solid var(--glass-border);'>
+                        <div style='margin-bottom:12px;padding:12px;background:rgba(0,0,0,0.2);border-radius:8px;border:1px solid ${hasData ? 'var(--success)' : 'var(--glass-border)'};'>
                             <div style='margin-bottom:8px;'>
-                                <label style='font-weight:600;color:var(--lighter);'>Sezon ${i+1}:</label>
+                                <label style='font-weight:600;color:var(--lighter);'>Sezon ${i+1}:${lockIcon}</label>
                                 <input type='number' class='edit-season-episodes' min='1' value='${val}' style='width:80px;display:inline-block;margin-left:8px;padding:6px;border-radius:4px;border:1px solid var(--glass-border);background:rgba(0,0,0,0.3);color:var(--lighter);'>
                                 <span style='margin-left:8px;color:var(--gray);font-size:0.9rem;'>odcinków</span>
                                 <input type='number' class='edit-season-episode-length' min='1' value='${episodeLength}' placeholder='24' style='width:80px;display:inline-block;margin-left:12px;padding:6px;border-radius:4px;border:1px solid var(--glass-border);background:rgba(0,0,0,0.3);color:var(--lighter);'>
@@ -10263,11 +10299,38 @@ const animeData = {
             // Event listeners dla sezonów w modalu edycji
             document.getElementById('edit-season-count').addEventListener('input', function() {
                 const count = parseInt(this.value);
+                const editSeasonsContainer = document.getElementById('edit-seasons-container');
+                
                 if (count > 1) {
-                    renderEditSeasonInputs(count);
+                    // Zachowaj istniejące wartości przed zmianą
+                    const existingValues = [];
+                    const existingRewatches = [];
+                    const existingLengths = [];
+                    const existingDates = [];
+                    
+                    const seasonInputs = editSeasonsContainer.querySelectorAll('.edit-season-episodes');
+                    const rewatchInputs = editSeasonsContainer.querySelectorAll('.edit-season-rewatch');
+                    const lengthInputs = editSeasonsContainer.querySelectorAll('.edit-season-episode-length');
+                    const dateInputs = editSeasonsContainer.querySelectorAll('.edit-season-completed-date');
+                    
+                    seasonInputs.forEach((input, index) => {
+                        existingValues[index] = parseInt(input.value) || '';
+                    });
+                    rewatchInputs.forEach((input, index) => {
+                        existingRewatches[index] = parseInt(input.value) || 0;
+                    });
+                    lengthInputs.forEach((input, index) => {
+                        existingLengths[index] = parseInt(input.value) || '';
+                    });
+                    dateInputs.forEach((input, index) => {
+                        existingDates[index] = input.value || '';
+                    });
+                    
+                    // Renderuj z zachowanymi wartościami
+                    renderEditSeasonInputs(count, existingValues, existingRewatches, existingLengths, existingDates);
                 } else {
-                    document.getElementById('edit-seasons-container').innerHTML = '';
-                    document.getElementById('edit-seasons-container').style.display = 'none';
+                    editSeasonsContainer.innerHTML = '';
+                    editSeasonsContainer.style.display = 'none';
                     document.getElementById('edit-total-episodes').readOnly = false;
                 }
                 updateEditTotalEpisodesFromSeasons();
