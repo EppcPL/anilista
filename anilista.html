@@ -10509,7 +10509,7 @@ const animeData = {
                 let seasonEpisodeLengths = [];
                 let seasonCompletedDates = [];
                 
-                if (seasonCount > 1) {
+                if (seasonCount >= 1) {
                     const editSeasonsContainer = document.getElementById('edit-seasons-container');
                     const seasonInputs = editSeasonsContainer.querySelectorAll('.edit-season-episodes');
                     const rewatchInputs = editSeasonsContainer.querySelectorAll('.edit-season-rewatch');
