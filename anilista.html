@@ -4304,7 +4304,12 @@
         </div>
         
         <div class="section" id="lista">
-            <h2><i class="fas fa-list-ul"></i> Twoja kolekcja</h2>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:1rem;">
+                <h2 style="margin:0;"><i class="fas fa-list-ul"></i> Twoja kolekcja</h2>
+                <button id="filter-watching-btn" class="btn-accent" style="padding:8px 16px;font-size:0.9rem;white-space:nowrap;">
+                    <i class="fas fa-eye"></i> Obecnie oglądane
+                </button>
+            </div>
             <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
                 <label for="sort-select" style="font-weight:500;">Sortuj po:</label>
                 <select id="sort-select" style="padding:8px 16px;border-radius:8px;">
@@ -7461,6 +7466,30 @@ const animeData = {
             // Wyszukiwarka na bieżąco
             searchInput.addEventListener('input', function() {
                 currentSearch = this.value;
+                collectionPage = 1;
+                showAllCollection = false;
+                renderAnimeList();
+            });
+
+            // Przycisk filtrowania "obecnie oglądane"
+            const filterWatchingBtn = document.getElementById('filter-watching-btn');
+            let isFilteringWatching = false;
+            
+            filterWatchingBtn.addEventListener('click', function() {
+                isFilteringWatching = !isFilteringWatching;
+                
+                if (isFilteringWatching) {
+                    // Aktywuj filtr
+                    currentSearch = 'watching';
+                    this.innerHTML = '<i class="fas fa-times"></i> Pokaż wszystkie';
+                    this.style.background = 'linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%)';
+                } else {
+                    // Wyłącz filtr
+                    currentSearch = '';
+                    this.innerHTML = '<i class="fas fa-eye"></i> Obecnie oglądane';
+                    this.style.background = '';
+                }
+                
                 collectionPage = 1;
                 showAllCollection = false;
                 renderAnimeList();
