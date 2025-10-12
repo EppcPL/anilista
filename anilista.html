@@ -5412,7 +5412,7 @@
                         episodesText += ` <span class="rewatch-info">(+${anime.rewatchCount} rewatch)</span>`;
                     }
                     let seasonsProgressHtml = '';
-                    let hasSeasons = anime.seasons && anime.seasons.length > 1;
+                    let hasSeasons = anime.seasons && anime.seasons.length >= 1;
                     if (hasSeasons) {
                         // Przygotuj HTML z progressem sezonów (ukryty domyślnie)
                         let watched = anime.watchedEpisodes;
@@ -10044,7 +10044,7 @@ const animeData = {
 
                 // Seasons info
                 let seasonsHtml = '';
-                if (anime.seasons && Array.isArray(anime.seasons) && anime.seasons.length > 1) {
+                if (anime.seasons && Array.isArray(anime.seasons) && anime.seasons.length >= 1) {
                     seasonsHtml = `
                         <div style="margin: 1rem 0;">
                             <strong style="color: var(--primary);">Sezony (${anime.seasons.length}):</strong>
@@ -10212,7 +10212,7 @@ const animeData = {
                         </div>
                     `;
                 }
-                editSeasonsContainer.style.display = count > 1 ? '' : 'none';
+                editSeasonsContainer.style.display = count >= 1 ? '' : 'none';
                 editTotalEpisodesInput.readOnly = count > 1;
             }
             
@@ -10230,7 +10230,7 @@ const animeData = {
             
             function fillEditSeasonInputsIfNeeded(anime) {
                 const editSeasonCountInput = document.getElementById('edit-season-count');
-                if (anime.seasons && Array.isArray(anime.seasons) && anime.seasons.length > 1) {
+                if (anime.seasons && Array.isArray(anime.seasons) && anime.seasons.length >= 1) {
                     editSeasonCountInput.value = anime.seasons.length;
                     const rewatchValues = anime.seasonRewatches || [];
                     const episodeLengthValues = anime.seasonEpisodeLengths || [];
@@ -10238,7 +10238,10 @@ const animeData = {
                     renderEditSeasonInputs(anime.seasons.length, anime.seasons, rewatchValues, episodeLengthValues, seasonCompletedDates);
                 } else {
                     editSeasonCountInput.value = 1;
-                    renderEditSeasonInputs(1);
+                    // Renderuj z pustymi wartościami dla nowego anime lub anime bez struktury sezonów
+                    const totalEps = anime.totalEpisodes || 0;
+                    const epLength = anime.episodeLength || 24;
+                    renderEditSeasonInputs(1, [totalEps], [0], [epLength], ['']);
                 }
             }
             
@@ -10524,13 +10527,13 @@ const animeData = {
                 anime.averageRating = parseFloat(((anime.ratings.graphics + anime.ratings.music + anime.ratings.characters + anime.ratings.story + anime.ratings.fun) / 5).toFixed(1));
                 
                 // Zapisz dane sezonów
-                if (seasonCount > 1) {
+                if (seasonCount >= 1) {
                     anime.seasons = seasons;
                     anime.seasonRewatches = seasonRewatches;
                     anime.seasonEpisodeLengths = seasonEpisodeLengths;
                     anime.seasonCompletedDates = seasonCompletedDates;
                 } else {
-                    // Usuń dane sezonów jeśli przeszło na pojedynczy sezon
+                    // Usuń dane sezonów jeśli nie ma sezonów
                     delete anime.seasons;
                     delete anime.seasonRewatches;
                     delete anime.seasonEpisodeLengths;
