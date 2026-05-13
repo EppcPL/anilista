@@ -4347,6 +4347,10 @@
                     <div class="tier-items" id="tier-SSS"></div>
                 </div>
                 <div class="tier-row">
+    <div class="tier-label ssplus">SS+</div>
+    <div class="tier-items" id="tier-SSPLUS"></div>
+</div>
+                <div class="tier-row">
                     <div class="tier-label tier-SS">SS</div>
                     <div class="tier-items" id="tier-SS"></div>
                 </div>
@@ -5687,7 +5691,15 @@ if (rating === 11) {
     tierItem.dataset.tier = 'SSS';
     document.getElementById('tier-SSS').appendChild(tierItem.cloneNode(true));
 
-} else if (rating >= 10 && rating < 11) {
+} else if (
+    selectedStat === 'average' &&
+    rating >= 10.5 &&
+    rating < 11
+) {
+    tierItem.dataset.tier = 'SS+';
+    document.getElementById('tier-SSPLUS').appendChild(tierItem.cloneNode(true));
+
+} else if (rating > 10 && rating < 11) {
     tierItem.dataset.tier = 'SS';
     document.getElementById('tier-SS').appendChild(tierItem.cloneNode(true));
 
