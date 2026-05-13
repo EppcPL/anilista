@@ -5683,31 +5683,38 @@
                         rating = anime.ratings[currentTierCategory];
                     }
                     
-                    if (rating >= 10.5) {
-                        tierItem.dataset.tier = 'SSS';
-                        document.getElementById('tier-SSS').appendChild(tierItem.cloneNode(true));
-                    } else if (rating >= 9.5 && rating < 10.5) {
-                        tierItem.dataset.tier = 'SS';
-                        document.getElementById('tier-SS').appendChild(tierItem.cloneNode(true));
-                    } else if (rating >= 8.5 && rating < 9.5) {
-                        tierItem.dataset.tier = 'S';
-                        document.getElementById('tier-S').appendChild(tierItem.cloneNode(true));
-                    } else if (rating >= 7.5 && rating < 8.5) {
-                        tierItem.dataset.tier = 'A';
-                        document.getElementById('tier-A').appendChild(tierItem.cloneNode(true));
-                    } else if (rating >= 5.5 && rating < 7.5) {
-                        tierItem.dataset.tier = 'B';
-                        document.getElementById('tier-B').appendChild(tierItem.cloneNode(true));
-                    } else if (rating >= 4.5 && rating < 5.5) {
-                        tierItem.dataset.tier = 'C';
-                        document.getElementById('tier-C').appendChild(tierItem.cloneNode(true));
-                    } else if (rating >= 2.5 && rating < 4.5) {
-                        tierItem.dataset.tier = 'D';
-                        document.getElementById('tier-D').appendChild(tierItem.cloneNode(true));
-                    } else if (rating >= 1 && rating < 2.5) {
-                        tierItem.dataset.tier = 'F';
-                        document.getElementById('tier-F').appendChild(tierItem.cloneNode(true));
-                    }
+if (rating === 11) {
+    tierItem.dataset.tier = 'SSS';
+    document.getElementById('tier-SSS').appendChild(tierItem.cloneNode(true));
+
+} else if (rating > 10 && rating < 11) {
+    tierItem.dataset.tier = 'SS';
+    document.getElementById('tier-SS').appendChild(tierItem.cloneNode(true));
+
+} else if (rating >= 8 && rating < 10) {
+    tierItem.dataset.tier = 'S';
+    document.getElementById('tier-S').appendChild(tierItem.cloneNode(true));
+
+} else if (rating >= 7 && rating < 8) {
+    tierItem.dataset.tier = 'A';
+    document.getElementById('tier-A').appendChild(tierItem.cloneNode(true));
+
+} else if (rating >= 6 && rating < 7) {
+    tierItem.dataset.tier = 'B';
+    document.getElementById('tier-B').appendChild(tierItem.cloneNode(true));
+
+} else if (rating >= 5 && rating < 6) {
+    tierItem.dataset.tier = 'C';
+    document.getElementById('tier-C').appendChild(tierItem.cloneNode(true));
+
+} else if (rating >= 4 && rating < 5) {
+    tierItem.dataset.tier = 'D';
+    document.getElementById('tier-D').appendChild(tierItem.cloneNode(true));
+
+} else if (rating >= 1 && rating < 4) {
+    tierItem.dataset.tier = 'F';
+    document.getElementById('tier-F').appendChild(tierItem.cloneNode(true));
+}
                 });
 
                 // Add click event listeners to tier items
