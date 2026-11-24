@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil – anilista</title>
+    <meta name="theme-color" content="#6c5ce7">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/views.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/summary.css">
+    <link rel="stylesheet" href="css/public.css">
+</head>
+<body class="readonly">
+    <!-- Dane profilu – ten plik generujesz w anilista.html (zakładka Dane) -->
+    <script>window.__PROFILE_PAGE__ = true;</script>
+    <script src="profil-dane.js"></script>
+
+    <header class="pub-head">
+        <div class="pub-head-inner">
+            <div class="pub-avatar" id="pub-avatar">?</div>
+            <div class="pub-id">
+                <span class="pub-kicker"><i class="fas fa-film"></i> anilista</span>
+                <h1 id="pub-nick">Profil</h1>
+                <p id="pub-meta" class="muted"></p>
+            </div>
+        </div>
+        <nav class="pub-tabs" aria-label="Sekcje profilu">
+            <a href="#profil" data-view="profil"><i class="fas fa-chart-line"></i> Statystyki</a>
+            <a href="#lista" data-view="lista"><i class="fas fa-layer-group"></i> Kolekcja</a>
+            <a href="#tier-lista" data-view="tier-lista"><i class="fas fa-trophy"></i> Tier lista</a>
+            <a href="#planer" data-view="planer" id="pub-tab-planer"><i class="fas fa-bookmark"></i> Planuje obejrzeć</a>
+        </nav>
+    </header>
+
+    <main class="main pub-main">
+        <div id="pub-missing" class="pub-missing" hidden>
+            <i class="fas fa-file-circle-question"></i>
+            <h2>Brak danych profilu</h2>
+            <p class="muted">Nie znaleziono pliku <b>profil-dane.js</b>. Wygeneruj go w anilista (zakładka „Dane” → „Publiczny profil”) i wgraj do repo obok tego pliku.</p>
+        </div>
+
+        <!-- STATYSTYKI -->
+        <section class="view" id="profil">
+            <div id="pub-watching"></div>
+            <h2 class="view-title">Statystyki</h2>
+            <div class="stats" id="profile-stats"></div>
+            <div class="wrapped" id="wrapped-banner"></div>
+            <div id="profile-panel" class="panel" hidden></div>
+            <div class="block" id="pub-calendar-block">
+                <div class="block-head">
+                    <h3><i class="fas fa-calendar-days"></i> Kalendarz aktywności</h3>
+                    <button class="btn btn-ghost btn-sm" id="toggle-calendar-btn" hidden></button>
+                </div>
+                <div id="calendar-container" class="calendar"></div>
+            </div>
+            <div class="block" id="profile-rewatch"></div>
+            <div class="block" id="profile-tags-stats"></div>
+        </section>
+
+        <!-- KOLEKCJA -->
+        <section class="view" id="lista">
+            <h2 class="view-title">Kolekcja</h2>
+            <div class="toolbar">
+                <input type="search" id="search-input" placeholder="Szukaj po tytule lub tagu (np. tag:isekai)">
+                <select id="sort-select" aria-label="Sortowanie">
+                    <option value="title">Tytuł A–Z</option>
+                    <option value="averageRating">Średnia ocena</option>
+                    <option value="lastWatched">Ostatnio oglądane</option>
+                    <option value="graphics">Grafika</option>
+                    <option value="music">Muzyka</option>
+                    <option value="characters">Postacie</option>
+                    <option value="story">Fabuła</option>
+                    <option value="fun">Śmieszność</option>
+                </select>
+            </div>
+            <div class="chips" id="status-filter">
+                <button class="chip active" data-status="all">Wszystkie</button>
+                <button class="chip" data-status="watching">Oglądane</button>
+                <button class="chip" data-status="completed">Obejrzane</button>
+                <button class="chip" data-status="upcoming">Nadchodzące</button>
+                <button class="chip" data-status="airing"><i class="fas fa-tower-broadcast"></i> W emisji</button>
+            </div>
+            <div class="anime-grid" id="anime-list"></div>
+            <div class="center" id="collection-controls"></div>
+        </section>
+
+        <!-- TIER LISTA -->
+        <section class="view" id="tier-lista">
+            <h2 class="view-title">Tier lista</h2>
+            <div class="chips" id="tier-controls">
+                <button class="chip active" data-category="average"><i class="fas fa-star"></i> Średnia</button>
+                <button class="chip" data-category="graphics"><i class="fas fa-paintbrush"></i> Grafika</button>
+                <button class="chip" data-category="music"><i class="fas fa-music"></i> Muzyka</button>
+                <button class="chip" data-category="characters"><i class="fas fa-users"></i> Postacie</button>
+                <button class="chip" data-category="story"><i class="fas fa-book"></i> Fabuła</button>
+                <button class="chip" data-category="fun"><i class="fas fa-face-laugh"></i> Śmieszność</button>
+            </div>
+            <div class="tiers" id="tier-list-container"></div>
+        </section>
+
+        <!-- PLANER -->
+        <section class="view" id="planer">
+            <h2 class="view-title">Planuje obejrzeć</h2>
+            <div id="pub-planner" class="planner-list"></div>
+        </section>
+
+        <p class="pub-footer muted">Profil tylko do oglądania · zrobione w <a href="anilista.html">anilista</a></p>
+    </main>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+
+    <dialog class="modal modal-wide" id="anime-details-modal">
+        <div class="modal-head">
+            <h3 id="anime-details-modal-title">Szczegóły</h3>
+            <button class="btn-icon" data-close aria-label="Zamknij"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div id="anime-details-content"></div>
+    </dialog>
+
+    <dialog class="modal" id="day-summary-modal">
+        <div class="modal-head">
+            <h3 id="day-summary-date">Dzień</h3>
+            <button class="btn-icon" data-close aria-label="Zamknij"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="mini-stats" id="day-summary-stats"></div>
+        <div id="day-summary-anime-list"></div>
+    </dialog>
+
+    <dialog class="modal modal-wide modal-summary" id="yearly-summary-modal">
+        <div class="modal-head">
+            <h3 id="yearly-summary-title">Podsumowanie</h3>
+            <button class="btn-icon" data-close aria-label="Zamknij"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div id="yearly-summary-content"></div>
+    </dialog>
+
+    <!-- Te same moduły co w aplikacji, w trybie tylko do odczytu -->
+    <script src="js/utils.js" defer></script>
+    <script src="js/store.js" defer></script>
+    <script src="js/calc.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="js/airing.js" defer></script>
+    <script src="js/summary.js" defer></script>
+    <script src="js/calendar.js" defer></script>
+    <script src="js/details.js" defer></script>
+    <script src="js/collection.js" defer></script>
+    <script src="js/tierlist.js" defer></script>
+    <script src="js/profile.js" defer></script>
+    <script src="js/public.js" defer></script>
+</body>
+</html>

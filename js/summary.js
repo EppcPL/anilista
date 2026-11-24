@@ -119,7 +119,7 @@ const Summary = (() => {
         return `
             <div class="viewer-type">
                 <i class="fas ${t.icon}"></i>
-                <div><span>Twój styl</span><strong>${t.name}</strong><p>${t.desc}</p></div>
+                <div><span>${Store.readonly ? 'Styl oglądania' : 'Twój styl'}</span><strong>${t.name}</strong><p>${t.desc}</p></div>
             </div>`;
     }
 
@@ -141,7 +141,7 @@ const Summary = (() => {
         const medals = ['gold', 'silver', 'bronze'];
         return `
             <section class="sum-section">
-                <h4><i class="fas fa-hourglass-half"></i> Na co poświęciłeś najwięcej czasu</h4>
+                <h4><i class="fas fa-hourglass-half"></i> ${Store.readonly ? 'Na co poszło najwięcej czasu' : 'Na co poświęciłeś najwięcej czasu'}</h4>
                 <ol class="rank">${s.perAnime.slice(0, limit).map((a, i) => `
                     <li class="${medals[i] || ''}" ${Store.find(a.id) ? `data-open="${a.id}"` : ''}>
                         <span class="rank-pos">${i + 1}</span>
@@ -221,7 +221,7 @@ const Summary = (() => {
     }
 
     function emptyState(text) {
-        return `<div class="sum-empty"><i class="fas fa-calendar-xmark"></i><p>${text}</p><small>Dodawaj odcinki przyciskiem „+ Odcinki” przy anime, a tutaj pojawią się statystyki.</small></div>`;
+        return `<div class="sum-empty"><i class="fas fa-calendar-xmark"></i><p>${text}</p>${Store.readonly ? '' : '<small>Dodawaj odcinki przyciskiem „+ Odcinki” przy anime, a tutaj pojawią się statystyki.</small>'}</div>`;
     }
 
     function openWide(title, html, onClick) {
@@ -330,7 +330,7 @@ const Summary = (() => {
         const keys = yearKeys(y);
         const s = collect(keys);
         const prev = collect(yearKeys(y - 1));
-        const title = `Twój rok ${y}`;
+        const title = `${Store.readonly ? 'Rok' : 'Twój rok'} ${y}`;
         U.$('yearly-summary-content').dataset.year = y;
         if (!s.episodes) return openWide(title, emptyState(`W ${y} roku nie ma zapisanej aktywności.`));
 

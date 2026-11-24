@@ -4,6 +4,12 @@
    istniejąca kolekcja wczytuje się bez zmian.
    ========================================================= */
 const Store = (() => {
+    // Publiczny profil (profil.html) wczytuje dane z pliku profil-dane.js
+    // i NIGDY nie zapisuje niczego w przeglądarce odwiedzającego.
+    const PUBLIC_PAGE = !!window.__PROFILE_PAGE__;
+    const PUBLIC = PUBLIC_PAGE ? (window.__PROFILE__ || null) : null;
+    const memoryPrefs = {};
+
     function read(key, fallback) {
         try {
             const raw = localStorage.getItem(key);
@@ -14,6 +20,7 @@ const Store = (() => {
     }
 
     function write(key, value) {
+        if (PUBLIC_PAGE) return true;
         try {
             localStorage.setItem(key, JSON.stringify(value));
             return true;
@@ -25,7 +32,12 @@ const Store = (() => {
         }
     }
 
-    const state = {
+    const state = PUBLIC_PAGE ? {
+        anime: (PUBLIC && PUBLIC.animeList) || [],
+        planner: (PUBLIC && PUBLIC.plannerList) || [],
+        activity: (PUBLIC && PUBLIC.activityData) || {},
+        details: (PUBLIC && PUBLIC.activityDetails) || {}
+    } : {
         anime: read('animeList', []),
         planner: read('plannerList', []),
         activity: read('activityData', {}),
@@ -51,8 +63,10 @@ const Store = (() => {
         },
         find: (id) => state.anime.find(a => U.sameId(a.id, id)),
         findPlanner: (id) => state.planner.find(p => U.sameId(p.id, id)),
-        pref: (key, fallback = null) => localStorage.getItem(key) ?? fallback,
-        setPref: (key, value) => localStorage.setItem(key, String(value)),
+        readonly: PUBLIC_PAGE,
+        profile: PUBLIC,
+        pref: (key, fallback = null) => PUBLIC_PAGE ? (memoryPrefs[key] ?? fallback) : (localStorage.getItem(key) ?? fallback),
+        setPref: (key, value) => { if (PUBLIC_PAGE) memoryPrefs[key] = String(value); else localStorage.setItem(key, String(value)); },
         newId: () => Date.now() + Math.floor(Math.random() * 1000)
     };
 })();

@@ -176,6 +176,25 @@
         <section class="view" id="eksport" data-title="Dane">
             <h2 class="view-title">Zarządzanie danymi</h2>
             <div class="data-grid">
+                <div class="card card-public">
+                    <h3><i class="fas fa-globe"></i> Publiczny profil</h3>
+                    <p class="muted">Strona tylko do oglądania, którą możesz wysłać znajomym. Wybierz, co ma być widoczne, pobierz plik <b>profil-dane.js</b> i wgraj go do repo obok <b>profil.html</b>.</p>
+                    <div class="field">
+                        <label for="pp-nick">Nazwa na profilu</label>
+                        <input type="text" id="pp-nick" maxlength="40" placeholder="np. Eppc">
+                    </div>
+                    <div class="pp-options">
+                        <label class="check"><input type="checkbox" id="pp-activity" checked> Kalendarz i historia oglądania</label>
+                        <label class="check"><input type="checkbox" id="pp-covers" checked> Okładki anime</label>
+                        <label class="check"><input type="checkbox" id="pp-planner" checked> Planer (co chcę obejrzeć)</label>
+                        <label class="check"><input type="checkbox" id="pp-notes"> Notatki z planera</label>
+                    </div>
+                    <div class="form-actions">
+                        <button id="pp-export" class="btn btn-accent"><i class="fas fa-download"></i> Pobierz profil-dane.js</button>
+                        <a id="pp-link" class="btn btn-ghost" href="profil.html" target="_blank" rel="noopener"><i class="fas fa-up-right-from-square"></i> Otwórz profil</a>
+                    </div>
+                    <p class="muted pp-size" id="pp-size"></p>
+                </div>
                 <div class="card">
                     <h3><i class="fas fa-file-export"></i> Kopia zapasowa</h3>
                     <p class="muted">Zapisuje całą kolekcję, planer, aktywność i harmonogramy emisji do pliku JSON.</p>

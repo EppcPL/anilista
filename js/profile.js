@@ -203,7 +203,7 @@ const Profile = (() => {
         U.$('wrapped-banner').innerHTML = `
             <button class="wrapped-card wrapped-year" data-wrap="year">
                 <span class="wrapped-kicker"><i class="fas fa-wand-magic-sparkles"></i> Podsumowanie</span>
-                <strong>Twój rok ${y}</strong>
+                <strong>${Store.readonly ? 'Rok' : 'Twój rok'} ${y}</strong>
                 <span>${Math.round(yearSum.minutes / 60)} h · ${U.eps(yearSum.episodes)}${top ? ` · najwięcej: ${U.esc(top.title)}` : ''}</span>
                 <i class="fas fa-arrow-right wrapped-go"></i>
             </button>

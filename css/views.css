@@ -354,6 +354,11 @@
 
 /* ================= DANE ================= */
 .data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+.card-public { grid-column: 1 / -1; border-color: rgba(108, 92, 231, 0.5); background: linear-gradient(135deg, rgba(108, 92, 231, 0.18), rgba(0, 206, 201, 0.06)); }
+.card-public .field { max-width: 22rem; }
+.pp-options { display: flex; flex-wrap: wrap; gap: 0 1.5rem; }
+.pp-options .check { margin: 0.35rem 0; }
+.pp-size { margin: 0.75rem 0 0; font-size: 0.85rem; }
 
 /* ================= SZCZEGÓŁY / PODSUMOWANIA ================= */
 .details { display: grid; grid-template-columns: 220px 1fr; gap: 1.25rem; margin-bottom: 1rem; }

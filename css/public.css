@@ -1,0 +1,75 @@
+/* =========================================================
+   public.css – publiczny profil (profil.html)
+   ========================================================= */
+
+/* bez bocznego menu – układ wyśrodkowany */
+.pub-main { margin: 0 auto; max-width: 1200px; padding-top: 1.5rem; }
+
+/* w trybie tylko do odczytu chowamy przyciski edycji */
+.readonly .card-actions,
+.readonly #anime-details-content .form-actions,
+.readonly [data-act="airing"] { display: none !important; }
+
+.pub-head {
+    position: relative; overflow: hidden;
+    padding: 2.5rem clamp(1rem, 4vw, 3rem) 0;
+    background: linear-gradient(120deg, rgba(108, 92, 231, 0.55), rgba(164, 99, 242, 0.35) 45%, rgba(0, 206, 201, 0.25));
+    border-bottom: 1px solid var(--line);
+}
+.pub-head::after {
+    content: ''; position: absolute; right: -6rem; top: -6rem; width: 22rem; height: 22rem; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 70%); pointer-events: none;
+}
+.pub-head-inner { display: flex; align-items: center; gap: 1.5rem; max-width: 1200px; margin: 0 auto; }
+.pub-avatar {
+    flex-shrink: 0; display: grid; place-items: center;
+    width: 5.5rem; height: 5.5rem; border-radius: 28px;
+    background: linear-gradient(135deg, var(--pink), var(--accent));
+    font: 800 2.6rem var(--display); color: #fff;
+    box-shadow: 0 14px 34px rgba(108, 92, 231, 0.5);
+    border: 3px solid rgba(255, 255, 255, 0.35);
+}
+.pub-kicker { font-size: 0.85rem; opacity: 0.85; }
+.pub-id h1 { font: 800 clamp(2rem, 5vw, 3rem)/1.05 var(--display); letter-spacing: -0.02em; margin: 0.15rem 0 0.4rem; }
+.pub-id p { color: rgba(255, 255, 255, 0.8); }
+
+.pub-tabs {
+    display: flex; gap: 0.25rem; overflow-x: auto;
+    max-width: 1200px; margin: 1.75rem auto 0;
+}
+.pub-tabs a {
+    display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap;
+    padding: 0.75rem 1.1rem; border-radius: 14px 14px 0 0;
+    color: rgba(255, 255, 255, 0.75); text-decoration: none; font-weight: 600; font-size: 0.95rem;
+}
+.pub-tabs a:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.pub-tabs a.active { color: #fff; background: var(--bg); box-shadow: inset 0 3px 0 var(--accent2); }
+
+/* teraz ogląda */
+#pub-watching:not(:empty) { margin-bottom: 2.5rem; }
+.now-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 0.75rem; }
+.now-card {
+    display: flex; gap: 0.85rem; align-items: center; text-align: left;
+    padding: 0.6rem; border-radius: var(--r-lg);
+    background: var(--surface); border: 1px solid var(--line); color: var(--text); font: inherit; cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.now-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: var(--glow); }
+.now-card img, .now-letter { width: 3.6rem; height: 4.8rem; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
+.now-letter { display: grid; place-items: center; background: linear-gradient(135deg, rgba(108, 92, 231, 0.6), rgba(0, 206, 201, 0.4)); font: 800 1.5rem var(--display); }
+.now-info { display: grid; gap: 0.3rem; min-width: 0; flex: 1; }
+.now-info b { font-family: var(--display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.now-info small { color: var(--muted); font-size: 0.8rem; }
+
+.pub-missing { text-align: center; padding: 4rem 1rem; }
+.pub-missing i { font-size: 3rem; color: var(--accent-light); margin-bottom: 1rem; }
+.pub-missing p { max-width: 36rem; margin: 0.75rem auto 0; }
+.pub-footer { text-align: center; margin-top: 3rem; font-size: 0.85rem; }
+
+@media (max-width: 760px) {
+    .pub-head { padding-top: 1.5rem; }
+    .pub-head-inner { gap: 1rem; }
+    .pub-avatar { width: 4rem; height: 4rem; border-radius: 20px; font-size: 1.8rem; }
+    .pub-main { padding-bottom: 3rem; }
+}
