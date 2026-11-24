@@ -101,15 +101,19 @@
 .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.6rem; }
 .stat {
     display: flex; flex-direction: column; gap: 0.25rem; text-align: left;
-    padding: 1rem; border-radius: var(--r-md);
+    padding: 1.1rem 1.2rem; border-radius: var(--r-lg);
     background: var(--surface); border: 1px solid var(--line); color: var(--text);
-    font: inherit; cursor: pointer;
+    font: inherit; cursor: pointer; box-shadow: var(--shadow);
 }
 .stat { backdrop-filter: blur(10px); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
 .stat:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--glow); }
 .stat-wide { grid-row: span 2; justify-content: flex-end; background: linear-gradient(135deg, rgba(108, 92, 231, 0.35), rgba(0, 206, 201, 0.15)); }
 .stat-wide .stat-value { font-size: clamp(2.5rem, 6vw, 4rem); }
-.stat-label { color: var(--muted); font-size: 0.85rem; }
+.stat-label { color: var(--muted); font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; }
+.stat-label i {
+    display: inline-grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 10px;
+    background: rgba(108, 92, 231, 0.22); color: var(--accent-light); font-size: 0.85rem;
+}
 .stat-value { font: 700 1.8rem/1.15 var(--display); background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .stat-sub { color: var(--muted); font-size: 0.85rem; }
 .stat .bar { margin-top: 0.4rem; }

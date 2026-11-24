@@ -102,8 +102,18 @@ const U = (() => {
     const eps = (n) => `${n} ${plural(n, 'odcinek', 'odcinki', 'odcinków')}`;
     const days = (n) => `${n} ${n === 1 ? 'dzień' : 'dni'}`;
 
+    /** Klucz tagu bez względu na wielkość liter ("Isekai" = "isekai") */
+    const tagKey = (t) => String(t || '').trim().toLocaleLowerCase('pl');
+
+    /** Tekst z pola -> lista tagów bez duplikatów (wielkość liter nie ma znaczenia) */
     function parseTags(raw) {
-        return (raw || '').split(/;|\n/).map(t => t.trim()).filter(Boolean);
+        const seen = new Set();
+        return (raw || '').split(/;|\n/).map(t => t.trim()).filter(t => {
+            const k = tagKey(t);
+            if (!k || seen.has(k)) return false;
+            seen.add(k);
+            return true;
+        });
     }
 
     const int = (v, fallback = 0) => {
@@ -151,6 +161,6 @@ const U = (() => {
         MONTHS, MONTHS_SHORT, DAYS_SHORT, DAYS_LONG, DAY_NAMES,
         $, qsa, esc, dateKey, todayKey, parseDate, addDays, startOfWeek, weekdayIndex,
         fmtDate, fmtDateRelative, fmtClock, fmtHours, fmtDuration, plural, eps, days,
-        parseTags, int, sameId, copyText, readImageFile
+        parseTags, tagKey, int, sameId, copyText, readImageFile
     };
 })();

@@ -26,11 +26,12 @@
     --display: 'Poppins', 'Segoe UI', system-ui, sans-serif;
     --body: 'Poppins', 'Segoe UI', system-ui, sans-serif;
 
-    --r-sm: 8px;
-    --r-md: 12px;
-    --r-lg: 16px;
+    --r-sm: 10px;
+    --r-md: 14px;
+    --r-lg: 20px;
     --nav-w: 92px;
     --glow: 0 8px 24px rgba(108, 92, 231, 0.35);
+    --shadow: 0 10px 34px rgba(0, 0, 0, 0.28);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -187,3 +188,30 @@ small { font-size: 0.82em; }
     content: ''; position: absolute; left: 0; bottom: 0;
     width: 80px; height: 4px; border-radius: 2px; background: var(--grad);
 }
+
+/* ---------- nowoczesne tło: miękkie poświaty zamiast płaskiego koloru ---------- */
+body::before {
+    content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+        radial-gradient(40rem 30rem at 12% -5%, rgba(108, 92, 231, 0.32), transparent 70%),
+        radial-gradient(36rem 28rem at 100% 100%, rgba(0, 206, 201, 0.16), transparent 70%),
+        radial-gradient(28rem 22rem at 85% 10%, rgba(253, 121, 168, 0.10), transparent 70%);
+}
+
+/* płynne wejście przy zmianie zakładki */
+.view:not([hidden]) { animation: viewIn 0.28s ease-out; }
+@keyframes viewIn { from { opacity: 0; transform: translateY(8px); } }
+
+/* wyraźniejszy aktywny element menu */
+.nav-item.active::before {
+    content: ''; position: absolute; left: -0.5rem; top: 22%; bottom: 22%;
+    width: 4px; border-radius: 0 4px 4px 0; background: var(--accent2);
+    box-shadow: 0 0 10px var(--accent2);
+}
+@media (max-width: 760px) {
+    .nav-item.active::before { left: 30%; right: 30%; top: -0.3rem; bottom: auto; width: auto; height: 3px; border-radius: 0 0 4px 4px; }
+    .nav { background: rgba(30, 39, 46, 0.92); }
+}
+
+/* cienkie, ładne paski przewijania */
+* { scrollbar-width: thin; scrollbar-color: rgba(108, 92, 231, 0.6) transparent; }

@@ -10,12 +10,12 @@ const Collection = (() => {
         if (view.status === 'airing') list = list.filter(a => a.airing && a.status !== 'completed');
         else if (view.status !== 'all') list = list.filter(a => a.status === view.status);
 
-        const q = view.search.trim().toLowerCase();
+        const q = view.search.trim().toLocaleLowerCase('pl');
         if (q) {
             const tagQ = q.match(/^tag:(.+)$/);
             list = tagQ
-                ? list.filter(a => a.tags.some(t => t.toLowerCase().includes(tagQ[1].trim())))
-                : list.filter(a => a.title.toLowerCase().includes(q) || a.tags.some(t => t.toLowerCase().includes(q)));
+                ? list.filter(a => a.tags.some(t => U.tagKey(t).includes(tagQ[1].trim())))
+                : list.filter(a => a.title.toLocaleLowerCase('pl').includes(q) || a.tags.some(t => U.tagKey(t).includes(q)));
         }
 
         const byTitle = (a, b) => a.title.localeCompare(b.title, 'pl');

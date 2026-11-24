@@ -125,12 +125,16 @@ const Profile = (() => {
 
     function renderTags() {
         const map = {};
-        Store.state.anime.forEach(a => a.tags.forEach(t => {
-            map[t] = map[t] || { tag: t, count: 0, minutes: 0, ratings: [] };
-            map[t].count++;
-            map[t].minutes += Calc.totalMinutes(a);
-            map[t].ratings.push(a.averageRating);
-        }));
+        Store.state.anime.forEach(a => {
+            // każdy tag liczony raz na anime, bez względu na wielkość liter
+            new Set(a.tags.map(U.tagKey)).forEach(k => {
+                const shown = a.tags.find(t => U.tagKey(t) === k);
+                map[k] = map[k] || { tag: shown, count: 0, minutes: 0, ratings: [] };
+                map[k].count++;
+                map[k].minutes += Calc.totalMinutes(a);
+                map[k].ratings.push(a.averageRating);
+            });
+        });
         const rows = Object.values(map).map(r => ({ ...r, avg: r.ratings.reduce((s, x) => s + x, 0) / r.ratings.length }));
         const box = U.$('profile-tags-stats');
         if (!rows.length) {
