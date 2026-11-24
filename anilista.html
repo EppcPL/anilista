@@ -190,10 +190,35 @@
                         <label class="check"><input type="checkbox" id="pp-notes"> Notatki z planera</label>
                     </div>
                     <div class="form-actions">
-                        <button id="pp-export" class="btn btn-accent"><i class="fas fa-download"></i> Pobierz profil-dane.js</button>
+                        <button id="pp-publish" class="btn btn-accent"><i class="fab fa-github"></i> Opublikuj na GitHubie</button>
+                        <button id="pp-export" class="btn btn-ghost"><i class="fas fa-download"></i> Pobierz plik</button>
                         <a id="pp-link" class="btn btn-ghost" href="profil.html" target="_blank" rel="noopener"><i class="fas fa-up-right-from-square"></i> Otwórz profil</a>
                     </div>
                     <p class="muted pp-size" id="pp-size"></p>
+                    <details class="gh-setup" id="gh-setup">
+                        <summary><i class="fas fa-key"></i> Połączenie z GitHubem <span id="gh-status" class="muted"></span></summary>
+                        <ol class="gh-steps">
+                            <li>Otwórz <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com → nowy token (fine-grained)</a>.</li>
+                            <li>Nazwa dowolna, np. „anilista”. Przy <b>Repository access</b> wybierz <b>Only select repositories</b> → <b>anilista</b>.</li>
+                            <li>W <b>Permissions → Repository permissions</b> ustaw <b>Contents: Read and write</b>.</li>
+                            <li>Kliknij <b>Generate token</b>, skopiuj go i wklej poniżej.</li>
+                        </ol>
+                        <div class="row-2">
+                            <div class="field">
+                                <label for="gh-token">Token</label>
+                                <input type="password" id="gh-token" placeholder="github_pat_…" autocomplete="off">
+                            </div>
+                            <div class="field">
+                                <label for="gh-repo">Repozytorium</label>
+                                <input type="text" id="gh-repo" value="EppcPL/anilista">
+                            </div>
+                        </div>
+                        <p class="note">Token zapisuje się tylko w tej przeglądarce i nie trafia do repo. Ma dostęp wyłącznie do repo <b>anilista</b>.</p>
+                        <div class="form-actions">
+                            <button id="gh-save" class="btn btn-ghost btn-sm"><i class="fas fa-floppy-disk"></i> Zapisz</button>
+                            <button id="gh-forget" class="btn btn-ghost btn-sm btn-danger-text"><i class="fas fa-trash"></i> Usuń token z tej przeglądarki</button>
+                        </div>
+                    </details>
                 </div>
                 <div class="card">
                     <h3><i class="fas fa-file-export"></i> Kopia zapasowa</h3>

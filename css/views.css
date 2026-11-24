@@ -359,6 +359,10 @@
 .pp-options { display: flex; flex-wrap: wrap; gap: 0 1.5rem; }
 .pp-options .check { margin: 0.35rem 0; }
 .pp-size { margin: 0.75rem 0 0; font-size: 0.85rem; }
+.gh-setup { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 0.75rem; }
+.gh-setup summary { cursor: pointer; font-weight: 600; }
+.gh-steps { margin: 0.75rem 0 1rem 1.2rem; display: grid; gap: 0.3rem; font-size: 0.92rem; }
+.gh-setup .row-2 { max-width: 40rem; }
 
 /* ================= SZCZEGÓŁY / PODSUMOWANIA ================= */
 .details { display: grid; grid-template-columns: 220px 1fr; gap: 1.25rem; margin-bottom: 1rem; }

@@ -86,20 +86,130 @@ const DataIO = (() => {
         };
     }
 
-    function exportProfile() {
+    function profileText() {
         const data = buildProfile(ppRead());
-        const text = `/* Publiczny profil anilista – wygenerowano ${new Date().toLocaleString('pl-PL')} */\nwindow.__PROFILE__ = ${JSON.stringify(data)};\n`;
+        return `/* Publiczny profil anilista – wygenerowano ${new Date().toLocaleString('pl-PL')} */\nwindow.__PROFILE__ = ${JSON.stringify(data)};\n`;
+    }
+
+    const fmtSize = (bytes) => bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+
+    function exportProfile() {
+        const text = profileText();
         const blob = new Blob([text], { type: 'text/javascript' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = 'profil-dane.js';
         a.click();
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-        U.$('pp-size').textContent = `Rozmiar pliku: ${(blob.size / 1024 / 1024).toFixed(2)} MB. Wgraj go do repo (Add file → Upload files), a po minucie profil będzie widoczny.`;
+        U.$('pp-size').textContent = `Rozmiar pliku: ${fmtSize(blob.size)}. Wgraj go do repo (Add file → Upload files), a po minucie profil będzie widoczny.`;
         UI.toast('Pobrano profil-dane.js', 'success');
     }
 
+    /* ---------- wysyłanie na GitHuba (GitHub API, token tylko w tej przeglądarce) ---------- */
+    const GH_TOKEN = 'ghToken';
+    const GH_REPO = 'ghRepo';
+    const PROFILE_FILE = 'profil-dane.js';
+
+    function ghConfig() {
+        return { token: Store.pref(GH_TOKEN, ''), repo: Store.pref(GH_REPO, 'EppcPL/anilista') };
+    }
+
+    function ghStatus() {
+        const { token, repo } = ghConfig();
+        U.$('gh-status').textContent = token ? `– połączono z ${repo}` : '– nie połączono';
+    }
+
+    /** Tekst (UTF-8) -> base64, kawałkami, żeby duże pliki nie wywaliły przeglądarki */
+    function toBase64(text) {
+        const bytes = new TextEncoder().encode(text);
+        let bin = '';
+        for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+        return btoa(bin);
+    }
+
+    async function ghRequest(path, options = {}) {
+        const { token, repo } = ghConfig();
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+            ...options,
+            headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${token}`,
+                'X-GitHub-Api-Version': '2022-11-28',
+                ...(options.headers || {})
+            }
+        });
+        return res;
+    }
+
+    function ghError(status) {
+        if (status === 401) return 'Token jest nieprawidłowy albo wygasł. Wygeneruj nowy.';
+        if (status === 403) return 'Token nie ma uprawnień do zapisu. Ustaw „Contents: Read and write”.';
+        if (status === 404) return 'Nie znaleziono repozytorium. Sprawdź nazwę i czy token ma dostęp do tego repo.';
+        if (status === 409 || status === 422) return 'GitHub odrzucił zapis (konflikt). Spróbuj jeszcze raz za chwilę.';
+        return `GitHub zwrócił błąd ${status}.`;
+    }
+
+    async function publishProfile() {
+        const { token } = ghConfig();
+        if (!token) {
+            U.$('gh-setup').open = true;
+            U.$('gh-token').focus();
+            return UI.toast('Najpierw połącz stronę z GitHubem (instrukcja poniżej)', 'warning');
+        }
+        const btn = U.$('pp-publish');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Wysyłanie…';
+        try {
+            // sha istniejącego pliku jest potrzebne, żeby go nadpisać
+            let sha;
+            const head = await ghRequest(`${PROFILE_FILE}?ref=main`);
+            if (head.ok) sha = (await head.json()).sha;
+            else if (head.status !== 404) throw new Error(ghError(head.status));
+
+            const text = profileText();
+            const res = await ghRequest(PROFILE_FILE, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: `Aktualizacja profilu (${new Date().toLocaleString('pl-PL')})`,
+                    content: toBase64(text),
+                    branch: 'main',
+                    ...(sha ? { sha } : {})
+                })
+            });
+            if (!res.ok) throw new Error(ghError(res.status));
+            const { repo } = ghConfig();
+            const [owner, name] = repo.split('/');
+            const url = `https://${owner.toLowerCase()}.github.io/${name}/profil.html`;
+            U.$('pp-size').innerHTML = `Opublikowano (${fmtSize(new Blob([text]).size)}). Za ok. minutę zmiany będą pod <a href="${url}" target="_blank" rel="noopener">${url}</a>.`;
+            UI.toast('Profil opublikowany na GitHubie', 'success');
+        } catch (err) {
+            UI.toast(err.message.startsWith('Failed to fetch') ? 'Brak połączenia z GitHubem' : err.message, 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    }
+
     function init() {
+        U.$('gh-token').value = Store.pref(GH_TOKEN, '');
+        U.$('gh-repo').value = Store.pref(GH_REPO, 'EppcPL/anilista');
+        ghStatus();
+        U.$('gh-save').onclick = () => {
+            Store.setPref(GH_TOKEN, U.$('gh-token').value.trim());
+            Store.setPref(GH_REPO, U.$('gh-repo').value.trim() || 'EppcPL/anilista');
+            ghStatus();
+            UI.toast('Zapisano połączenie z GitHubem', 'success');
+        };
+        U.$('gh-forget').onclick = () => {
+            localStorage.removeItem(GH_TOKEN);
+            U.$('gh-token').value = '';
+            ghStatus();
+            UI.toast('Token usunięty z tej przeglądarki', 'info');
+        };
+        U.$('pp-publish').onclick = publishProfile;
+
         const pp = ppSettings();
         U.$('pp-nick').value = pp.nick;
         PP_FIELDS.forEach(f => { U.$(`pp-${f}`).checked = !!pp[f]; });
