@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/views.css">
     <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/summary.css">
 </head>
 <body>
     <!-- ============ NAWIGACJA ============ -->
@@ -55,6 +56,7 @@
         <section class="view" id="profil" data-title="Profil">
             <h2 class="view-title">Twoje statystyki</h2>
             <div class="stats" id="profile-stats"></div>
+            <div class="wrapped" id="wrapped-banner"></div>
 
             <div class="transfer" id="transfer-box"></div>
 
@@ -247,20 +249,12 @@
         <div id="day-summary-anime-list"></div>
     </dialog>
 
-    <dialog class="modal modal-wide" id="yearly-summary-modal">
+    <dialog class="modal modal-wide modal-summary" id="yearly-summary-modal">
         <div class="modal-head">
             <h3 id="yearly-summary-title">Podsumowanie roku</h3>
             <button class="btn-icon" data-close aria-label="Zamknij"><i class="fas fa-xmark"></i></button>
         </div>
         <div id="yearly-summary-content"></div>
-    </dialog>
-
-    <dialog class="modal" id="stat-detail-modal">
-        <div class="modal-head">
-            <h3 id="stat-detail-title"></h3>
-            <button class="btn-icon" data-close aria-label="Zamknij"><i class="fas fa-xmark"></i></button>
-        </div>
-        <div id="stat-detail-content"></div>
     </dialog>
 
     <dialog class="modal" id="generate-code-modal">
@@ -307,6 +301,7 @@
     <script src="js/details.js" defer></script>
     <script src="js/tierlist.js" defer></script>
     <script src="js/planner.js" defer></script>
+    <script src="js/summary.js" defer></script>
     <script src="js/calendar.js" defer></script>
     <script src="js/profile.js" defer></script>
     <script src="js/transfer.js" defer></script>

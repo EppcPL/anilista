@@ -17,12 +17,14 @@ const Profile = (() => {
         const watched = list.reduce((s, a) => s + Calc.watchedCount(a), 0);
         const progress = total ? Math.round(watched / total * 100) : 0;
         const minutes = list.reduce((s, a) => s + Calc.totalMinutes(a), 0);
+        const allEpisodes = list.reduce((s, a) => s + Calc.watchedCount(a) + (a.rewatchCount || 0)
+            + (a.seasonRewatches || []).reduce((x, r, i) => x + (r || 0) * ((a.seasons || [])[i] || 0), 0), 0);
         const streak = Calc.currentStreak();
         const longest = Calc.longestStreak();
         const count = (st) => list.filter(a => a.status === st).length;
 
         const tiles = [
-            { key: 'time', icon: 'fa-clock', label: 'Czas oglądania', value: U.fmtHours(minutes, Store.pref('timeFormat', 'hours')), sub: `${U.fmtDuration(minutes)} · ${list.length} anime w kolekcji`, wide: true },
+            { key: 'time', icon: 'fa-clock', label: 'Czas oglądania', value: U.fmtHours(minutes, Store.pref('timeFormat', 'hours')), sub: `${U.fmtDuration(minutes)} · ${U.eps(allEpisodes)} · ${list.length} anime`, wide: true },
             { key: 'rating', icon: 'fa-star', label: 'Średnia ocena', value: avg.toFixed(1), bar: avg / 11 * 100 },
             { key: 'progress', icon: 'fa-list-check', label: 'Postęp', value: `${progress}%`, bar: progress },
             { key: 'streak', icon: 'fa-fire', label: 'Streak', value: U.days(streak), sub: `rekord: ${U.days(longest.length)}`,
@@ -154,8 +156,31 @@ const Profile = (() => {
         });
     }
 
+    /** Skróty do podsumowań roku i miesiąca */
+    function renderWrapped() {
+        const now = new Date();
+        const y = now.getFullYear(), m = now.getMonth();
+        const yearSum = Summary.collect(Object.keys(Store.state.activity).filter(k => k.startsWith(`${y}-`)));
+        const monthSum = Summary.collect(Object.keys(Store.state.activity).filter(k => k.startsWith(`${y}-${String(m + 1).padStart(2, '0')}`)));
+        const top = yearSum.perAnime[0];
+        U.$('wrapped-banner').innerHTML = `
+            <button class="wrapped-card wrapped-year" data-wrap="year">
+                <span class="wrapped-kicker"><i class="fas fa-wand-magic-sparkles"></i> Podsumowanie</span>
+                <strong>Twój rok ${y}</strong>
+                <span>${Math.round(yearSum.minutes / 60)} h · ${U.eps(yearSum.episodes)}${top ? ` · najwięcej: ${U.esc(top.title)}` : ''}</span>
+                <i class="fas fa-arrow-right wrapped-go"></i>
+            </button>
+            <button class="wrapped-card wrapped-month" data-wrap="month">
+                <span class="wrapped-kicker"><i class="fas fa-calendar"></i> Ten miesiąc</span>
+                <strong>${U.MONTHS[m]}</strong>
+                <span>${U.eps(monthSum.episodes)} · ${U.fmtDuration(monthSum.minutes)}</span>
+                <i class="fas fa-arrow-right wrapped-go"></i>
+            </button>`;
+    }
+
     function render() {
         renderStats();
+        renderWrapped();
         renderTags();
     }
 
@@ -170,6 +195,12 @@ const Profile = (() => {
                 const l = Calc.longestStreak();
                 UI.showPanel('Streak', `<p>Obecny streak: <b>${U.days(Calc.currentStreak())}</b>. Najdłuższy: <b>${U.days(l.length)}</b>${l.start ? ` (${U.fmtDate(l.start)} – ${U.fmtDate(l.end)})` : ''}.</p><p class="muted">Streak to kolejne dni, w których dodałeś choć jeden odcinek.</p>`);
             } else listPanel(key);
+        });
+        U.$('wrapped-banner').addEventListener('click', (e) => {
+            const w = e.target.closest('[data-wrap]')?.dataset.wrap;
+            const now = new Date();
+            if (w === 'year') Summary.year(now.getFullYear());
+            if (w === 'month') Summary.month(now.getMonth(), now.getFullYear());
         });
         U.$('profil').addEventListener('click', (e) => {
             const open = e.target.closest('[data-open]');

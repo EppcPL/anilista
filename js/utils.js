@@ -4,6 +4,10 @@
 const U = (() => {
     const MONTHS = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
         'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+    // „w styczniu”, „w lutym”…
+    const MONTHS_LOC = ['styczniu', 'lutym', 'marcu', 'kwietniu', 'maju', 'czerwcu', 'lipcu', 'sierpniu', 'wrześniu', 'październiku', 'listopadzie', 'grudniu'];
+    // „4 października”
+    const MONTHS_GEN = ['stycznia', 'lutego', 'marca', 'kwietnia', 'maja', 'czerwca', 'lipca', 'sierpnia', 'września', 'października', 'listopada', 'grudnia'];
     const MONTHS_SHORT = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
     // Tydzień od poniedziałku
     const DAYS_SHORT = ['Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob', 'Nie'];
@@ -158,7 +162,7 @@ const U = (() => {
     }
 
     return {
-        MONTHS, MONTHS_SHORT, DAYS_SHORT, DAYS_LONG, DAY_NAMES,
+        MONTHS, MONTHS_LOC, MONTHS_GEN, MONTHS_SHORT, DAYS_SHORT, DAYS_LONG, DAY_NAMES,
         $, qsa, esc, dateKey, todayKey, parseDate, addDays, startOfWeek, weekdayIndex,
         fmtDate, fmtDateRelative, fmtClock, fmtHours, fmtDuration, plural, eps, days,
         parseTags, tagKey, int, sameId, copyText, readImageFile
