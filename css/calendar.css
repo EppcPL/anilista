@@ -74,7 +74,7 @@
 .month-bars { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0.4rem; }
 .month-bar {
     display: grid; grid-template-rows: 1.2rem 5.5rem auto; gap: 0.3rem; justify-items: center;
-    padding: 0.5rem 0.2rem; border-radius: var(--r-md);
+    padding: 0.5rem 0.1rem; border-radius: var(--r-md);
     border: 1px solid transparent; background: rgba(0, 0, 0, 0.18); color: var(--text);
     cursor: pointer; font: 0.8rem var(--body);
     transition: border-color 0.15s, transform 0.15s, background 0.15s;
@@ -84,7 +84,7 @@
 .mb-val { font-weight: 700; font-size: 0.8rem; }
 .mb-col { width: 60%; height: 100%; display: flex; align-items: flex-end; border-radius: 6px; background: rgba(255, 255, 255, 0.05); overflow: hidden; }
 .mb-col span { width: 100%; min-height: 2px; border-radius: 6px; background: linear-gradient(0deg, var(--accent), var(--accent2)); transition: height 0.4s ease-out; }
-.mb-name { color: var(--muted); }
+.mb-name { color: var(--muted); font-size: 0.74rem; }
 
 /* ---------- widok miesiąca ---------- */
 .month-layout { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: 1.5rem; align-items: start; }
@@ -126,3 +126,11 @@
     .md-day small { font-size: 0.6rem; }
     [data-tip]:hover::after { display: none; }
 }
+
+/* pełne nazwy miesięcy na komputerze, skróty na mniejszych ekranach */
+.name-short { display: none; }
+@media (max-width: 1250px) {
+    .name-full { display: none; }
+    .name-short { display: inline; }
+}
+.mb-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

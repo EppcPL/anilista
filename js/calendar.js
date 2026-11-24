@@ -67,7 +67,11 @@ const Calendar = (() => {
                 cells += `<button class="hm-day ${c.cls}${edge}" style="${pos}" data-date="${c.key}" data-m="${date.getMonth()}" data-wd="${d}" data-tip="${c.tip}" aria-label="${c.tip}"></button>`;
             }
         }
-        const months = monthCols.map((col, m) => `<button class="hm-month" style="grid-column:${col} / span 4" data-month-summary="${m}" title="Statystyki: ${U.MONTHS[m]}">${U.MONTHS_SHORT[m]}</button>`).join('');
+        const monthName = (m) => `<span class="name-full">${U.MONTHS[m]}</span><span class="name-short">${U.MONTHS_SHORT[m]}</span>`;
+        const months = monthCols.map((col, m) => {
+            const end = monthCols[m + 1] || weeks + 2;
+            return `<button class="hm-month" style="grid-column:${col} / ${end}" data-month-summary="${m}" title="Statystyki: ${U.MONTHS[m]}">${monthName(m)}</button>`;
+        }).join('');
         const labels = U.DAYS_SHORT.map((d, i) => `<span class="hm-wd" style="grid-row:${i + 2}" data-wd-label="${i}">${d}</span>`).join('');
         const totals = monthTotals(y);
         const yearTotal = totals.reduce((a, b) => a + b, 0);
@@ -98,7 +102,7 @@ const Calendar = (() => {
                 <button class="month-bar ${m === thisMonth ? 'is-now' : ''}" data-month-summary="${m}" title="${U.MONTHS[m]}: ${U.eps(n)}">
                     <span class="mb-val">${n || ''}</span>
                     <span class="mb-col"><span style="height:${Math.round(n / max * 100)}%"></span></span>
-                    <span class="mb-name">${U.MONTHS_SHORT[m]}</span>
+                    <span class="mb-name">${monthName(m)}</span>
                 </button>`).join('')}
             </div>`;
     }
