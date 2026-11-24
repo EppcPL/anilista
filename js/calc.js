@@ -78,6 +78,14 @@ const Calc = (() => {
 
     const totalMinutes = (a) => mainMinutes(a) + rewatchMinutes(a);
 
+    /** Ile razy (w przybliżeniu) obejrzano całość – 1 = raz, 2.5 = półtora powtórki */
+    function viewCount(a) {
+        const full = fullMinutes(a);
+        if (!full) return 1;
+        return 1 + rewatchMinutes(a) / full;
+    }
+    const isRewatched = (a) => rewatchMinutes(a) > 0;
+
     function progress(a) {
         if (a.status === 'completed') return 100;
         if (!a.totalEpisodes) return 0;
@@ -147,7 +155,7 @@ const Calc = (() => {
     return {
         RATING_KEYS, RATING_NAMES, STATUS,
         hasSeasons, multiSeason, seasonLength, watchedCount, seasonBreakdown,
-        mainMinutes, rewatchMinutes, rewatchTimes, fullMinutes, totalMinutes,
+        mainMinutes, rewatchMinutes, rewatchTimes, fullMinutes, totalMinutes, viewCount, isRewatched,
         progress, isComplete, average, ratingFor,
         activityLevel, detailMinutes, currentStreak, longestStreak
     };

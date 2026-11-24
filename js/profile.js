@@ -123,6 +123,43 @@ const Profile = (() => {
         });
     }
 
+    /* ---------- wielokrotnie oglądane ---------- */
+
+    function renderRewatch() {
+        const box = U.$('profile-rewatch');
+        const list = Store.state.anime.filter(Calc.isRewatched)
+            .sort((a, b) => Calc.viewCount(b) - Calc.viewCount(a) || Calc.rewatchMinutes(b) - Calc.rewatchMinutes(a));
+        const head = '<h3><i class="fas fa-rotate"></i> Wielokrotnie oglądane</h3>';
+        if (!list.length) {
+            box.innerHTML = `${head}<div class="empty">Nic jeszcze nie oglądałeś drugi raz. Powtórki dodasz w edycji anime (pole „Powtórki”) albo dodając odcinki do już ukończonego anime.</div>`;
+            return;
+        }
+        const total = list.reduce((s, a) => s + Calc.rewatchMinutes(a), 0);
+        box.innerHTML = `${head}
+            <p class="muted rw-sum">${list.length} ${U.plural(list.length, 'tytuł', 'tytuły', 'tytułów')} · ${U.fmtDuration(total)} spędzone na powtórkach</p>
+            <div class="rewatch-grid">${list.map(a => {
+                const views = Calc.viewCount(a);
+                const label = Math.abs(views - Math.round(views)) < 0.05 ? `${Math.round(views)}×` : `${views.toFixed(1)}×`;
+                const parts = [];
+                if (Calc.multiSeason(a)) {
+                    (a.seasonRewatches || []).forEach((r, i) => { if (r > 0) parts.push(`S${i + 1}: +${r}×`); });
+                } else if (a.seasonRewatches && a.seasonRewatches[0] > 0) {
+                    parts.push(`+${a.seasonRewatches[0]}× całość`);
+                }
+                if (a.rewatchCount) parts.push(`+${a.rewatchCount} odc.`);
+                return `
+                <button class="rewatch-card" data-open="${a.id}">
+                    ${a.image ? `<img src="${a.image}" alt="">` : `<span class="rw-letter">${U.esc(a.title.charAt(0).toUpperCase())}</span>`}
+                    <span class="rw-times" title="Obejrzane ok. ${views.toFixed(1)} razy">${label}</span>
+                    <span class="rw-info">
+                        <b>${U.esc(a.title)}</b>
+                        <small>${parts.join(' · ')}</small>
+                        <small>+${U.fmtDuration(Calc.rewatchMinutes(a))} powtórek</small>
+                    </span>
+                </button>`;
+            }).join('')}</div>`;
+    }
+
     /* ---------- tagi ---------- */
 
     function renderTags() {
@@ -181,6 +218,7 @@ const Profile = (() => {
     function render() {
         renderStats();
         renderWrapped();
+        renderRewatch();
         renderTags();
     }
 
