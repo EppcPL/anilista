@@ -149,47 +149,112 @@ const DataIO = (() => {
         return `GitHub zwrócił błąd ${status}.`;
     }
 
-    async function publishProfile() {
+    /* ---------- automatyczna publikacja ---------- */
+    const AUTO_KEY = 'ghAutoPublish';
+    const SIG_KEY = 'ghLastSignature';
+    const LAST_KEY = 'ghLastPublished';
+    const AUTO_DELAY = 15 * 1000; // zbieramy zmiany przez 15 s, potem jedna wysyłka
+    let autoTimer = null;
+    let publishing = null;   // trwająca wysyłka (Promise)
+    let again = false;       // coś się zmieniło w trakcie wysyłki
+
+    const autoOn = () => Store.pref(AUTO_KEY, 'true') !== 'false' && !!ghConfig().token;
+
+    /** Podpis danych bez daty – żeby nie wysyłać, gdy nic się nie zmieniło */
+    function signature() {
+        const data = buildProfile(ppSettingsSaved());
+        delete data.updatedAt;
+        const str = JSON.stringify(data);
+        let h = 0;
+        for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+        return `${str.length}:${h}`;
+    }
+
+    function ppSettingsSaved() {
+        const s = ppSettings();
+        return s;
+    }
+
+    function renderPublishInfo(extra = '') {
+        const last = Store.pref(LAST_KEY, '');
+        const el = U.$('pp-last');
+        if (!el) return;
+        if (!ghConfig().token) { el.textContent = 'Połącz z GitHubem, żeby profil aktualizował się sam.'; return; }
+        el.innerHTML = `${autoOn() ? '<i class="fas fa-circle-check ok"></i> Profil aktualizuje się automatycznie.' : '<i class="fas fa-circle-pause"></i> Automatyczna aktualizacja wyłączona.'}
+            ${last ? ` Ostatnia publikacja: ${U.fmtDateRelative(new Date(last)).toLowerCase()} o ${U.fmtClock(new Date(last))}.` : ''} ${extra}`;
+    }
+
+    /** Wywoływane przy każdym zapisie danych */
+    function scheduleAuto() {
+        if (!autoOn()) return;
+        clearTimeout(autoTimer);
+        renderPublishInfo('<span class="muted">Zmiany zostaną wysłane za chwilę…</span>');
+        autoTimer = setTimeout(() => publishProfile({ silent: true }), AUTO_DELAY);
+    }
+
+    async function publishProfile({ silent = false } = {}) {
+        clearTimeout(autoTimer);
         const { token } = ghConfig();
         if (!token) {
+            if (silent) return;
             U.$('gh-setup').open = true;
             U.$('gh-token').focus();
             return UI.toast('Najpierw połącz stronę z GitHubem (instrukcja poniżej)', 'warning');
         }
+        // jedna wysyłka naraz; zmiany w trakcie – kolejna po zakończeniu
+        if (publishing) { again = true; return publishing; }
+        const sig = signature();
+        if (silent && sig === Store.pref(SIG_KEY, '')) { renderPublishInfo(); return; }
+
         const btn = U.$('pp-publish');
         const original = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Wysyłanie…';
-        try {
-            // sha istniejącego pliku jest potrzebne, żeby go nadpisać
-            let sha;
-            const head = await ghRequest(`${PROFILE_FILE}?ref=main`);
-            if (head.ok) sha = (await head.json()).sha;
-            else if (head.status !== 404) throw new Error(ghError(head.status));
+        publishing = (async () => {
+            try {
+                // sha istniejącego pliku jest potrzebne, żeby go nadpisać
+                let sha;
+                const head = await ghRequest(`${PROFILE_FILE}?ref=main`, { cache: 'no-store' });
+                if (head.ok) sha = (await head.json()).sha;
+                else if (head.status !== 404) throw new Error(ghError(head.status));
 
-            const text = profileText();
-            const res = await ghRequest(PROFILE_FILE, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: `Aktualizacja profilu (${new Date().toLocaleString('pl-PL')})`,
-                    content: toBase64(text),
-                    branch: 'main',
-                    ...(sha ? { sha } : {})
-                })
-            });
-            if (!res.ok) throw new Error(ghError(res.status));
-            const { repo } = ghConfig();
-            const [owner, name] = repo.split('/');
-            const url = `https://${owner.toLowerCase()}.github.io/${name}/profil.html`;
-            U.$('pp-size').innerHTML = `Opublikowano (${fmtSize(new Blob([text]).size)}). Za ok. minutę zmiany będą pod <a href="${url}" target="_blank" rel="noopener">${url}</a>.`;
-            UI.toast('Profil opublikowany na GitHubie', 'success');
-        } catch (err) {
-            UI.toast(err.message.startsWith('Failed to fetch') ? 'Brak połączenia z GitHubem' : err.message, 'danger');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = original;
-        }
+                const text = silent ? profileTextSaved() : profileText();
+                const res = await ghRequest(PROFILE_FILE, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: `Aktualizacja profilu (${new Date().toLocaleString('pl-PL')})`,
+                        content: toBase64(text),
+                        branch: 'main',
+                        ...(sha ? { sha } : {})
+                    })
+                });
+                if (!res.ok) throw new Error(ghError(res.status));
+                Store.setPref(SIG_KEY, signature());
+                Store.setPref(LAST_KEY, new Date().toISOString());
+                const { repo } = ghConfig();
+                const [owner, name] = repo.split('/');
+                const url = `https://${owner.toLowerCase()}.github.io/${name}/profil.html`;
+                U.$('pp-size').innerHTML = `Opublikowano (${fmtSize(new Blob([text]).size)}). Profil: <a href="${url}" target="_blank" rel="noopener">${url}</a>`;
+                renderPublishInfo();
+                if (!silent) UI.toast('Profil opublikowany na GitHubie', 'success');
+            } catch (err) {
+                const msg = err.message.startsWith('Failed to fetch') ? 'Brak połączenia z GitHubem' : err.message;
+                UI.toast(silent ? `Nie udało się zaktualizować profilu: ${msg}` : msg, 'danger');
+                renderPublishInfo('<span class="warn">Ostatnia próba się nie udała.</span>');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = original;
+                publishing = null;
+                if (again) { again = false; scheduleAuto(); }
+            }
+        })();
+        return publishing;
+    }
+
+    function profileTextSaved() {
+        const data = buildProfile(ppSettingsSaved());
+        return `/* Publiczny profil anilista – wygenerowano ${new Date().toLocaleString('pl-PL')} */\nwindow.__PROFILE__ = ${JSON.stringify(data)};\n`;
     }
 
     function init() {
@@ -200,15 +265,33 @@ const DataIO = (() => {
             Store.setPref(GH_TOKEN, U.$('gh-token').value.trim());
             Store.setPref(GH_REPO, U.$('gh-repo').value.trim() || 'EppcPL/anilista');
             ghStatus();
+            renderPublishInfo();
             UI.toast('Zapisano połączenie z GitHubem', 'success');
+            scheduleAuto();
         };
         U.$('gh-forget').onclick = () => {
             localStorage.removeItem(GH_TOKEN);
             U.$('gh-token').value = '';
             ghStatus();
+            renderPublishInfo();
             UI.toast('Token usunięty z tej przeglądarki', 'info');
         };
-        U.$('pp-publish').onclick = publishProfile;
+        U.$('pp-publish').onclick = () => publishProfile();
+        U.$('pp-auto').checked = Store.pref(AUTO_KEY, 'true') !== 'false';
+        U.$('pp-auto').onchange = (e) => {
+            Store.setPref(AUTO_KEY, e.target.checked);
+            renderPublishInfo();
+            if (e.target.checked) scheduleAuto();
+        };
+        // zmiana ustawień profilu też się liczy jako zmiana
+        ['pp-nick', 'pp-activity', 'pp-covers', 'pp-planner', 'pp-notes'].forEach(id => U.$(id).addEventListener('change', () => { ppRead(); scheduleAuto(); }));
+        // przy zamykaniu karty wyślij od razu, jeśli coś czeka
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden' && autoTimer) publishProfile({ silent: true });
+        });
+        renderPublishInfo();
+        // przy otwarciu strony nadrób zmiany z innej sesji
+        if (autoOn()) setTimeout(() => publishProfile({ silent: true }), 3000);
 
         const pp = ppSettings();
         U.$('pp-nick').value = pp.nick;
@@ -227,5 +310,5 @@ const DataIO = (() => {
         U.$('clear-btn').onclick = clearAll;
     }
 
-    return { init };
+    return { init, scheduleAuto };
 })();

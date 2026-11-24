@@ -23,6 +23,8 @@ const Store = (() => {
         if (PUBLIC_PAGE) return true;
         try {
             localStorage.setItem(key, JSON.stringify(value));
+            // publiczny profil aktualizuje się sam (data.js)
+            if (typeof DataIO !== 'undefined' && DataIO.scheduleAuto) DataIO.scheduleAuto();
             return true;
         } catch (err) {
             // Najczęściej: brak miejsca (duże obrazki)
