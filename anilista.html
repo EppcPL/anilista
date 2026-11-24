@@ -202,7 +202,7 @@
                         <ol class="gh-steps">
                             <li>Otwórz <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com → nowy token (fine-grained)</a>.</li>
                             <li>Nazwa dowolna, np. „anilista”. Przy <b>Repository access</b> wybierz <b>Only select repositories</b> → <b>anilista</b>.</li>
-                            <li>W <b>Permissions → Repository permissions</b> ustaw <b>Contents: Read and write</b>.</li>
+                            <li>Rozwiń <b>Repository permissions</b> (nie „Account permissions”!) i przy <b>Contents</b> wybierz <b>Read and write</b>. Ta lista pojawia się dopiero po wybraniu repo w poprzednim kroku.</li>
                             <li>Kliknij <b>Generate token</b>, skopiuj go i wklej poniżej.</li>
                         </ol>
                         <div class="row-2">
@@ -215,9 +215,11 @@
                                 <input type="text" id="gh-repo" value="EppcPL/anilista">
                             </div>
                         </div>
+                        <p id="gh-check-result" class="pp-last"></p>
                         <p class="note">Token zapisuje się tylko w tej przeglądarce i nie trafia do repo. Ma dostęp wyłącznie do repo <b>anilista</b>.</p>
                         <div class="form-actions">
                             <button id="gh-save" class="btn btn-ghost btn-sm"><i class="fas fa-floppy-disk"></i> Zapisz</button>
+                            <button id="gh-check" class="btn btn-ghost btn-sm"><i class="fas fa-stethoscope"></i> Sprawdź połączenie</button>
                             <button id="gh-forget" class="btn btn-ghost btn-sm btn-danger-text"><i class="fas fa-trash"></i> Usuń token z tej przeglądarki</button>
                         </div>
                     </details>

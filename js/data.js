@@ -143,10 +143,42 @@ const DataIO = (() => {
 
     function ghError(status) {
         if (status === 401) return 'Token jest nieprawidłowy albo wygasł. Wygeneruj nowy.';
-        if (status === 403) return 'Token nie ma uprawnień do zapisu. Ustaw „Contents: Read and write”.';
+        if (status === 403) return 'Token nie ma prawa zapisu do repo. Najczęstsza przyczyna: przy „Repository access” zostało „Public repositories (read-only)” – trzeba wybrać „Only select repositories → anilista” i wtedy w „Repository permissions” ustawić „Contents: Read and write”.';
         if (status === 404) return 'Nie znaleziono repozytorium. Sprawdź nazwę i czy token ma dostęp do tego repo.';
         if (status === 409 || status === 422) return 'GitHub odrzucił zapis (konflikt). Spróbuj jeszcze raz za chwilę.';
         return `GitHub zwrócił błąd ${status}.`;
+    }
+
+    /** Błąd z odpowiedzi GitHuba – nasz opis + oryginalny komunikat GitHuba */
+    async function ghFail(res) {
+        let detail = '';
+        try { detail = (await res.json()).message || ''; } catch { /* brak treści */ }
+        const err = new Error(ghError(res.status) + (detail ? ` (GitHub: „${detail}”)` : ''));
+        err.status = res.status;
+        return err;
+    }
+
+    /** Sprawdza token: czy widzi repo i czy może pisać */
+    async function ghCheck() {
+        const out = U.$('gh-check-result');
+        const { token, repo } = ghConfig();
+        if (!token) { out.innerHTML = '<span class="warn">Najpierw wklej token i kliknij Zapisz.</span>'; return; }
+        out.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sprawdzam…';
+        try {
+            const res = await fetch(`https://api.github.com/repos/${repo}`, {
+                headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`, 'X-GitHub-Api-Version': '2022-11-28' },
+                cache: 'no-store'
+            });
+            if (!res.ok) throw await ghFail(res);
+            const info = await res.json();
+            const canPush = info.permissions ? info.permissions.push : null;
+            const tokenType = token.startsWith('github_pat_') ? 'fine-grained' : token.startsWith('ghp_') ? 'classic' : 'nieznany';
+            out.innerHTML = `<i class="fas fa-circle-check ok"></i> Token (${tokenType}) widzi repo <b>${U.esc(info.full_name)}</b>.`
+                + (canPush === false ? ' <span class="warn">Ale konto nie ma prawa zapisu do tego repo.</span>' : '')
+                + ' Kliknij „Opublikuj na GitHubie”, żeby sprawdzić zapis.';
+        } catch (err) {
+            out.innerHTML = `<i class="fas fa-circle-xmark warn"></i> ${U.esc(err.message.startsWith('Failed to fetch') ? 'Brak połączenia z GitHubem' : err.message)}`;
+        }
     }
 
     /* ---------- automatyczna publikacja ---------- */
@@ -216,7 +248,7 @@ const DataIO = (() => {
                 let sha;
                 const head = await ghRequest(`${PROFILE_FILE}?ref=main`, { cache: 'no-store' });
                 if (head.ok) sha = (await head.json()).sha;
-                else if (head.status !== 404) throw new Error(ghError(head.status));
+                else if (head.status !== 404) throw await ghFail(head);
 
                 const text = silent ? profileTextSaved() : profileText();
                 const res = await ghRequest(PROFILE_FILE, {
@@ -229,7 +261,7 @@ const DataIO = (() => {
                         ...(sha ? { sha } : {})
                     })
                 });
-                if (!res.ok) throw new Error(ghError(res.status));
+                if (!res.ok) throw await ghFail(res);
                 Store.setPref(SIG_KEY, signature());
                 Store.setPref(LAST_KEY, new Date().toISOString());
                 const { repo } = ghConfig();
@@ -241,7 +273,7 @@ const DataIO = (() => {
             } catch (err) {
                 const msg = err.message.startsWith('Failed to fetch') ? 'Brak połączenia z GitHubem' : err.message;
                 UI.toast(silent ? `Nie udało się zaktualizować profilu: ${msg}` : msg, 'danger');
-                renderPublishInfo('<span class="warn">Ostatnia próba się nie udała.</span>');
+                renderPublishInfo(`<span class="warn">Ostatnia próba się nie udała: ${U.esc(msg)}</span>`);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = original;
@@ -277,6 +309,7 @@ const DataIO = (() => {
             UI.toast('Token usunięty z tej przeglądarki', 'info');
         };
         U.$('pp-publish').onclick = () => publishProfile();
+        U.$('gh-check').onclick = ghCheck;
         U.$('pp-auto').checked = Store.pref(AUTO_KEY, 'true') !== 'false';
         U.$('pp-auto').onchange = (e) => {
             Store.setPref(AUTO_KEY, e.target.checked);
