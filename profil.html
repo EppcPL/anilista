@@ -21,7 +21,8 @@
 <body class="readonly">
     <!-- Dane profilu – ten plik generujesz w anilista.html (zakładka Dane) -->
     <script>window.__PROFILE_PAGE__ = true;</script>
-    <script src="profil-dane.js"></script>
+    <!-- ?v=… omija pamięć podręczną, więc znajomi zawsze widzą najnowszą wersję -->
+    <script>document.write('<script src="profil-dane.js?v=' + Date.now() + '"><\/script>');</script>
 
     <header class="pub-head">
         <div class="pub-head-inner">
