@@ -111,7 +111,14 @@ const Collection = (() => {
             ? `<button class="btn btn-ghost" id="load-more-btn">Pokaż więcej (${rest})</button>`
             : '';
         const more = U.$('load-more-btn');
-        if (more) more.onclick = () => { view.shown += PAGE; render(); };
+        if (more) more.onclick = () => {
+            const before = view.shown;
+            view.shown += PAGE;
+            render();
+            // animuj tylko nowo dołożone karty
+            const fresh = U.qsa('#anime-list > .anime-card').slice(before);
+            fresh.forEach((el, i) => { el.style.setProperty('--i', i); el.classList.add('fx-in'); });
+        };
     }
 
     function remove(id) {
@@ -125,7 +132,7 @@ const Collection = (() => {
 
     function init() {
         U.$('search-input').addEventListener('input', (e) => { view.search = e.target.value; view.shown = PAGE; render(); });
-        U.$('sort-select').addEventListener('change', (e) => { view.sort = e.target.value; view.shown = PAGE; render(); });
+        U.$('sort-select').addEventListener('change', (e) => { view.sort = e.target.value; view.shown = PAGE; render(); FX.stagger(U.$('anime-list')); });
         U.$('status-filter').addEventListener('click', (e) => {
             const chip = e.target.closest('[data-status]');
             if (!chip) return;
@@ -133,6 +140,7 @@ const Collection = (() => {
             view.status = chip.dataset.status;
             view.shown = PAGE;
             render();
+            FX.stagger(U.$('anime-list'));
         });
         // Jeden nasłuch dla wszystkich kart
         U.$('anime-list').addEventListener('click', (e) => {

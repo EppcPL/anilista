@@ -68,9 +68,10 @@ const App = (() => {
 
     function show(view) {
         if (!VIEWS.includes(view)) view = 'profil';
-        U.qsa('.view').forEach(v => { v.hidden = v.id !== view; });
-        U.qsa('.pub-tabs a').forEach(a => a.classList.toggle('active', a.dataset.view === view));
-        window.scrollTo({ top: 0 });
+        FX.switchView(() => {
+            U.qsa('.view').forEach(v => { v.hidden = v.id !== view; });
+            U.qsa('.pub-tabs a').forEach(a => a.classList.toggle('active', a.dataset.view === view));
+        }, () => U.$(view));
     }
 
     function init() {
@@ -79,6 +80,7 @@ const App = (() => {
             U.$('pub-missing').hidden = false;
             return;
         }
+        FX.init();
         UI.initDialogs();
         Collection.init();
         TierList.init();

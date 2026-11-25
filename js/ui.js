@@ -22,21 +22,26 @@ const UI = (() => {
     /* ---------- okna <dialog> ---------- */
     function open(id) {
         const d = U.$(id);
-        if (d && !d.open) d.showModal();
+        if (!d) return d;
+        if (d.classList.contains('closing')) { d.classList.remove('closing'); }
+        if (!d.open) d.showModal();
+        if (typeof FX !== 'undefined') FX.enter(d);
         return d;
     }
     function close(id) {
         const d = U.$(id);
-        if (d && d.open) d.close();
+        if (!d || !d.open) return;
+        if (typeof FX !== 'undefined') FX.closeDialog(d); else d.close();
     }
 
     function initDialogs() {
         U.qsa('dialog.modal').forEach(d => {
             // Klik w tło zamyka okno
             d.addEventListener('click', (e) => {
-                if (e.target === d) d.close();
-                if (e.target.closest('[data-close]')) d.close();
+                if (e.target === d || e.target.closest('[data-close]')) close(d.id);
             });
+            // Esc – też z animacją
+            d.addEventListener('cancel', (e) => { e.preventDefault(); close(d.id); });
         });
     }
 
@@ -52,6 +57,7 @@ const UI = (() => {
         panel.hidden = false;
         panel.querySelector('[data-panel-close]').onclick = () => { panel.hidden = true; };
         if (after) after(panel);
+        if (typeof FX !== 'undefined') FX.stagger(panel, ['tbody > tr', '.ro-row']);
         panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 

@@ -166,7 +166,7 @@ const Summary = (() => {
             <section class="sum-section">
                 <h4><i class="fas ${icon}"></i> ${title}</h4>
                 <div class="chart ${small ? 'chart-dense' : ''}">${bars.map((b, i) => `
-                    <div class="chart-col ${i === highlight ? 'is-top' : ''}" ${b.month !== undefined ? `data-month-summary="${b.month}"` : ''} ${b.date ? `data-date="${b.date}"` : ''} data-tip="${b.tip}">
+                    <div class="chart-col ${i === highlight ? 'is-top' : ''}" style="--w:${i}" ${b.month !== undefined ? `data-month-summary="${b.month}"` : ''} ${b.date ? `data-date="${b.date}"` : ''} data-tip="${b.tip}">
                         <span class="chart-val">${b.value && !small ? b.value : ''}</span>
                         <span class="chart-bar"><span style="height:${b.value / max * 100}%"></span></span>
                         <span class="chart-label">${b.label}</span>
@@ -237,9 +237,11 @@ const Summary = (() => {
             if (day) return dayView(day.dataset.date);
             if (onClick) onClick(e);
         };
-        UI.open('yearly-summary-modal');
-        box.scrollTop = 0;
         U.$('yearly-summary-modal').scrollTop = 0;
+        box.classList.remove('fx-swap');
+        void box.offsetWidth;
+        box.classList.add('fx-swap');
+        UI.open('yearly-summary-modal');
     }
 
     /* ---------------- dzień ---------------- */

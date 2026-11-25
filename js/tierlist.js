@@ -41,6 +41,7 @@ const TierList = (() => {
             category = btn.dataset.category;
             U.qsa('#tier-controls .chip').forEach(c => c.classList.toggle('active', c === btn));
             render();
+            FX.stagger(U.$('tier-list-container'), ['.tier-row', '.tier-item']);
         });
         U.$('tier-list-container').addEventListener('click', (e) => {
             const item = e.target.closest('.tier-item');

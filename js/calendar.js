@@ -21,6 +21,12 @@ const Calendar = (() => {
         box.innerHTML = mode === 'year' ? yearHTML() : monthHTML();
     }
 
+    /** Przerysuj z animacją (zmiana roku/miesiąca/trybu) */
+    function renderAnimated() {
+        render();
+        FX.wave(U.$('calendar-container'));
+    }
+
     function dayCell(date) {
         const key = U.dateKey(date);
         const n = Store.state.activity[key] || 0;
@@ -64,7 +70,7 @@ const Calendar = (() => {
                 if (date.getDate() === 1) monthCols[date.getMonth()] = w + 2;
                 const c = dayCell(date);
                 const edge = w < 4 ? ' tip-left' : w > weeks - 5 ? ' tip-right' : '';
-                cells += `<button class="hm-day ${c.cls}${edge}" style="${pos}" data-date="${c.key}" data-m="${date.getMonth()}" data-wd="${d}" data-tip="${c.tip}" aria-label="${c.tip}"></button>`;
+                cells += `<button class="hm-day ${c.cls}${edge}" style="${pos};--w:${w}" data-date="${c.key}" data-m="${date.getMonth()}" data-wd="${d}" data-tip="${c.tip}" aria-label="${c.tip}"></button>`;
             }
         }
         const monthName = (m) => `<span class="name-full">${U.MONTHS[m]}</span><span class="name-short">${U.MONTHS_SHORT[m]}</span>`;
@@ -99,7 +105,7 @@ const Calendar = (() => {
             <h4 class="cal-sub">Miesiące <small>kliknij, aby zobaczyć statystyki</small></h4>
             <div class="month-bars">
                 ${totals.map((n, m) => `
-                <button class="month-bar ${m === thisMonth ? 'is-now' : ''}" data-month-summary="${m}" title="${U.MONTHS[m]}: ${U.eps(n)}">
+                <button class="month-bar ${m === thisMonth ? 'is-now' : ''}" style="--w:${m}" data-month-summary="${m}" title="${U.MONTHS[m]}: ${U.eps(n)}">
                     <span class="mb-val">${n || ''}</span>
                     <span class="mb-col"><span style="height:${Math.round(n / max * 100)}%"></span></span>
                     <span class="mb-name">${monthName(m)}</span>
@@ -118,7 +124,7 @@ const Calendar = (() => {
         for (let d = 1; d <= daysIn; d++) {
             const c = dayCell(new Date(y, m, d));
             keys.push(c.key);
-            cells += `<button class="md-day ${c.cls}" data-date="${c.key}" data-tip="${c.tip}" aria-label="${c.tip}"><span>${d}</span>${c.n ? `<small>${c.n} odc.</small>` : ''}</button>`;
+            cells += `<button class="md-day ${c.cls}" style="--w:${d + offset}" data-date="${c.key}" data-tip="${c.tip}" aria-label="${c.tip}"><span>${d}</span>${c.n ? `<small>${c.n} odc.</small>` : ''}</button>`;
         }
         const s = Summary.collect(keys);
         const top = s.topDay ? U.parseDate(s.topDay.key) : null;
@@ -157,25 +163,25 @@ const Calendar = (() => {
             if (cal.month < 0) { cal.month = 11; cal.year--; }
             if (cal.month > 11) { cal.month = 0; cal.year++; }
         }
-        render();
+        renderAnimated();
     }
 
     function init() {
         const box = U.$('calendar-container');
         U.$('toggle-calendar-btn').onclick = () => {
             Store.setPref('calendarShown', !visible());
-            render();
+            renderAnimated();
         };
         box.addEventListener('click', (e) => {
             const act = e.target.closest('[data-cal]')?.dataset.cal;
             if (act === 'prev') return step(-1);
             if (act === 'next') return step(1);
             if (act === 'summary') return Summary.year(cal.year);
-            if (act === 'to-year') { cal.mode = 'year'; return render(); }
+            if (act === 'to-year') { cal.mode = 'year'; return renderAnimated(); }
             if (act === 'to-month') {
                 cal.mode = 'month';
                 if (cal.year === new Date().getFullYear()) cal.month = new Date().getMonth();
-                return render();
+                return renderAnimated();
             }
             const ms = e.target.closest('[data-month-summary]');
             if (ms) return Summary.month(U.int(ms.dataset.monthSummary), cal.year);

@@ -1,0 +1,183 @@
+/* =========================================================
+   motion.css – animacje, przejścia i efekty
+   ========================================================= */
+:root {
+    --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+html.fx-ready { scroll-behavior: smooth; }
+
+/* ---------- elementy wchodzące jeden po drugim ---------- */
+.fx-in { animation: fxUp 0.6s var(--ease-out) backwards; animation-delay: calc(var(--i, 0) * 45ms); }
+@keyframes fxUp {
+    from { opacity: 0; transform: translateY(18px) scale(0.98); filter: blur(4px); }
+}
+/* paski postępu rosną razem z kartą */
+.fx-in .bar > span, .fx-in .rank-bar > span { animation: barGrow 1s var(--ease-out) backwards; animation-delay: calc(var(--i, 0) * 45ms + 200ms); transform-origin: left; }
+@keyframes barGrow { from { transform: scaleX(0); } }
+
+/* ---------- sekcje pojawiające się przy przewijaniu ---------- */
+.fx-reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out); }
+.fx-reveal.fx-visible { opacity: 1; transform: none; }
+
+/* ---------- płynna zmiana zakładki (View Transitions) ---------- */
+::view-transition-old(root) { animation: vtOut 0.16s ease-in both; }
+::view-transition-new(root) { animation: vtIn 0.42s var(--ease-out) 0.1s both; }
+@keyframes vtOut { to { opacity: 0; transform: translateY(-8px); } }
+@keyframes vtIn { from { opacity: 0; transform: translateY(14px); } }
+.nav { view-transition-name: main-nav; }
+.toasts { view-transition-name: toasts; }
+::view-transition-group(main-nav), ::view-transition-group(toasts) { animation: none; }
+
+/* ---------- przesuwany wskaźnik w menu ---------- */
+.nav-pill {
+    position: absolute; top: 0; left: 0; z-index: 0;
+    border-radius: var(--r-md);
+    background: linear-gradient(135deg, var(--accent), #5649c0 60%, #4a7ee0);
+    box-shadow: 0 8px 24px rgba(108, 92, 231, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    transition: transform 0.5s var(--ease-spring), width 0.3s, height 0.3s, opacity 0.2s;
+    pointer-events: none;
+}
+.nav-item { z-index: 1; }
+.nav-item.active { background: transparent; box-shadow: none; color: #fff; }
+.nav-item.active::before { display: none; }
+.nav-item.active i { animation: iconPop 0.45s var(--ease-spring); }
+@keyframes iconPop { 40% { transform: scale(1.3) rotate(-8deg); } }
+
+/* licznik zaległych pulsuje */
+.nav-badge { z-index: 2; }
+.nav-badge::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit;
+    box-shadow: 0 0 0 0 rgba(253, 203, 110, 0.7);
+    animation: ping 2.2s ease-out infinite;
+}
+@keyframes ping { 70%, 100% { box-shadow: 0 0 0 9px rgba(253, 203, 110, 0); } }
+
+/* ---------- tło: wolno płynące poświaty ---------- */
+body::before { animation: drift 38s ease-in-out infinite alternate; }
+@keyframes drift {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-3%, 2%) scale(1.08); }
+    100% { transform: translate(2%, -2%) scale(1.04); }
+}
+
+/* nagłówki – powoli przesuwający się gradient */
+.view-title, .onair-title, .modal-summary .modal-head h3 {
+    background-image: linear-gradient(90deg, var(--accent-light), var(--accent2), var(--pink), var(--accent-light));
+    background-size: 300% 100%;
+    animation: shimmer 12s linear infinite;
+}
+.view-title::after, .onair-title::after { animation: lineIn 0.8s var(--ease-out) 0.15s backwards; transform-origin: left; }
+@keyframes shimmer { to { background-position: 300% 0; } }
+@keyframes lineIn { from { transform: scaleX(0); } }
+
+/* ---------- przechylanie kart + odblask za kursorem ---------- */
+.anime-card, .wrapped-card, .rewatch-card, .now-card, .stat { position: relative; will-change: transform; }
+.fx-tilt {
+    transform: perspective(900px) rotateX(var(--rx, 0)) rotateY(var(--ry, 0)) translateY(-5px) !important;
+    transition: transform 0.12s linear, box-shadow 0.3s, border-color 0.3s !important;
+}
+.anime-card, .rewatch-card, .now-card, .stat, .wrapped-card { transition: transform 0.5s var(--ease-spring), box-shadow 0.3s, border-color 0.3s; }
+.anime-card::before, .rewatch-card::before, .now-card::before, .stat::before {
+    content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: inherit;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.1), transparent 45%);
+    opacity: 0; transition: opacity 0.3s;
+}
+.fx-tilt::before { opacity: 1; }
+/* okładka – przesuwający się błysk przy najechaniu */
+.card-cover::before {
+    content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; z-index: 2; pointer-events: none;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+    transform: skewX(-15deg);
+}
+.anime-card:hover .card-cover::before { animation: sweep 0.9s var(--ease-out); }
+@keyframes sweep { to { left: 130%; } }
+.card-score { transition: transform 0.4s var(--ease-spring); z-index: 4; }
+.anime-card:hover .card-score { transform: scale(1.12) rotate(-6deg); }
+
+/* ---------- fala po kliknięciu ---------- */
+.btn, .chip, .btn-icon, .slot, .month-bar, .cal-mode button, .nav-item { position: relative; overflow: hidden; }
+.ripple {
+    position: absolute; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 70%);
+    transform: scale(0); animation: ripple 0.65s var(--ease-out);
+}
+@keyframes ripple { to { transform: scale(1); opacity: 0; } }
+
+/* ---------- przyciski ---------- */
+.btn { transition: transform 0.25s var(--ease-spring), box-shadow 0.25s, background-position 0.5s, border-color 0.2s, background-color 0.2s; }
+.btn-accent { background-size: 200% 100%; background-image: linear-gradient(135deg, var(--accent), #8b7cf6, var(--accent2)); }
+.btn-accent:hover { background-position: 100% 0; transform: translateY(-2px); }
+.btn:active { transform: translateY(0) scale(0.97); }
+.btn-icon { transition: transform 0.25s var(--ease-spring), background 0.2s, border-color 0.2s; }
+.btn-icon:hover { transform: translateY(-1px); border-color: var(--accent); }
+.chip { transition: background 0.25s, color 0.25s, border-color 0.25s, transform 0.25s var(--ease-spring), box-shadow 0.25s; }
+.chip:hover { transform: translateY(-1px); }
+.chip.active { animation: chipOn 0.4s var(--ease-spring); }
+@keyframes chipOn { 50% { transform: scale(1.07); } }
+
+/* ---------- okna dialogowe: otwieranie i zamykanie ---------- */
+.modal[open] { animation: modalIn 0.42s var(--ease-spring); }
+.modal[open]::backdrop { animation: fadeIn 0.3s ease-out; }
+.modal.closing { animation: modalOut 0.24s ease-in forwards; }
+.modal.closing::backdrop { animation: fadeOut 0.24s ease-in forwards; }
+@keyframes modalIn { from { opacity: 0; transform: translateY(24px) scale(0.94); } }
+@keyframes modalOut { to { opacity: 0; transform: translateY(14px) scale(0.96); } }
+@keyframes fadeIn { from { opacity: 0; } }
+@keyframes fadeOut { to { opacity: 0; } }
+/* zmiana treści w otwartym oknie podsumowania */
+.fx-swap { animation: swapIn 0.4s var(--ease-out); }
+@keyframes swapIn { from { opacity: 0; transform: translateX(16px); } }
+
+/* ---------- powiadomienia ---------- */
+.toast {
+    position: relative; overflow: hidden;
+    transform: translateX(120%); opacity: 0;
+    transition: transform 0.5s var(--ease-spring), opacity 0.3s;
+    backdrop-filter: blur(12px);
+}
+.toast.show { transform: none; opacity: 1; }
+.toast::after {
+    content: ''; position: absolute; left: 0; bottom: 0; height: 3px; width: 100%;
+    background: currentColor; opacity: 0.35; transform-origin: left;
+    animation: toastTimer 3.5s linear forwards;
+}
+.toast-success::after { background: var(--ok); opacity: 0.8; }
+.toast-danger::after { background: var(--danger); opacity: 0.8; }
+.toast-warning::after { background: var(--onair); opacity: 0.8; }
+.toast-info::after { background: var(--watch); opacity: 0.8; }
+@keyframes toastTimer { to { transform: scaleX(0); } }
+
+/* ---------- kalendarz i wykresy: fala ---------- */
+.fx-wave .hm-day:not(.hm-out) { animation: cellIn 0.5s var(--ease-spring) backwards; animation-delay: calc(var(--w, 0) * 14ms); }
+.fx-wave .md-day:not(.md-out) { animation: cellIn 0.5s var(--ease-spring) backwards; animation-delay: calc(var(--w, 0) * 18ms); }
+.fx-wave .month-bar { animation: fxUp 0.5s var(--ease-out) backwards; animation-delay: calc(var(--w, 0) * 40ms); }
+.fx-wave .mb-col span, .fx-wave .chart-bar span { animation: rise 0.8s var(--ease-out) backwards; animation-delay: calc(var(--w, 0) * 30ms + 150ms); transform-origin: bottom; }
+@keyframes cellIn { from { opacity: 0; transform: scale(0.3); } }
+@keyframes rise { from { transform: scaleY(0); } }
+
+/* ---------- inne drobne ---------- */
+.fx-pulse { animation: pulseOnce 0.5s var(--ease-spring); }
+@keyframes pulseOnce { 40% { transform: scale(1.06); } }
+.slot { transition: transform 0.25s var(--ease-spring), border-color 0.2s, box-shadow 0.2s; }
+.slot:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3); }
+.slot-behind { animation: glow 2.4s ease-in-out infinite; }
+@keyframes glow { 50% { box-shadow: 0 0 22px rgba(253, 203, 110, 0.7); } }
+.tier-item { transition: transform 0.3s var(--ease-spring), box-shadow 0.3s; }
+.tier-item:hover { transform: translateY(-2px) scale(1.04); }
+.overdue { transition: transform 0.3s var(--ease-spring), border-color 0.2s; }
+.overdue:hover { transform: translateX(4px); }
+.rank li { transition: transform 0.3s var(--ease-spring), border-color 0.15s, background 0.15s; }
+.rank li[data-open]:hover { transform: translateX(4px); }
+.panel:not([hidden]) { animation: fxUp 0.45s var(--ease-out); }
+details[open] > :not(summary) { animation: fxUp 0.35s var(--ease-out); }
+input, select, textarea { transition: border-color 0.2s, box-shadow 0.25s, background 0.2s; }
+.image-drop img { animation: fadeIn 0.4s ease-out; }
+.counter output { display: inline-block; }
+
+.confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2000; }
+
+@media (prefers-reduced-motion: reduce) {
+    body::before, .view-title, .onair-title, .slot-behind, .nav-badge::after { animation: none !important; }
+    .fx-reveal { opacity: 1; transform: none; }
+}

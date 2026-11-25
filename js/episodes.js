@@ -21,6 +21,7 @@ const Episodes = (() => {
      * activityOnly = tylko wpis w kalendarzu, bez zmiany postępu.
      */
     function add(animeId, count, date, activityOnly = false) {
+        const behindBefore = Airing.totalBehind();
         const anime = Store.find(animeId);
         addActivity(date, count, animeId);
 
@@ -35,6 +36,7 @@ const Episodes = (() => {
                     if (Calc.isComplete(anime) && anime.status === 'watching') {
                         anime.status = 'completed';
                         UI.toast(`Ukończono „${anime.title}”!`, 'success');
+                        FX.confetti();
                     }
                 }
             }
@@ -42,6 +44,13 @@ const Episodes = (() => {
         }
         App.refresh();
         UI.toast(activityOnly ? 'Aktywność dodana' : `Dodano ${U.eps(count)}`, 'success');
+        // wszystko nadrobione – mała nagroda
+        if (behindBefore > 0 && Airing.totalBehind() === 0) {
+            UI.toast('Jesteś na bieżąco ze wszystkimi emisjami!', 'success');
+            FX.confetti({ count: 90, y: 0.25 });
+        }
+        const card = document.querySelector(`.anime-card[data-id="${CSS.escape(String(animeId))}"]`);
+        if (card) FX.pulse(card);
     }
 
     function openModal(animeId) {

@@ -17,9 +17,11 @@ const App = (() => {
 
     function show(view) {
         if (!VIEWS.includes(view)) view = defaultView();
-        U.qsa('.view').forEach(v => { v.hidden = v.id !== view; });
-        U.qsa('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === view));
-        window.scrollTo({ top: 0 });
+        FX.switchView(() => {
+            U.qsa('.view').forEach(v => { v.hidden = v.id !== view; });
+            U.qsa('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === view));
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        }, () => U.$(view));
     }
 
     /** Start: emisje, jeśli coś jest śledzone; inaczej kolekcja */
@@ -28,6 +30,7 @@ const App = (() => {
     }
 
     function init() {
+        FX.init();
         UI.initDialogs();
         Episodes.init();
         AnimeForm.init();

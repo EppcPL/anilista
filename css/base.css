@@ -198,9 +198,6 @@ body::before {
         radial-gradient(28rem 22rem at 85% 10%, rgba(253, 121, 168, 0.10), transparent 70%);
 }
 
-/* płynne wejście przy zmianie zakładki */
-.view:not([hidden]) { animation: viewIn 0.28s ease-out; }
-@keyframes viewIn { from { opacity: 0; transform: translateY(8px); } }
 
 /* wyraźniejszy aktywny element menu */
 .nav-item.active::before {

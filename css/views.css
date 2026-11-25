@@ -223,7 +223,7 @@
     font: 700 0.95rem var(--display);
     border: 3px solid #1e272e; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
-.card-body { display: flex; flex-direction: column; gap: 0.7rem; padding: 0.9rem 1rem 1rem; flex: 1; }
+.card-body { container-type: inline-size; display: flex; flex-direction: column; gap: 0.7rem; padding: 0.9rem 1rem 1rem; flex: 1; }
 .card-top { display: flex; flex-wrap: wrap; gap: 0.35rem; padding-right: 2.5rem; }
 .card-title { font-size: 1.2rem; }
 .card-progress-line { display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--muted); margin-bottom: 0.3rem; }
@@ -238,6 +238,11 @@
 .mini-ratings dd { display: flex; align-items: center; gap: 0.4rem; }
 .mini-ratings dd .bar { flex: 1; }
 .mini-ratings dd span { width: 1.2rem; text-align: right; font-weight: 700; }
+/* wąska karta – oceny w jednej kolumnie, żeby paski były czytelne */
+@container (max-width: 300px) {
+    .mini-ratings { grid-template-columns: 1fr; gap: 0.3rem; }
+    .mini-ratings > div { grid-template-columns: 5.5rem 1fr; }
+}
 
 .card-dates { display: flex; gap: 1rem; font-size: 0.82rem; color: var(--muted); }
 .card-actions { display: flex; gap: 0.4rem; margin-top: auto; padding-top: 0.25rem; }
