@@ -10,7 +10,7 @@ const FX = (() => {
 
     /* ---------- wejście elementów „jeden po drugim” ---------- */
     const STAGGER = [
-        '.stats > *', '.wrapped > *', '.anime-grid > .anime-card', '.overdue-list > *', '.schedule > .day-col',
+        '.stats > *', '.wrapped > *', '.anime-grid > .anime-card', '.anime-grid > .series-card', '.series-list > li', '.related > *', '.overdue-list > *', '.schedule > .day-col',
         '.planner-list > *', '.tier-row', '.rewatch-grid > *', '.data-grid > *', '.now-row > *',
         '.sum-tiles > *', '.rank > li', '.facts > li', '.podium > li', '.form-grid > .form-col', '.chips > .chip'
     ];
@@ -96,7 +96,7 @@ const FX = (() => {
     }
 
     /* ---------- przechylanie kart za kursorem ---------- */
-    const TILT = '.anime-card, .wrapped-card, .rewatch-card, .now-card, .stat';
+    const TILT = '.anime-card, .series-card, .wrapped-card, .rewatch-card, .now-card, .stat';
     function initTilt() {
         if (!finePointer()) return;
         let current = null;

@@ -82,6 +82,7 @@ const App = (() => {
         }
         FX.init();
         UI.initDialogs();
+        Series.init();
         Collection.init();
         TierList.init();
         Calendar.init();

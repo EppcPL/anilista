@@ -1,0 +1,109 @@
+/* =========================================================
+   series.css – serie / powiązania między anime
+   ========================================================= */
+
+/* plakietka na karcie */
+.series-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.1rem 0.55rem; border-radius: 999px; border: 0;
+    background: rgba(0, 206, 201, 0.15); color: var(--accent2);
+    font: 600 0.78rem var(--body); cursor: pointer;
+    transition: background 0.2s, transform 0.25s var(--ease-spring, ease);
+}
+.series-badge span { opacity: 0.7; font-weight: 500; }
+.series-badge:hover { background: rgba(0, 206, 201, 0.28); transform: translateY(-1px); }
+
+/* pola w formularzu */
+.row-series { display: grid; grid-template-columns: 1fr 6.5rem; gap: 0.75rem; }
+
+/* karty serii w kolekcji */
+.series-card {
+    position: relative; overflow: hidden; display: flex; flex-direction: column;
+    background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(6px);
+    border: 1px solid var(--line); border-radius: var(--r-lg); cursor: pointer;
+    transition: transform 0.5s var(--ease-spring, ease), box-shadow 0.3s, border-color 0.3s;
+}
+.series-card:hover, .series-card:focus-visible { transform: translateY(-5px); border-color: var(--accent2); box-shadow: 0 12px 30px rgba(0, 206, 201, 0.22); }
+.series-card .card-score { position: absolute; right: 0.9rem; top: calc(7.5rem - 1.3rem); }
+.series-card-body { display: grid; gap: 0.6rem; padding: 1rem 1.1rem 1.1rem; }
+.series-card h3 { font-size: 1.3rem; }
+.series-mini { list-style: none; display: grid; gap: 0.2rem; font-size: 0.85rem; }
+.series-mini li { display: flex; justify-content: space-between; gap: 0.75rem; }
+.series-mini li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.series-mini li b { color: var(--accent-light); }
+
+/* kolaż okładek */
+.series-collage { display: grid; height: 7.5rem; gap: 2px; background: linear-gradient(135deg, rgba(0, 206, 201, 0.35), rgba(108, 92, 231, 0.45)); }
+.series-collage img { width: 100%; height: 100%; object-fit: cover; min-height: 0; }
+.series-collage.n2 { grid-template-columns: 1fr 1fr; }
+.series-collage.n3 { grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; }
+.series-collage.n3 img:first-child { grid-row: span 2; }
+.series-collage.n4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.series-collage.is-empty { place-items: center; }
+.series-collage.is-empty span { font: 800 3rem var(--display); color: rgba(255, 255, 255, 0.25); }
+
+/* okno serii */
+.series-hero { display: grid; grid-template-columns: 240px 1fr; gap: 1.25rem; align-items: stretch; }
+.series-hero .series-collage { height: 100%; min-height: 10rem; border-radius: var(--r-md); overflow: hidden; }
+.series-hero-info { display: grid; gap: 0.75rem; align-content: start; }
+.series-score { display: flex; align-items: baseline; gap: 0.6rem; }
+.series-score strong {
+    font: 800 3rem/1 var(--display);
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.series-score span { color: var(--muted); }
+.series-hero .mini-stats { margin: 0; }
+
+.series-list { list-style: none; display: grid; gap: 0.45rem; }
+.series-list li {
+    display: grid; grid-template-columns: auto auto 1fr auto auto; align-items: center; gap: 0.75rem;
+    padding: 0.55rem 0.75rem; border-radius: var(--r-md); background: rgba(255, 255, 255, 0.04);
+    transition: background 0.2s;
+}
+.series-list li:hover { background: rgba(108, 92, 231, 0.12); }
+.series-item-main { display: grid; gap: 0.1rem; min-width: 0; text-decoration: none; }
+.series-item-main b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.series-item-main small { color: var(--muted); }
+.series-item-score { font: 800 1.15rem var(--display); color: var(--accent-light); }
+.series-item-actions { display: flex; gap: 0.25rem; }
+.series-item-actions .btn-icon { width: 2rem; height: 2rem; }
+.series-item-actions .btn-icon:disabled { opacity: 0.3; cursor: default; }
+.series-add { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; margin-top: 1rem; }
+
+/* powiązane w oknie szczegółów */
+.details-series { margin-top: 1.5rem; padding: 1rem; border-radius: var(--r-md); background: rgba(0, 206, 201, 0.06); border: 1px solid rgba(0, 206, 201, 0.25); }
+.details-series-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.details-series-head h4 { margin: 0; color: var(--accent2); }
+.related { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.25rem; }
+.related-item {
+    flex: 0 0 8.5rem; display: grid; gap: 0.35rem; text-align: left;
+    padding: 0.4rem; border-radius: var(--r-md); border: 1px solid var(--line);
+    background: rgba(0, 0, 0, 0.25); color: var(--text); font: 0.82rem var(--body); cursor: pointer;
+    transition: transform 0.25s var(--ease-spring, ease), border-color 0.2s;
+}
+.related-item:hover:not(:disabled) { transform: translateY(-3px); border-color: var(--accent2); }
+.related-item.is-current { border-color: var(--accent); cursor: default; box-shadow: inset 0 0 0 1px var(--accent); }
+.related-item img, .related-item .rank-letter { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 8px; }
+.related-item .rank-letter { display: grid; place-items: center; }
+.related-item span { line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.related-item small { color: var(--muted); }
+.related-item b { color: var(--accent-light); }
+
+/* tier lista – przełącznik i seria jako jeden element */
+.chip-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+.chip-toggle:has(input:checked) { background: var(--accent2); border-color: var(--accent2); color: #0d2b2a; font-weight: 600; }
+.chip-toggle:has(input:focus-visible) { outline: 2px solid var(--onair); }
+.tier-item.tier-series { box-shadow: inset 0 0 0 2px var(--accent2), 0 0 12px rgba(0, 206, 201, 0.35); }
+.tier-item.tier-series i { font-size: 0.75rem; opacity: 0.85; }
+.tier-item.tier-series small { padding: 0 0.4rem; border-radius: 999px; background: rgba(0, 0, 0, 0.25); font-size: 0.72rem; }
+
+/* tylko do odczytu */
+.readonly #series-modal .series-add, .readonly #series-modal .form-actions { display: none; }
+
+@media (max-width: 700px) {
+    .series-hero { grid-template-columns: 1fr; }
+    .series-hero .series-collage { height: 9rem; }
+    .series-list li { grid-template-columns: auto 1fr auto; }
+    .series-list li .rank-cover { display: none; }
+    .series-item-actions { grid-column: 1 / -1; justify-content: flex-end; }
+}

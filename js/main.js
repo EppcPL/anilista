@@ -6,6 +6,7 @@ const App = (() => {
 
     /** Przerysuj wszystko, co zależy od danych */
     function refresh() {
+        Series.renderDatalist();
         Airing.render();
         Profile.render();
         Calendar.render();
@@ -32,6 +33,7 @@ const App = (() => {
     function init() {
         FX.init();
         UI.initDialogs();
+        Series.init();
         Episodes.init();
         AnimeForm.init();
         Collection.init();

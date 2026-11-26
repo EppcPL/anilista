@@ -8,12 +8,16 @@ const Collection = (() => {
     function filtered() {
         let list = [...Store.state.anime];
         if (view.status === 'airing') list = list.filter(a => a.airing && a.status !== 'completed');
+        else if (view.status === 'series') list = list.filter(a => a.series);
         else if (view.status !== 'all') list = list.filter(a => a.status === view.status);
 
         const q = view.search.trim().toLocaleLowerCase('pl');
         if (q) {
             const tagQ = q.match(/^tag:(.+)$/);
-            list = tagQ
+            const serQ = q.match(/^seria:(.+)$/);
+            list = serQ
+                ? list.filter(a => Series.key(a.series).includes(serQ[1].trim()))
+                : tagQ
                 ? list.filter(a => a.tags.some(t => U.tagKey(t).includes(tagQ[1].trim())))
                 : list.filter(a => a.title.toLocaleLowerCase('pl').includes(q) || a.tags.some(t => U.tagKey(t).includes(q)));
         }
@@ -44,6 +48,7 @@ const Collection = (() => {
                 <div class="card-top">
                     ${UI.statusChip(a.status)}
                     ${Airing.badge(a)}
+                    ${Series.badge(a)}
                 </div>
                 <h3 class="card-title"><button class="link" data-act="details">${U.esc(a.title)}</button></h3>
                 ${a.tags.length ? `<div class="tags">${a.tags.map(t => `<span class="tag">${U.esc(t)}</span>`).join('')}</div>` : ''}
@@ -96,8 +101,15 @@ const Collection = (() => {
 
     function render() {
         const box = U.$('anime-list');
-        const list = filtered();
         const controls = U.$('collection-controls');
+        // widok „Serie” – karty całych serii zamiast pojedynczych anime
+        box.classList.toggle('series-grid', view.status === 'series' && !view.search.trim());
+        if (view.status === 'series' && !view.search.trim()) {
+            box.innerHTML = Series.cardsHTML();
+            controls.innerHTML = '';
+            return;
+        }
+        const list = filtered();
         if (!list.length) {
             box.innerHTML = `<div class="empty">${Store.state.anime.length
                 ? 'Nic nie pasuje do wyszukiwania. Spróbuj innego hasła lub filtra.'

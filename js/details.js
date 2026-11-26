@@ -11,6 +11,27 @@ const Details = (() => {
         return 'var(--danger)';
     }
 
+    /** Powiązane anime z tej samej serii */
+    function seriesBlock(a) {
+        const g = a.series ? Series.get(a.series) : null;
+        if (!g) return '';
+        const s = Series.stats(g);
+        return `
+            <div class="details-series">
+                <div class="details-series-head">
+                    <h4><i class="fas fa-link"></i> Seria: ${U.esc(g.name)}</h4>
+                    <button class="btn btn-ghost btn-sm" data-series="${U.esc(g.name)}">Cała seria · ocena ${s.average}</button>
+                </div>
+                <div class="related">${g.items.map((x, i) => `
+                    <button class="related-item ${x === a ? 'is-current' : ''}" ${x === a ? 'disabled' : `data-related="${x.id}"`}>
+                        ${x.image ? `<img src="${x.image}" alt="">` : `<span class="rank-letter">${U.esc(x.title.charAt(0).toUpperCase())}</span>`}
+                        <span><small>${i + 1}.</small> ${U.esc(x.title)}</span>
+                        <b>${x.averageRating}</b>
+                    </button>`).join('')}
+                </div>
+            </div>`;
+    }
+
     function open(id) {
         const a = Store.find(id);
         if (!a) return;
@@ -49,6 +70,8 @@ const Details = (() => {
                 <li>Sezon ${s.index + 1}: ${s.watched}/${s.count} odc. · ${s.length} min${s.rewatch ? ` · ${s.rewatch}× powtórka` : ''}${s.completedDate ? ` · ukończono ${U.fmtDate(s.completedDate)}` : ''}</li>`).join('')}
             </ul>` : ''}
 
+            ${seriesBlock(a)}
+
             ${air ? `
             <h4>Emisja</h4>
             <p>Wydane: <b>${air.aired}</b>${air.next ? ` · odcinek ${air.next.ep}: ${Airing.relTime(air.next.at)}` : ''}${air.behind ? ` · <b class="warn">zaległe: ${air.behind}</b>` : ''}</p>` : ''}
@@ -61,18 +84,22 @@ const Details = (() => {
             <div class="form-actions">
                 <button class="btn btn-accent" data-d="episodes"><i class="fas fa-plus"></i> Dodaj odcinki</button>
                 <button class="btn btn-ghost" data-d="airing"><i class="fas fa-calendar-plus"></i> Emisja</button>
+                <button class="btn btn-ghost" data-d="series"><i class="fas fa-link"></i> ${a.series ? 'Zmień serię' : 'Dodaj do serii'}</button>
                 <button class="btn btn-ghost" data-d="edit"><i class="fas fa-pen"></i> Edytuj</button>
             </div>`;
 
         U.$('anime-details-content').onclick = (e) => {
             const tag = e.target.closest('[data-tag]');
             if (tag) { UI.close('anime-details-modal'); Collection.searchTag(tag.dataset.tag); return; }
+            const rel = e.target.closest('[data-related]');
+            if (rel) return open(rel.dataset.related);
             const act = e.target.closest('[data-d]')?.dataset.d;
             if (!act) return;
             UI.close('anime-details-modal');
             if (act === 'episodes') Episodes.openModal(a.id);
             if (act === 'airing') Airing.openEditor(a.id);
             if (act === 'edit') AnimeForm.openEdit(a.id);
+            if (act === 'series') Series.openPicker(a.id);
         };
         UI.open('anime-details-modal');
     }

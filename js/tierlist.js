@@ -18,15 +18,27 @@ const TierList = (() => {
 
     function render() {
         const groups = Object.fromEntries(TIERS.map(t => [t.id, []]));
+        const asSeries = U.$('tier-series-toggle') && U.$('tier-series-toggle').checked;
         Store.state.anime.forEach(a => {
+            if (asSeries && a.series && Series.get(a.series)) return; // pokażemy całą serię
             const r = Number(Calc.ratingFor(a, category)) || 0;
             groups[tierOf(r)].push({ a, r });
         });
+        if (asSeries) {
+            Series.groups().forEach(g => {
+                const s = Series.stats(g);
+                const r = category === 'average' ? s.average : s.ratings[category];
+                groups[tierOf(r)].push({ a: { id: null, title: g.name, image: s.cover }, r, series: g });
+            });
+        }
         U.$('tier-list-container').innerHTML = TIERS.map(t => `
             <div class="tier-row">
                 <div class="tier-label tier-${t.id}">${t.id}</div>
                 <div class="tier-items">
-                    ${groups[t.id].sort((x, y) => y.r - x.r).map(({ a, r }) => `
+                    ${groups[t.id].sort((x, y) => y.r - x.r).map(({ a, r, series }) => series ? `
+                        <button class="tier-item tier-series" data-tier="${t.id}" data-series="${U.esc(series.name)}" title="Seria ${U.esc(series.name)} (${series.items.length}): ${r}">
+                            ${a.image ? `<img src="${a.image}" alt="">` : ''}<i class="fas fa-link"></i><span>${U.esc(a.title)}</span><small>${series.items.length}</small>
+                        </button>` : `
                         <button class="tier-item" data-tier="${t.id}" data-id="${a.id}" title="${U.esc(a.title)}: ${r}">
                             ${a.image ? `<img src="${a.image}" alt="">` : ''}<span>${U.esc(a.title)}</span>
                         </button>`).join('') || '<span class="tier-empty">—</span>'}
@@ -44,8 +56,12 @@ const TierList = (() => {
             FX.stagger(U.$('tier-list-container'), ['.tier-row', '.tier-item']);
         });
         U.$('tier-list-container').addEventListener('click', (e) => {
-            const item = e.target.closest('.tier-item');
+            const item = e.target.closest('.tier-item[data-id]');
             if (item) Details.open(item.dataset.id);
+        });
+        U.$('tier-series-toggle').addEventListener('change', () => {
+            render();
+            FX.stagger(U.$('tier-list-container'), ['.tier-row', '.tier-item']);
         });
     }
 

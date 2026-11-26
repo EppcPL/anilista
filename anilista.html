@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="css/views.css">
     <link rel="stylesheet" href="css/calendar.css">
     <link rel="stylesheet" href="css/summary.css">
+    <link rel="stylesheet" href="css/series.css">
     <link rel="stylesheet" href="css/motion.css">
 </head>
 <body>
@@ -83,7 +84,7 @@
                 <a href="#dodaj" class="btn btn-accent"><i class="fas fa-plus"></i> Dodaj anime</a>
             </div>
             <div class="toolbar">
-                <input type="search" id="search-input" placeholder="Szukaj po tytule lub tagu (np. tag:isekai)">
+                <input type="search" id="search-input" placeholder="Szukaj po tytule, tagu (tag:isekai) lub serii (seria:fate)">
                 <select id="sort-select" aria-label="Sortowanie">
                     <option value="title">Tytuł A–Z</option>
                     <option value="averageRating">Średnia ocena</option>
@@ -101,6 +102,7 @@
                 <button class="chip" data-status="completed">Obejrzane</button>
                 <button class="chip" data-status="upcoming">Nadchodzące</button>
                 <button class="chip" data-status="airing"><i class="fas fa-tower-broadcast"></i> W emisji</button>
+                <button class="chip" data-status="series"><i class="fas fa-link"></i> Serie</button>
             </div>
             <div class="anime-grid" id="anime-list"></div>
             <div class="center" id="collection-controls"></div>
@@ -122,6 +124,7 @@
                 <button class="chip" data-category="characters"><i class="fas fa-users"></i> Postacie</button>
                 <button class="chip" data-category="story"><i class="fas fa-book"></i> Fabuła</button>
                 <button class="chip" data-category="fun"><i class="fas fa-face-laugh"></i> Śmieszność</button>
+                <label class="chip chip-toggle"><input type="checkbox" id="tier-series-toggle"> <i class="fas fa-link"></i> Serie jako całość</label>
             </div>
             <div class="tiers" id="tier-list-container"></div>
         </section>
@@ -291,6 +294,14 @@
         <div id="anime-details-content"></div>
     </dialog>
 
+    <dialog class="modal modal-wide" id="series-modal">
+        <div class="modal-head">
+            <h3 id="series-modal-title">Seria</h3>
+            <button class="btn-icon" data-close aria-label="Zamknij"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div id="series-modal-body"></div>
+    </dialog>
+
     <dialog class="modal" id="day-summary-modal">
         <div class="modal-head">
             <h3 id="day-summary-date">Dzień</h3>
@@ -347,6 +358,7 @@
     <script src="js/motion.js" defer></script>
     <script src="js/seasons.js" defer></script>
     <script src="js/airing.js" defer></script>
+    <script src="js/series.js" defer></script>
     <script src="js/episodes.js" defer></script>
     <script src="js/anime-form.js" defer></script>
     <script src="js/collection.js" defer></script>

@@ -17,6 +17,16 @@ const AnimeForm = (() => {
                     <label>Tagi <small>oddziel średnikiem</small></label>
                     <input type="text" name="tags" placeholder="isekai; komedia; sport">
                 </div>
+                <div class="row-series">
+                    <div class="field">
+                        <label>Seria <small>powiązane anime, np. Fate</small></label>
+                        <input type="text" name="series" list="series-names" placeholder="brak">
+                    </div>
+                    <div class="field">
+                        <label>Kolejność</label>
+                        <input type="number" name="seriesOrder" min="1" placeholder="–">
+                    </div>
+                </div>
                 <div class="field">
                     <label>Status</label>
                     <div class="seg seg-status">
@@ -161,6 +171,8 @@ const AnimeForm = (() => {
             editing = a;
             f('title').value = a ? a.title : '';
             f('tags').value = a ? (a.tags || []).join('; ') : '';
+            f('series').value = a && a.series ? a.series : '';
+            f('seriesOrder').value = a && a.seriesOrder ? a.seriesOrder : '';
             form.querySelector(`input[name="status"][value="${a ? a.status : 'watching'}"]`).checked = true;
             f('totalEpisodes').value = a ? a.totalEpisodes : 12;
             f('episodeLength').value = a ? a.episodeLength : 24;
@@ -222,6 +234,20 @@ const AnimeForm = (() => {
                     a.seasonRewatches = [rewatch];
                     a.seasonCompletedDates = [a.completedDate || null];
                 }
+            }
+
+            // seria – dopasuj do istniejącej nazwy bez względu na wielkość liter
+            const seriesName = f('series').value.trim();
+            if (seriesName) {
+                const existing = Series.get(seriesName);
+                const sameSeries = existing && Series.key(a.series) === existing.key;
+                a.seriesOrder = U.int(f('seriesOrder').value)
+                    || (sameSeries ? a.seriesOrder : 0)
+                    || (existing ? existing.items.filter(x => x !== a).length + 1 : 1);
+                a.series = existing ? existing.name : seriesName;
+            } else {
+                delete a.series;
+                delete a.seriesOrder;
             }
 
             const airing = airingEd.read();
